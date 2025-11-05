@@ -1,3 +1,9 @@
 spring:
-  application:
-    name: service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hub_db
+    username: postgres
+    password: 1234
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
