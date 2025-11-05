@@ -109,7 +109,7 @@ services:
   # Delivery Service
   delivery-service:
     build:
-      context: ../delivery_1
+      context: ../delivery
       dockerfile: ../docker/Dockerfile
     container_name: delivery-service
     ports:
