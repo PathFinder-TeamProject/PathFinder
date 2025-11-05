@@ -24,23 +24,23 @@ public class HubController {
     }
 
     @GetMapping("/hubs/{hubId}")
-    public ResponseEntity<HubResponseDto> getHub(@PathVariable UUID id){
-        return ResponseEntity.ok(HubServiceV1.getHubById(id));
+    public ResponseEntity<HubResponseDto> getHub(@PathVariable UUID hubId){
+        return ResponseEntity.ok(hubServiceV1.getHubById(hubId));
     }
 
     @PostMapping("/hubs")
     public ResponseEntity<HubResponseDto> createHub(@RequestBody HubRequestDto requestDto){
-        return ResponseEntity.ok(HubServiceV1.createHub(requestDto));
+        return ResponseEntity.ok(hubServiceV1.createHub(requestDto));
     }
 
     @PatchMapping("/hubs/{hubId}")
-    public ResponseEntity<HubResponseDto> updateHub(@PathVariable UUID id, @RequestBody HubRequestDto requestDto){
-        return ResponseEntity.ok(HubServiceV1.updateHub(requestDto));
+    public ResponseEntity<HubResponseDto> updateHub(@PathVariable UUID hubId, @RequestBody HubRequestDto requestDto){
+        return ResponseEntity.ok(hubServiceV1.updateHub(hubId, requestDto));
     }
 
     @DeleteMapping("/hubs/{hudId}")
-    public ResponseEntity<String> deleteHub(@PathVariable UUID id){
-        hubServiceV1.deleteHub(id);
+    public ResponseEntity<String> deleteHub(@PathVariable UUID hudId){
+        hubServiceV1.deleteHub(hudId);
         return ResponseEntity.ok("허브가 삭제되었습니다.");
     }
 

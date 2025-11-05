@@ -16,13 +16,14 @@ public class Hub {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID hubId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "name", nullable = false)
+    private String hubName;
 
-    @Column(nullable = false)
-    private String address;
+    @Column(name = "address", nullable = false)
+    private String hubAddress;
+
 
     @Column(nullable = false)
     private double latitude;

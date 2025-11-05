@@ -10,9 +10,9 @@ import java.util.UUID;
 @Data
 @Builder
 public class HubResponseDto {
-    private UUID id;
-    private String name;
-    private String address;
+    private UUID hubId;
+    private String hubName;
+    private String hubAddress;
     private double latitude;
     private double longitude;
 }

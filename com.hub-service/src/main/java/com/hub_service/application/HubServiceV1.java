@@ -32,8 +32,8 @@ public class HubServiceV1 {
 
     public HubResponseDto createHub(HubRequestDto requestDto) {
         Hub hub = Hub.builder()
-                .name(requestDto.getName())
-                .address(requestDto.getAddress())
+                .hubName(requestDto.getHubName())
+                .hubAddress(requestDto.getHubAddress())
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
                 .build();
@@ -45,9 +45,9 @@ public class HubServiceV1 {
         Hub hub = hubRepository.findById(id).
                 orElseThrow(() -> new IllegalArgumentException("허브를 찾을 수 없습니다."));
         Hub updated = Hub.builder()
-                .id(hub.getId())
-                .name(requestDto.getName())
-                .address(requestDto.getAddress())
+                .hubId(hub.getHubId())
+                .hubName(requestDto.getHubName())
+                .hubAddress(requestDto.getHubAddress())
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
                 .build();
@@ -63,9 +63,9 @@ public class HubServiceV1 {
 
     private HubResponseDto toResponse(Hub hub) {
         return HubResponseDto.builder()
-                .id(hub.getId())
-                .name(hub.getName())
-                .address(hub.getAddress())
+                .hubId(hub.getHubId())
+                .hubName(hub.getHubName())
+                .hubAddress(hub.getHubAddress())
                 .latitude(hub.getLatitude())
                 .longitude(hub.getLongitude())
                 .build();
