@@ -1,0 +1,13 @@
+.gradle
+build
+bin
+.idea
+*.iml
+.vscode
+.git
+.gitignore
+README.md
+HELP.md
+gradlew.bat
+*.log
+
