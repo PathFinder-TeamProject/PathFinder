@@ -2,19 +2,14 @@ package com.pathfinder.user.presentation.controller;
 
 import com.pathfinder.user.application.UserServiceV1;
 import com.pathfinder.user.application.dto.request.SignupRequestDto;
-import com.pathfinder.user.application.dto.request.UserUpdateRequestDto;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.presentation.dto.ApiResponse;
-import com.pathfinder.user.presentation.dto.response.SignupResponseDto;
-import com.pathfinder.user.presentation.dto.response.UserResponseDto;
-import com.pathfinder.user.presentation.dto.response.UserUpdateResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,7 +26,8 @@ public class UserControllerV1 {
         return ResponseEntity.ok(Map.of(
                 "userId", UUID.randomUUID().toString(),
                 "email", request.getEmail(),
-                "username", request.getUserName(),
+                "username", request.getUsername(),
+                "name", request.getName(),
                 "organization", request.getOrganization(),
                 "role", request.getRole(),
                 "status", "PENDING",
