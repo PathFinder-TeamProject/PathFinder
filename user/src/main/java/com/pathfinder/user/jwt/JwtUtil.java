@@ -35,9 +35,9 @@ public class JwtUtil {
     }
 
     // 토큰 생성
-    public String createToken(UserEntity user) {
+ public String createToken(UserEntity user) {
         return BEARER_PREFIX + Jwts.builder()
-                .setId(user.getId().toString())
+                .setId(user.getUsername().toString())
                 .setSubject(user.getEmail())
                 .claim(AUTHORIZATION_KEY, user.getRole())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_TIME))

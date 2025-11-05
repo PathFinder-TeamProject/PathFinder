@@ -38,7 +38,7 @@ services:
       timeout: 3s
       retries: 3
 
-  # Zookeeper (Kafka의존)
+  # Zookeeper (Kafka 의존)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     container_name: pathfinder-zookeeper
@@ -69,11 +69,23 @@ services:
     networks:
       - pathfinder-network
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "kafka-broker-api-versions --bootstrap-server localhost:9092",
-        ]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Eureka Server (서비스 디스커버리)
+  eureka-server:
+    build:
+      context: ../eureka
+      dockerfile: ../docker/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - pathfinder-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -87,12 +99,13 @@ services:
     ports:
       - "8081:8080"
     environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pathfinder_db
       - SPRING_DATASOURCE_USERNAME=pathfinder
       - SPRING_DATASOURCE_PASSWORD=pathfinder123
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     networks:
       - pathfinder-network
@@ -100,40 +113,40 @@ services:
       - postgres
       - redis
       - kafka
+      - eureka-server
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-
   # Delivery Service
-  delivery-service:
-    build:
-      context: ../delivery
-      dockerfile: ../docker/Dockerfile
-    container_name: delivery-service
-    ports:
-      - "8082:8080"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pathfinder_db
-      - SPRING_DATASOURCE_USERNAME=pathfinder
-      - SPRING_DATASOURCE_PASSWORD=pathfinder123
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-    networks:
-      - pathfinder-network
-    depends_on:
-      - postgres
-      - redis
-      - kafka
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
+#  delivery-service:
+#    build:
+#      context: ../delivery
+#      dockerfile: ../docker/Dockerfile
+#    container_name: delivery-service
+#    ports:
+#      - "8082:8080"
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=docker
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/pathfinder_db
+#      - SPRING_DATASOURCE_USERNAME=pathfinder
+#      - SPRING_DATASOURCE_PASSWORD=pathfinder123
+#      - SPRING_REDIS_HOST=redis
+#      - SPRING_REDIS_PORT=6379
+#      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+#    networks:
+#      - pathfinder-network
+#    depends_on:
+#      - postgres
+#      - redis
+#      - kafka
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#
   # Delivery Manager Service
   delivery-manager-service:
     build:

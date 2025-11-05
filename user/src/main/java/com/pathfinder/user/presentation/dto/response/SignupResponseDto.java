@@ -12,6 +12,9 @@ import lombok.Getter;
 public class SignupResponseDto {
 
     @NotBlank
+    private String username;
+
+    @NotBlank
     @Email
     private String email;
 
@@ -19,6 +22,21 @@ public class SignupResponseDto {
     private String name;
 
     @NotBlank
+    private String organization;
+
+    @NotBlank
+    private String slackId;
+
+    @NotBlank
     private UserRoleEnum role;
+
+    public static SignupResponseDto of(UserEntity userEntity) {
+        return SignupResponseDto.builder()
+                .username(userEntity.getUsername())
+                .email(userEntity.getEmail())
+                .name(userEntity.getName())
+                .role(userEntity.getRole())
+                .build();
+    }
 
 }

@@ -31,7 +31,7 @@ public class UserEntity {
     @Column(nullable = false)
     private String organization;
 
-    @Column
+    @Column(nullable = false)
     private String slackId;
 
     @Column(nullable = false)
@@ -45,10 +45,13 @@ public class UserEntity {
     public static UserEntity create(SignupRequestDto requestDto, String encodingPassword) {
         return UserEntity.builder()
                 .email(requestDto.getEmail())
+                .username(requestDto.getUsername())
+                .slackId(requestDto.getSlackId())
                 .name(requestDto.getName())
                 .password(encodingPassword)
                 .organization(requestDto.getOrganization())
                 .role(requestDto.getRole())
+                .status(UserStatusEnum.PENDING)
                 .build();
     }
 

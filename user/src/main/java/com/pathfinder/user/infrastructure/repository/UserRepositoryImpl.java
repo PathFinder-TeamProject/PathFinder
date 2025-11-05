@@ -16,9 +16,7 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserJpaRepository userJpaRepository;
 
     @Override
-    public Optional<UserEntity> findById(Long userId) {
-        return userJpaRepository.findById(userId);
-    }
+    public Optional<UserEntity> findByUsername(String username) { return userJpaRepository.findByUsername(username); }
 
     @Override
     public Optional<UserEntity> findByEmail(String email) {
@@ -35,8 +33,8 @@ public class UserRepositoryImpl implements UserRepository {
         return userJpaRepository.findAll(pageable);
     }
 
-    @Override
+/*    @Override
     public Optional<UserEntity> findByEmailAndIsDeletedFalse(String email) {
         return userJpaRepository.findByEmailAndIsDeletedFalse(email);
-    }
+    }*/
 }

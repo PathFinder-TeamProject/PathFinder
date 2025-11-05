@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    Optional<UserEntity> findById(Long userId);
+    Optional<UserEntity> findByUsername(String username);
 
     Optional<UserEntity> findByEmail(String email);
 
@@ -16,5 +16,5 @@ public interface UserRepository {
 
     Page<UserEntity> findAll(Pageable pageable);
 
-    Optional<UserEntity> findByEmailAndIsDeletedFalse(String email);
+//    Optional<UserEntity> findByEmailAndIsDeletedFalse(String email);
 }
