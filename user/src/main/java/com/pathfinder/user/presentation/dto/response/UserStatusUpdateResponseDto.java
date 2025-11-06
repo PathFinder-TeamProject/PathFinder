@@ -10,31 +10,32 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class UserResponseDto {
-
+public class UserStatusUpdateResponseDto {
     private String username;
-
-    private String name;
 
     private String email;
 
+    private String name;
+
     private UserRoleEnum role;
 
-    private UserStatusEnum status;
-
-    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     private boolean isDeleted;
 
-    public static UserResponseDto of(UserEntity user) {
-        return UserResponseDto.builder()
+    private UserStatusEnum status;
+
+    public static UserStatusUpdateResponseDto of(UserEntity user) {
+        return UserStatusUpdateResponseDto.builder()
                 .username(user.getUsername())
-                .name(user.getName())
                 .email(user.getEmail())
+                .name(user.getName())
                 .role(user.getRole())
                 .status(user.getStatus())
-//                .createdAt(user.getCreatedAt())
-//                .isDeleted(user.getIsDeleted())
+/*                .updatedAt(user.getUpdatedAt())
+                .updatedBy(user.getUpdatedBy())
+                .isDeleted(user.getIsDeleted())
+                */
                 .build();
     }
 }

@@ -1,5 +1,5 @@
 # Multi-stage build for Spring Boot application
-FROM openjdk:17-jdk-slim as builder
+FROM eclipse-temurin:17-jdk-jammy as builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ RUN chmod +x ./gradlew
 RUN ./gradlew clean build -x test --no-daemon
 
 # 실행 이미지
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 WORKDIR /app
 
