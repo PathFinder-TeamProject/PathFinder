@@ -110,10 +110,10 @@ services:
     networks:
       - pathfinder-network
     depends_on:
+      - eureka-server
       - postgres
       - redis
       - kafka
-      - eureka-server
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
