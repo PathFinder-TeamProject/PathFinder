@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: eureka-service
+  config:
+    import: "configserver:http://localhost:19000"
+  cloud:
+    config:
+      name: eureka-service
+      profile: dev
+      fail-fast: true
