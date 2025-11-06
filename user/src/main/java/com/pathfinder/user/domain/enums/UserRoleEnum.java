@@ -1,8 +1,8 @@
 package com.pathfinder.user.domain.enums;
 
 public enum UserRoleEnum {
-    DELIVERY_MANAGER(Authority.DELIVERY_MANAGER),  // 사용자 권한
-    COMPANY_MANAGER(Authority.COMPANY_MANAGER),  // 가게 주인 권한
+    DELIVERY_MANAGER(Authority.DELIVERY_MANAGER),
+    COMPANY_MANAGER(Authority.COMPANY_MANAGER),
     HUB_MANAGER(Authority.HUB_MANAGER),
     MASTER(Authority.MASTER);
 

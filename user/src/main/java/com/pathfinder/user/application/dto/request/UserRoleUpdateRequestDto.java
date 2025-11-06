@@ -2,15 +2,17 @@ package com.pathfinder.user.application.dto.request;
 
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @Builder
-public class UserRoleChangeRequestDto {
+public class UserRoleUpdateRequestDto {
 
-    @NotNull
+//    @NotNull
     private UserRoleEnum role;
 }
