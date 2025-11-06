@@ -1,0 +1,21 @@
+-- MSA Database per Service 패턴
+-- 각 마이크로서비스별 독립된 데이터베이스 생성
+
+-- User Service Database
+CREATE DATABASE user_db;
+
+-- Delivery Service Database
+CREATE DATABASE delivery_db;
+
+-- Hub Service Database
+CREATE DATABASE hub_db;
+
+-- Delivery Manager Service Database
+CREATE DATABASE delivery_manager_db;
+
+-- 권한 부여 (필요시)
+GRANT ALL PRIVILEGES ON DATABASE user_db TO pathfinder;
+GRANT ALL PRIVILEGES ON DATABASE delivery_db TO pathfinder;
+GRANT ALL PRIVILEGES ON DATABASE hub_db TO pathfinder;
+GRANT ALL PRIVILEGES ON DATABASE delivery_manager_db TO pathfinder;
+
