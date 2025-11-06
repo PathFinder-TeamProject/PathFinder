@@ -17,11 +17,15 @@ import java.util.Optional;
 
 public interface UserJpaRepository extends JpaRepository<UserEntity, Long> {
 
-    Optional<UserEntity> findByEmail(String email);
-
     Optional<UserEntity> findByUsername(String username);
 
+    Optional<UserEntity> findByEmail(String email);
+
+    Optional<UserEntity> findBySlackId(String slackId);
+
     Page<UserEntity> findAll(Pageable pageable);
+
+    Page<UserEntity> findByOrganization(String organization, Pageable pageable);
 
 //    Optional<UserEntity> findByEmailAndIsDeletedFalse(String email);
 }

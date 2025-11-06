@@ -40,6 +40,7 @@ public class UserEntity {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private UserStatusEnum status = UserStatusEnum.PENDING;
 
     public static UserEntity create(SignupRequestDto requestDto, String encodingPassword) {
@@ -60,7 +61,10 @@ public class UserEntity {
         this.password = requestDto.getNewPassword() == null ? this.password : passwordEncoder.encode(requestDto.getNewPassword());
     }
 
-    public void changeRole(UserRoleEnum role) {
+    public void updateStatus(UserStatusEnum status) {
+        this.status = status;
+    }
+    public void updateRole(UserRoleEnum role) {
         this.role = role;
     }
 }

@@ -38,7 +38,7 @@ public class JwtUtil {
  public String createToken(UserEntity user) {
         return BEARER_PREFIX + Jwts.builder()
                 .setId(user.getUsername().toString())
-                .setSubject(user.getEmail())
+                .setSubject(user.getUsername().toString())
                 .claim(AUTHORIZATION_KEY, user.getRole())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)

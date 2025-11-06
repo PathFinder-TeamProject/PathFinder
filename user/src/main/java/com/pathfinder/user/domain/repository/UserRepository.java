@@ -12,9 +12,13 @@ public interface UserRepository {
 
     Optional<UserEntity> findByEmail(String email);
 
+    Optional<UserEntity> findBySlackId(String slackId);
+
     UserEntity save(UserEntity user);
 
     Page<UserEntity> findAll(Pageable pageable);
 
-//    Optional<UserEntity> findByEmailAndIsDeletedFalse(String email);
+    Page<UserEntity> findByOrganization(String organization, Pageable pageable);
+
+//    Optional<UserEntity> findByUsernameAndIsDeletedFalse(String username);
 }

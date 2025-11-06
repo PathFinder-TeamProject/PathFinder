@@ -34,10 +34,6 @@ public record ApiResponse<T>(
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK, data));
     }
 
-    public static <T> ResponseEntity<ApiResponse<T>> ok() {
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK));
-    }
-
     // 201 CREATED
     public static <T> ResponseEntity<ApiResponse<T>> created(T data) {
         return ResponseEntity.status(HttpStatus.CREATED)

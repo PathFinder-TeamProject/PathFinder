@@ -19,9 +19,15 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<UserEntity> findByUsername(String username) { return userJpaRepository.findByUsername(username); }
 
     @Override
+    public Page<UserEntity> findByOrganization(String organization, Pageable pageable) { return userJpaRepository.findByOrganization(organization, pageable); }
+
+    @Override
     public Optional<UserEntity> findByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
+
+    @Override
+    public Optional<UserEntity> findBySlackId(String slackId) { return userJpaRepository.findBySlackId(slackId); }
 
     @Override
     public UserEntity save(UserEntity user) {

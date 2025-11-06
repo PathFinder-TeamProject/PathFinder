@@ -73,7 +73,9 @@ public class SecurityConfig {
                                 "/v1/auth/login",
                                 "/v1/auth/logout",
                                 "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/v1/users").hasAnyRole("MASTER")
+                        .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
+                        .requestMatchers("/v1/users/**").hasRole("MASTER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
 
