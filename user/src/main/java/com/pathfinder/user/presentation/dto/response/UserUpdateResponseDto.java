@@ -1,7 +1,6 @@
 package com.pathfinder.user.presentation.dto.response;
 
 import com.pathfinder.user.domain.entity.UserEntity;
-import com.pathfinder.user.domain.enums.UserRoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,7 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UserUpdateResponseDto {
 
-    private Long id;
+    private String username;
 
     private String email;
 
@@ -20,4 +19,14 @@ public class UserUpdateResponseDto {
     private LocalDateTime updatedAt;
 
     private boolean isDeleted;
+    public static UserUpdateResponseDto of(UserEntity user) {
+        return UserUpdateResponseDto.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .email(user.getEmail())
+//                .role(user.getRole())
+//                .createdAt(user.getCreatedAt())
+//                .isDeleted(user.getIsDeleted())
+                .build();
+    }
 }

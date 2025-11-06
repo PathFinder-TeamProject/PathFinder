@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UserDeleteResponseDto {
 
-    private Long id;
+    private String username;
 
     private String email;
 
@@ -20,5 +20,13 @@ public class UserDeleteResponseDto {
     private LocalDateTime deletedAt;
 
     private boolean isDeleted;
-
+    public static UserDeleteResponseDto of(UserEntity user) {
+        return UserDeleteResponseDto.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .name(user.getName())
+/*                .deletedAt(user.getDeletedAt())
+                .isDeleted(user.getIsDeleted())*/
+                .build();
+    }
 }
