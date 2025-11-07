@@ -19,12 +19,12 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DeliveryManagerServiceV1 {
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final HubCacheRepository hubCacheRepository;
 
-    public DeliveryManagerResponseDto createManager(DeliveryManagerRequestDto dto) {
+    @Transactional
+    public DeliveryManagerResponseDto createDeliveryManager(DeliveryManagerRequestDto dto) {
         // 허브 캐시 기반 존재 여부 확인
         if (!hubCacheRepository.exists(dto.getHubId())) {
             throw new IllegalArgumentException("허브 서비스에서 존재하지 않는 허브입니다.");
@@ -34,55 +34,40 @@ public class DeliveryManagerServiceV1 {
                 ? dto.getDeliveryOrder()
                 : deliveryManagerRepository.countByHubId(dto.getHubId());
 
-        DeliveryManagerEntity entity = DeliveryManagerEntity.builder()
-                .username(dto.getUsername())
-                .hubId(dto.getHubId())
-                .type(dto.getType())
-                .deliveryOrder(order)
-                .build();
+        DeliveryManagerEntity deliveryManager = DeliveryManagerEntity.create(dto);
 
-        DeliveryManagerEntity saved = deliveryManagerRepository.save(entity);
-        return toResponseDto(saved);
+        DeliveryManagerEntity saved = deliveryManagerRepository.save(deliveryManager);
+        return DeliveryManagerResponseDto.of(saved);
     }
 
     @Transactional(readOnly = true)
     public DeliveryManagerResponseDto getManager(Long id) {
-        DeliveryManagerEntity entity = deliveryManagerRepository.findById(id)
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-        return toResponseDto(entity);
+        return DeliveryManagerResponseDto.of(deliveryManager);
     }
-
+    @Transactional
     public void deleteManager(Long id) {
-        DeliveryManagerEntity entity = deliveryManagerRepository.findById(id)
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-//        entity.setDeletedAt(LocalDateTime.now());
-//        entity.setDeletedBy("system");
+//        deliveryManager.setDeletedAt(LocalDateTime.now());
+//        deliveryManager.setDeletedBy("system");
     }
-
-    private DeliveryManagerResponseDto toResponseDto(DeliveryManagerEntity entity) {
-        return DeliveryManagerResponseDto.builder()
-                .deliveryManagerId(entity.getDeliveryManagerId())
-                .username(entity.getUsername())
-                .hubId(entity.getHubId())
-                .type(entity.getType())
-                .deliveryOrder(entity.getDeliveryOrder())
-                .build();
-    }
-
+    @Transactional(readOnly = true)
     public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
-        Page<DeliveryManagerEntity> entities;
+        Page<DeliveryManagerEntity> deliveryManagerPage;
         if(size != 10 && size != 30 && size != 50) {
             size = 10;
         }
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page-1, size, sort);
         if (hubId != null) {
-            entities = deliveryManagerRepository.findByHubId(hubId, pageable);
+            deliveryManagerPage = deliveryManagerRepository.findByHubId(hubId, pageable);
         } else {
-            entities = deliveryManagerRepository.findAll(pageable);
+            deliveryManagerPage = deliveryManagerRepository.findAll(pageable);
         }
-        return entities.map(this::toResponseDto);
+        return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
     }
 }

@@ -1,23 +1,67 @@
 package com.pathfinder.delivery_manager.presentation.dto.response;
 
+import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DeliveryManagerResponseDto {
+
     private Long deliveryManagerId;
     private String username;
-    private Long hubId;
+    private Integer deliveryOrder;
     private DeliveryManagerTypeEnum type;
-    private int deliveryOrder;
-    private LocalDateTime createdAt;
-    private String createdBy;
+
+    private HubInfoDto hubInfo;
+    private UserInfoDto userInfo;
+
+    // 리스트용 DTO
+    public static DeliveryManagerResponseDto forList(DeliveryManagerEntity deliveryManager) {
+        HubInfoDto hubInfo = HubInfoDto.builder()
+                .hubId(deliveryManager.getHubId())
+                .build();
+
+        UserInfoDto userInfo = UserInfoDto.builder()
+                .username(deliveryManager.getUsername())
+                .build();
+
+        return DeliveryManagerResponseDto.builder()
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .username(deliveryManager.getUsername())
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+/*              .deletedAt(user.getDeletedAt())
+                .isDeleted(user.getIsDeleted())*/
+                .hubInfo(hubInfo)
+                .userInfo(userInfo)
+                .build();
+    }
+
+    // 상세보기용 DTO (추후 UserService, HubService 연동 시 확장)
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager) {
+        HubInfoDto hubInfo = HubInfoDto.builder()
+                .hubId(deliveryManager.getHubId())
+                .build();
+
+        UserInfoDto userInfo = UserInfoDto.builder()
+                .username(deliveryManager.getUsername())
+                // 추후 외부 서비스 연동으로 상세정보 주입 예정
+                .build();
+
+        return DeliveryManagerResponseDto.builder()
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubInfo(hubInfo)
+                .userInfo(userInfo)
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+/*              .deletedAt(user.getDeletedAt())
+                .isDeleted(user.getIsDeleted())*/
+                .build();
+    }
 }

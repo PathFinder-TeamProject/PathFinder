@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,16 @@ public class UserServiceV1 {
 
         UserEntity user = UserEntity.create(requestDto, passwordEncoder.encode(requestDto.getPassword()));
         UserEntity saveUser = userRepository.save(user);
+        /*if (role == UserRoleEnum.DELIVERY_MANAGER) {
+            NewDeliveryManagerEvent event = NewDeliveryManagerEvent.builder()
+                    .username(saveUser.getUsername())
+                    .email(saveUser.getEmail())
+                    .hubId(requestDto.getHubId())
+                    .deliveryManagerType(requestDto.getDeliveryManagerType().name())
+                    .build();
+
+            userEventProducer.publishNewDeliveryManagerEvent(event);
+        }*/
         return SignupResponseDto.of(saveUser);
     }
 
@@ -53,7 +64,7 @@ public class UserServiceV1 {
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page-1, size, sort);
 
         Page<UserEntity> userList = userRepository.findAll(pageable);
         return userList.map(UserResponseDto::of);

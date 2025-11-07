@@ -28,7 +28,7 @@ public class DeliveryManagerControllerV1 {
 //    @PreAuthorize("hasRole('MASTER') or hasRole('HUB_MANAGER')")
     public ResponseEntity<DeliveryManagerResponseDto> createManager(
             @Valid @RequestBody DeliveryManagerRequestDto requestDto) {
-        return ResponseEntity.ok(deliveryManagerService.createManager(requestDto));
+        return ResponseEntity.ok(deliveryManagerService.createDeliveryManager(requestDto));
     }
 
     // 단일 조회
@@ -44,7 +44,7 @@ public class DeliveryManagerControllerV1 {
             @RequestParam(required = false) Long hubId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "sortBy", defaultValue = "username") String sortBy,
             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
         return ResponseEntity.ok(deliveryManagerService.getAllManagers(hubId, page, size, sortBy, isAsc));
     }
