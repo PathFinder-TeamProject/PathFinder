@@ -1,7 +1,6 @@
 package com.pathfinder.user.presentation.dto.response;
 
 import com.pathfinder.user.domain.entity.UserEntity;
-import com.pathfinder.user.domain.enums.DeliveryManagerType;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,8 +19,6 @@ public class SignupResponseDto {
     private String name;
 
     private String organization;
-
-    private DeliveryManagerType type;
 
     private String eventType;
 

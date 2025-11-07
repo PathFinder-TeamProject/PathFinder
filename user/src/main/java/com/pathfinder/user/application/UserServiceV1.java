@@ -3,9 +3,9 @@ package com.pathfinder.user.application;
 import com.pathfinder.user.application.dto.request.*;
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
+import com.pathfinder.user.domain.enums.UserStatusEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
 import com.pathfinder.user.presentation.dto.response.*;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -58,7 +58,7 @@ public class UserServiceV1 {
         Page<UserEntity> userList = userRepository.findAll(pageable);
         return userList.map(UserResponseDto::of);
     }
-
+    //관리자 기준 유저 조회
     public UserResponseDto getUser(String username, UserEntity user) {
         // 요청 유저 id와 토큰 유저의 id가 같을 경우 유저 정보 반환
         if (username.equals(user.getUsername())) {

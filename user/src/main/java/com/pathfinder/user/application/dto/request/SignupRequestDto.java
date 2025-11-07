@@ -1,6 +1,5 @@
 package com.pathfinder.user.application.dto.request;
 
-import com.pathfinder.user.domain.enums.DeliveryManagerType;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

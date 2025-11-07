@@ -1,21 +1,19 @@
 package com.pathfinder.user.presentation.controller;
 
 import com.pathfinder.user.application.UserServiceV1;
-import com.pathfinder.user.application.dto.request.SignupRequestDto;
-import com.pathfinder.user.application.dto.request.UserRoleUpdateRequestDto;
-import com.pathfinder.user.application.dto.request.UserStatusUpdateRequestDto;
-import com.pathfinder.user.application.dto.request.UserUpdateRequestDto;
+import com.pathfinder.user.application.dto.request.*;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.presentation.dto.response.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.pathfinder.user.presentation.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -27,43 +25,43 @@ public class UserControllerV1 {
     private final UserServiceV1 userServiceV1;
     // 회원가입 (더미)
     @PostMapping("/auth/register")
-    public ResponseEntity<ApiResponse<SignupResponseDto>> signup(@RequestBody @Valid SignupRequestDto requestDto) {
-        return ApiResponse.created(userServiceV1.signup(requestDto));
+    public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userServiceV1.signup(requestDto));
     }
     @GetMapping("/users")
-    public ResponseEntity<ApiResponse<Page<UserResponseDto>>> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
-                                                                          @RequestParam(value = "size", defaultValue = "10") int size,
-                                                                          @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
-                                                                          @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
-        return ApiResponse.ok(userServiceV1.getUserList(page - 1, size, sortBy, isAsc));
+    public ResponseEntity<Page<UserResponseDto>> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
+                                                             @RequestParam(value = "size", defaultValue = "10") int size,
+                                                             @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+                                                             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
+        return ResponseEntity.ok(userServiceV1.getUserList(page - 1, size, sortBy, isAsc));
     }
     @PatchMapping("/users/{username}/confirm-member")
-    public ResponseEntity<ApiResponse<UserStatusUpdateResponseDto>> updateUserConfirm(@PathVariable String username,
+    public ResponseEntity<UserStatusUpdateResponseDto> updateUserConfirm(@PathVariable String username,
                                                                                       @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
                                                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ApiResponse.ok(userServiceV1.updateUserStatus(username, userStatusUpdateRequestDto, userDetails.getUser()));
+        return ResponseEntity.ok(userServiceV1.updateUserStatus(username, userStatusUpdateRequestDto, userDetails.getUser()));
     }
     @PatchMapping("/users/{username}/role")
-    public ResponseEntity<ApiResponse<UserRoleUpdateResponseDto>> updateUserRole(@PathVariable String username,
+    public ResponseEntity<UserRoleUpdateResponseDto> updateUserRole(@PathVariable String username,
                                                                                  @RequestBody @Valid UserRoleUpdateRequestDto userRoleUpdateRequestDto,
                                                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ApiResponse.ok(userServiceV1.userRoleUpdate(username, userRoleUpdateRequestDto, userDetails.getUser()));
+        return ResponseEntity.ok(userServiceV1.userRoleUpdate(username, userRoleUpdateRequestDto, userDetails.getUser()));
     }
 
     @GetMapping("/users/myInfo")
-    public ResponseEntity<ApiResponse<UserResponseDto>> getMyUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ApiResponse.ok(userServiceV1.getUser(userDetails.getUser().getUsername(), userDetails.getUser()) );
+    public ResponseEntity<UserResponseDto> getMyUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(userServiceV1.getUser(userDetails.getUser().getUsername(), userDetails.getUser()) );
     }
 
     @GetMapping("/users/{username}")
-    public ResponseEntity<ApiResponse<UserResponseDto>> getUserInfo(@PathVariable String username,
+    public ResponseEntity<UserResponseDto> getUserInfo(@PathVariable String username,
                                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ApiResponse.ok(userServiceV1.getUser(username, userDetails.getUser()) );
+        return ResponseEntity.ok(userServiceV1.getUser(username, userDetails.getUser()) );
     }
     @PutMapping("/users/{username}")
-    public ResponseEntity<ApiResponse<UserUpdateResponseDto>> updateUserInfo(@PathVariable String username,
+    public ResponseEntity<UserUpdateResponseDto> updateUserInfo(@PathVariable String username,
                                                                         @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
                                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ApiResponse.ok(userServiceV1.updateUser(username, userUpdateRequestDto, userDetails.getUser()) );
+        return ResponseEntity.ok(userServiceV1.updateUser(username, userUpdateRequestDto, userDetails.getUser()) );
     }
 }

@@ -2,7 +2,7 @@ package com.pathfinder.user.presentation.dto.response;
 
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
-import com.pathfinder.user.domain.enums.UserStatusEnum;
+import com.pathfinder.user.domain.enums.UserRoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,7 +26,7 @@ public class UserRoleUpdateResponseDto {
 
     private boolean isDeleted;
 
-    private UserStatusEnum status;
+//    private UserStatusEnum status;
 
     public static UserRoleUpdateResponseDto of(UserEntity user) {
         return UserRoleUpdateResponseDto.builder()
@@ -34,7 +34,7 @@ public class UserRoleUpdateResponseDto {
                 .email(user.getEmail())
                 .name(user.getName())
                 .role(user.getRole())
-                .status(user.getStatus())
+//                .status(user.getStatus())
 /*                .updatedAt(user.getUpdatedAt())
                 .updatedBy(user.getUpdatedBy())
                 .isDeleted(user.getIsDeleted())

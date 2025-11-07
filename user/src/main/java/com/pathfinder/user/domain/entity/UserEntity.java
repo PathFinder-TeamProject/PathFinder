@@ -2,8 +2,7 @@ package com.pathfinder.user.domain.entity;
 
 import com.pathfinder.user.application.dto.request.SignupRequestDto;
 import com.pathfinder.user.application.dto.request.UserUpdateRequestDto;
-import com.pathfinder.user.domain.enums.UserRoleEnum;
-import com.pathfinder.user.domain.enums.UserStatusEnum;
+import com.pathfinder.user.domain.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,7 +39,6 @@ public class UserEntity {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    @Builder.Default
     private UserStatusEnum status = UserStatusEnum.PENDING;
 
     public static UserEntity create(SignupRequestDto requestDto, String encodingPassword) {
