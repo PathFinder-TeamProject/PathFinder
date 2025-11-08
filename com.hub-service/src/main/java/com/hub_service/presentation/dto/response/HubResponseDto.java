@@ -5,12 +5,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class HubResponseDto {
-    private String hubId;
+    private UUID hubId;
     private String hubName;
     private String hubAddress;
     private double latitude;
