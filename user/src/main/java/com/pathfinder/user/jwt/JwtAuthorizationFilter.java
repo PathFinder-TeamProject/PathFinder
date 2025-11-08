@@ -1,5 +1,6 @@
 package com.pathfinder.user.jwt;
 import com.pathfinder.user.application.UserDetailsServiceImpl;
+import com.pathfinder.user.application.excpetion.ErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +20,7 @@ import java.io.IOException;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
-    private final JwtUtil jwtUtil;
+   private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
     public JwtAuthorizationFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
@@ -39,7 +40,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-//                response.getWriter().write(ErrorCode.INVALID_TOKEN.getMessage());
+                response.getWriter().write(ErrorCode.INVALID_TOKEN.getMessage());
                 return;
             }
 
@@ -58,17 +59,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     }
 
     // 인증 처리
-    public void setAuthentication(String email) {
+    public void setAuthentication(String username) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = createAuthentication(email);
+        Authentication authentication = createAuthentication(username);
         context.setAuthentication(authentication);
 
         SecurityContextHolder.setContext(context);
     }
 
     // 인증 객체 생성
-    private Authentication createAuthentication(String email) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+    private Authentication createAuthentication(String username) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 }
