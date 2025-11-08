@@ -5,20 +5,29 @@ import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.domain.enums.UserStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@ToString
 public class UserResponseDto {
-
     private String username;
-
-    private String name;
 
     private String email;
 
+    private String name;
+
+    private String organization;
+
+    private String eventType;
+
+    private String slackId;
+
     private UserRoleEnum role;
+
+    private Long hubId;
 
     private UserStatusEnum status;
 
@@ -32,6 +41,10 @@ public class UserResponseDto {
                 .name(user.getName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .status(user.getStatus())
+                .organization(user.getOrganization())
+                .slackId(user.getSlackId())
+                .hubId(user.getHubId())
                 .status(user.getStatus())
 //                .createdAt(user.getCreatedAt())
 //                .isDeleted(user.getIsDeleted())

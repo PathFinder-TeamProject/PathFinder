@@ -49,5 +49,4 @@ public class SignupRequestDto {
 
     @NotNull(message = "허브 아이디(hubId)는 필수 입력 값입니다.")
     private Long hubId;
-
 }

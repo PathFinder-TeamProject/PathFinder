@@ -2,8 +2,10 @@ package com.pathfinder.user.presentation.controller;
 
 import com.pathfinder.user.application.UserServiceV1;
 import com.pathfinder.user.application.dto.request.*;
+import com.pathfinder.user.application.excpetion.ErrorCode;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
 import com.pathfinder.user.domain.entity.UserEntity;
+import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.presentation.dto.response.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +28,11 @@ public class UserControllerV1 {
     // 회원가입 (더미)
     @PostMapping("/auth/register")
     public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+        if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER
+                && requestDto.getDeliveryManagerType() == null) {
+            throw new RuntimeException(/*ErrorCode.INVALID_REQUEST,*/ "배송 담당자 타입이 필요합니다.");
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(userServiceV1.signup(requestDto));
     }
     @GetMapping("/users")

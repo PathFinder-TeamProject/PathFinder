@@ -3,15 +3,14 @@ package com.pathfinder.user.application;
 import com.pathfinder.user.application.dto.request.*;
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
-import com.pathfinder.user.domain.enums.UserStatusEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
+import com.pathfinder.user.infrastructure.client.DeliveryManagerClient;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceV1 {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final DeliveryManagerClient deliveryManagerClient;
     public SignupResponseDto signup(SignupRequestDto requestDto) {
         // 유저네임 중복 확인
         String username = requestDto.getUsername();
@@ -54,6 +53,10 @@ public class UserServiceV1 {
 
             userEventProducer.publishNewDeliveryManagerEvent(event);
         }*/
+        if(requestDto.getRole()==UserRoleEnum.DELIVERY_MANAGER) {
+            deliveryManagerClient.createDeliveryManager(
+                    new DeliveryManagerRequestDto(user.getUsername(),user.gethubId(), requestDto.getDeliveryManagerType()));
+        }
         return SignupResponseDto.of(saveUser);
     }
 

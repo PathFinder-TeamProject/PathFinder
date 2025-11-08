@@ -5,6 +5,7 @@ import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRe
 import com.pathfinder.delivery_manager.presentation.dto.request.DeliveryManagerRequest;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

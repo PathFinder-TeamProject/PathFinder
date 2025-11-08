@@ -68,14 +68,68 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers(
-                                "/v1/auth/register",
+                        .requestMatchers("/v1/auth/register",
                                 "/v1/auth/login",
                                 "/v1/auth/logout",
                                 "/v3/api-docs/**").permitAll()
+
+                        // Users
+                        .requestMatchers("/v1/users/**").hasRole("MASTER")
+                        // user
                         .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
+
+                        // DeliveryManager
+                        .requestMatchers(HttpMethod.GET, "/v1/delivery-managers", "/v1/delivery-managers/{delivery_manager_id}").hasAnyRole("DELIVERY_MANAGER", "HUB_MANAGER", "MASTER")
+                        .requestMatchers("/v1/delivery-managers/**").hasAnyRole("HUB_MANAGER", "MASTER")
+
+                        // AI
+                        .requestMatchers("/api/v1/ai/**").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.POST, "/v1/ai").authenticated()
+
+                        // Hubs
+                        .requestMatchers(HttpMethod.POST,"/v1/hubs").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.PUT,"/v1/hubs/{hubId}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.DELETE,"/v1/hubs/{hubId}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.GET,"/v1/hubs","/v1/hubs/{hubId}")
+                        .authenticated()
+
+                        // Deliveries
+                        // Deliveries API
+                        .requestMatchers(HttpMethod.POST, "/v1/deliverys/*/assign").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/v1/deliverys").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/v1/deliverys/*/routes/*").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/v1/deliverys/*/routes/*").hasAnyRole("MASTER", "HUB_MANAGER", "DELIVERY_MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/v1/deliverys/*").hasAnyRole("MASTER", "DELIVERY_MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/v1/deliverys/*").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/v1/deliverys/*/routes/*").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/v1/deliverys/*/routes", "/v1/deliverys", "/v1/deliverys/*").authenticated()
+                        // Slack Messages
+                        .requestMatchers(HttpMethod.GET,"/v1/slack-messages","/v1/slack-messages/{message_id}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.DELETE,"/v1/slack-messages/{message_id}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.PATCH,"/v1/slack-messages/{message_id}").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.POST,"/v1/slack-messages")
+                        .authenticated()
+
+                        // Products
+                        .requestMatchers(HttpMethod.GET,"/v1/products","/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.POST,"/v1/products").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.PUT,"/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.DELETE,"/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+
+                        // Companies
+                        .requestMatchers(HttpMethod.GET,"/v1/companys","/v1/companys/{company_id}")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.POST,"/v1/companys").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.PUT,"/v1/companys/{company_id}").hasAnyRole("MASTER", "HUB_MANAGER", "COMPANY_MANAGER")
+                        .requestMatchers(HttpMethod.DELETE,"/v1/companys/{company_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+
+                        // Orders
+                        .requestMatchers(HttpMethod.GET, "/v1/orders", "/v1/orders/{order_id}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/v1/orders","/v1/orders/{order_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers(HttpMethod.PATCH, "/v1/orders/{order_id}").hasAnyRole("MASTER", "HUB_MANAGER")
+
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
 

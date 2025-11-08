@@ -1,6 +1,7 @@
 package com.pathfinder.user.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pathfinder.global.event.NewDeliveryManagerEvent;
 import com.pathfinder.user.application.dto.request.SignupRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +18,11 @@ public class UserEventProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper; // DTO 객체를 JSON 문자열로 변환하기 위해 필요
-
-    /*public void publishNewDeliveryManagerEvent(NewDeliveryManagerEvent event) {
+ /*
+    public void sendUserUpdateEvent(String username) {
+        kafkaTemplate.send("user-updated", username);
+    }
+    public void publishNewDeliveryManagerEvent(NewDeliveryManagerEvent event) {
         try {
             // DTO 객체를 JSON 문자열로 직렬화
             String jsonMessage = objectMapper.writeValueAsString(event);
