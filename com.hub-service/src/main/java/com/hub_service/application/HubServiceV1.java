@@ -5,7 +5,12 @@ import com.hub_service.domain.repository.HubRepository;
 import com.hub_service.presentation.dto.request.HubRequestDto;
 import com.hub_service.presentation.dto.response.HubResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,23 +18,27 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HubServiceV1 {
 
     private final HubRepository hubRepository;
 
+    @Cacheable(value = "hubs", key = "'all'")
     public List<HubResponseDto> getAllHubs() {
-        return hubRepository.findAll().stream()
+        return hubRepository.findAllByDeletedAtIsNull()
+                .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public HubResponseDto getHubById(UUID id) {
-        Hub hub = hubRepository.findById(id)
+    @Cacheable(value = "hubs", key = "#hubId")
+    public HubResponseDto getHubById(UUID hubId) {
+        Hub hub = hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> new IllegalArgumentException("허브를 찾을 수 없습니다."));
         return toResponse(hub);
     }
 
-
+    @Transactional
     public HubResponseDto createHub(HubRequestDto requestDto) {
         Hub hub = Hub.builder()
                 .hubName(requestDto.getHubName())
@@ -37,28 +46,32 @@ public class HubServiceV1 {
                 .latitude(requestDto.getLatitude())
                 .longitude(requestDto.getLongitude())
                 .build();
-        Hub saved = hubRepository.save(hub);
-        return toResponse(saved);
+        return toResponse(hubRepository.save(hub));
     }
 
-    public HubResponseDto updateHub(UUID id, HubRequestDto requestDto) {
-        Hub hub = hubRepository.findById(id).
-                orElseThrow(() -> new IllegalArgumentException("허브를 찾을 수 없습니다."));
-        Hub updated = Hub.builder()
-                .hubId(hub.getHubId())
-                .hubName(requestDto.getHubName())
-                .hubAddress(requestDto.getHubAddress())
-                .latitude(requestDto.getLatitude())
-                .longitude(requestDto.getLongitude())
-                .build();
-        return toResponse(hubRepository.save(updated));
+    @CacheEvict(value = "hubs", allEntries = true)
+    @Transactional
+    public HubResponseDto updateHub(UUID hubId, HubRequestDto requestDto) {
+        Hub hub = hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> new IllegalArgumentException("허브를 찾을 수 없습니다."));
+        hub.update(requestDto.getHubName(), requestDto.getHubAddress(),
+                requestDto.getLatitude(), requestDto.getLongitude());
+        return toResponse(hubRepository.save(hub));
     }
 
-    public void deleteHub(UUID id) {
-        if(!hubRepository.existsById(id)){
-            throw new IllegalArgumentException("허브를 찾을 수 없습니다.");
-        }
-        hubRepository.deleteById(id);
+    @CacheEvict(value = "hubs", allEntries = true)
+    @Transactional
+    public void deleteHub(UUID hubId, String username) {
+        Hub hub = hubRepository.findByHubIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> new IllegalArgumentException("허브가 존재하지 않거나 이미 삭제되었습니다."));
+        hub.softDelete(username);
+        hubRepository.save(hub);
+    }
+
+    @Transactional
+    public Page<HubResponseDto> searchHubs(String keyword, String sortBy, Pageable pageable) {
+        return hubRepository.searchHubs(keyword, sortBy, pageable)
+                .map(this::toResponse);
     }
 
     private HubResponseDto toResponse(Hub hub) {
@@ -71,3 +84,4 @@ public class HubServiceV1 {
                 .build();
     }
 }
+
