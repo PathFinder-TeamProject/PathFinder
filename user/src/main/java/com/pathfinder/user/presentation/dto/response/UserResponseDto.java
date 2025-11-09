@@ -22,15 +22,13 @@ public class UserResponseDto {
 
     private String organization;
 
-    private String eventType;
-
     private String slackId;
 
-    private UserRoleEnum role;
+    private String role;
 
     private Long hubId;
 
-    private UserStatusEnum status;
+    private String status;
 
     private Instant createdAt;
 
@@ -41,12 +39,11 @@ public class UserResponseDto {
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
-                .role(user.getRole())
-                .status(user.getStatus())
+                .role(user.getRole().name())
+                .status(user.getStatus().name())
                 .organization(user.getOrganization())
                 .slackId(user.getSlackId())
                 .hubId(user.getHubId())
-                .status(user.getStatus())
                 .createdAt(user.getCreatedAt())
                 .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();

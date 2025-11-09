@@ -1,7 +1,5 @@
-package com.pathfinder.user.application.excpetion;
+package com.pathfinder.user.application.exception;
 
-
-import com.pathfinder.global.presentation.handler.GlobalExceptionHandler;
 
 public class PasswordNotMatchException extends RuntimeException {
 

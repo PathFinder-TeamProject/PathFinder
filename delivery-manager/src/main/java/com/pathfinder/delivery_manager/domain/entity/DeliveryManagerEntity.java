@@ -21,7 +21,7 @@ public class DeliveryManagerEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long deliveryManagerId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -29,7 +29,7 @@ public class DeliveryManagerEntity extends BaseEntity {
     private DeliveryManagerTypeEnum type;
 
     @Column(nullable = false)
-    private Integer deliveryOrder;
+    private int deliveryOrder;
 
     @Column(nullable = false)
     private Long hubId;
@@ -43,10 +43,13 @@ public class DeliveryManagerEntity extends BaseEntity {
                 .hubId(requestDto.getHubId())
                 .build();
     }
+    public void setDeliveryOrder(int deliveryOrder) {
+        this.deliveryOrder = deliveryOrder;
+    }
 
     public void update(DeliveryManagerRequestDto requestDto) {
         this.type = requestDto.getType() == null ? this.type : requestDto.getType();
-        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder();
+        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder().intValue();
         this.hubId = requestDto.getHubId() == null ? this.hubId : requestDto.getHubId();
     }
 }

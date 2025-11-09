@@ -1,4 +1,4 @@
-package com.pathfinder.user.application.excpetion;
+package com.pathfinder.user.application.exception;
 
 import com.pathfinder.global.presentation.error.BaseErrorCode;
 import lombok.Getter;

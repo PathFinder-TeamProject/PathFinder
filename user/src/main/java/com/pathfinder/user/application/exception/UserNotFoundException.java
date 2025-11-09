@@ -1,6 +1,4 @@
-package com.pathfinder.user.application.excpetion;
-
-import com.pathfinder.global.presentation.handler.GlobalExceptionHandler;
+package com.pathfinder.user.application.exception;
 
 public class UserNotFoundException extends RuntimeException {
 

@@ -1,4 +1,4 @@
-package com.pathfinder.user.application.excpetion;
+package com.pathfinder.user.application.exception;
 
 
 public class DuplicateUserException extends RuntimeException {

@@ -1,6 +1,6 @@
 package com.pathfinder.user.jwt;
 import com.pathfinder.user.application.UserDetailsServiceImpl;
-import com.pathfinder.user.application.excpetion.UserErrorCode;
+import com.pathfinder.user.application.exception.UserErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
