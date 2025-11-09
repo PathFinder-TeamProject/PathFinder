@@ -5,8 +5,10 @@ import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -20,8 +22,13 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
     }
 
     @Override
-    public Optional<DeliveryEntity> findById(Long id) {
-        return jpaRepository.findById(id);
+    public Optional<DeliveryEntity> findById(UUID id) {
+        return jpaRepository.findByDeliveryIdAndDeletedAtIsNull(id);
+    }
+
+    @Override
+    public Optional<DeliveryEntity> findByOrderId(UUID orderId) {
+        return jpaRepository.findByOrderIdAndDeletedAtIsNull(orderId);
     }
 
     @Override
@@ -30,13 +37,10 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
     }
 
     @Override
-    public Optional<DeliveryEntity> findByOrderId(Long orderId) {
-        return jpaRepository.findByOrderId(orderId);
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        jpaRepository.deleteById(id);
+    public void softDelete(UUID id, String deletedBy) {
+        jpaRepository.findById(id).ifPresent(entity -> {
+            entity.softDelete(Instant.now(), Long.parseLong(deletedBy));
+            jpaRepository.save(entity);
+        });
     }
 }
-
