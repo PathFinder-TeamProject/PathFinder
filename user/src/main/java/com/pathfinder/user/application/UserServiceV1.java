@@ -4,8 +4,8 @@ import com.pathfinder.user.application.dto.request.*;
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
+import com.pathfinder.user.infrastructure.client.DeliveryManagerClient;
 import com.pathfinder.user.presentation.dto.response.*;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceV1 {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final DeliveryManagerClient deliveryManagerClient;
     public SignupResponseDto signup(SignupRequestDto requestDto) {
         // 유저네임 중복 확인
         String username = requestDto.getUsername();
@@ -43,6 +43,20 @@ public class UserServiceV1 {
 
         UserEntity user = UserEntity.create(requestDto, passwordEncoder.encode(requestDto.getPassword()));
         UserEntity saveUser = userRepository.save(user);
+        /*if (role == UserRoleEnum.DELIVERY_MANAGER) {
+            NewDeliveryManagerEvent event = NewDeliveryManagerEvent.builder()
+                    .username(saveUser.getUsername())
+                    .email(saveUser.getEmail())
+                    .hubId(requestDto.getHubId())
+                    .deliveryManagerType(requestDto.getDeliveryManagerType().name())
+                    .build();
+
+            userEventProducer.publishNewDeliveryManagerEvent(event);
+        }*/
+        if(requestDto.getRole()==UserRoleEnum.DELIVERY_MANAGER) {
+            deliveryManagerClient.createDeliveryManager(
+                    new DeliveryManagerRequestDto(user.getUsername(),user.gethubId(), requestDto.getDeliveryManagerType()));
+        }
         return SignupResponseDto.of(saveUser);
     }
 
@@ -53,12 +67,12 @@ public class UserServiceV1 {
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page-1, size, sort);
 
         Page<UserEntity> userList = userRepository.findAll(pageable);
         return userList.map(UserResponseDto::of);
     }
-
+    //관리자 기준 유저 조회
     public UserResponseDto getUser(String username, UserEntity user) {
         // 요청 유저 id와 토큰 유저의 id가 같을 경우 유저 정보 반환
         if (username.equals(user.getUsername())) {

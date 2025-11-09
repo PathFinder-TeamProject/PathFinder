@@ -1,15 +1,16 @@
 package com.pathfinder.user.presentation.dto.response;
 
 import com.pathfinder.user.domain.entity.UserEntity;
-import com.pathfinder.user.domain.enums.UserRoleEnum;
-import com.pathfinder.user.domain.enums.UserStatusEnum;
+import com.pathfinder.user.domain.enums.*;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@ToString
 public class UserStatusUpdateResponseDto {
     private String username;
 
