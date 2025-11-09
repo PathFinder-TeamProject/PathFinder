@@ -1,16 +1,16 @@
 package com.hub_service.presentation.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@Builder
+import java.util.UUID;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HubResponseDto {
-    private String hubId;
+    private UUID hubId;
     private String hubName;
     private String hubAddress;
     private double latitude;

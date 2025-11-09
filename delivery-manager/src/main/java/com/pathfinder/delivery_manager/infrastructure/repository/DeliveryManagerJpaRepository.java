@@ -9,4 +9,8 @@ import java.util.Optional;
 
 public interface DeliveryManagerJpaRepository extends JpaRepository<DeliveryManagerEntity, Long> {
 
+    Optional<DeliveryManagerEntity> findByUsername(String username);
+
+    int countByHubId(Long hubId);
+    Page<DeliveryManagerEntity> findByHubId(Long hubId, Pageable pageable);
 }

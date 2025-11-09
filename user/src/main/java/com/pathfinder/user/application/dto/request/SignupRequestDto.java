@@ -1,6 +1,6 @@
 package com.pathfinder.user.application.dto.request;
 
-import com.pathfinder.user.domain.enums.DeliveryManagerType;
+import com.pathfinder.user.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -42,10 +42,11 @@ public class SignupRequestDto {
     @NotNull(message = "역할(role)은 필수 입력 값입니다.")
     private UserRoleEnum role;
 
+    private DeliveryManagerTypeEnum DeliveryManagerType;
+
     @NotNull(message = "슬랙 아이디(slackId)는 필수 입력 값입니다.")
     private String slackId;
 
     @NotNull(message = "허브 아이디(hubId)는 필수 입력 값입니다.")
     private Long hubId;
-
 }
