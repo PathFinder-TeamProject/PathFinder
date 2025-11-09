@@ -1,9 +1,11 @@
 package com.pathfinder.user.application.excpetion;
 
 
-public class PasswordNotMatchException {
+import com.pathfinder.global.presentation.handler.GlobalExceptionHandler;
 
-    public PasswordNotMatchException(ErrorCode errorCode) {
+public class PasswordNotMatchException extends RuntimeException {
+
+    public PasswordNotMatchException(UserErrorCode errorCode) {
         super();
     }
 }

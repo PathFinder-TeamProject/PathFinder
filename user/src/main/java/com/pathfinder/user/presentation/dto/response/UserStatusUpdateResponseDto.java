@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,7 +21,9 @@ public class UserStatusUpdateResponseDto {
 
     private UserRoleEnum role;
 
-    private LocalDateTime updatedAt;
+    private Instant modifiedAt;
+
+    private String modifiedBy;
 
     private boolean isDeleted;
 
@@ -33,10 +36,9 @@ public class UserStatusUpdateResponseDto {
                 .name(user.getName())
                 .role(user.getRole())
                 .status(user.getStatus())
-/*                .updatedAt(user.getUpdatedAt())
-                .updatedBy(user.getUpdatedBy())
-                .isDeleted(user.getIsDeleted())
-                */
+                .modifiedAt(user.getModifiedAt())
+                .modifiedBy(user.getModifiedBy())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

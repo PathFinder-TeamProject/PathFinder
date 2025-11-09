@@ -9,6 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryManagerRequestDto {
+
+    private Long deliveryManagerId;
+
     private String username;
 
     private Long hubId;

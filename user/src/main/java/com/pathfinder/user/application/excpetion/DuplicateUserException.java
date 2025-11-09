@@ -1,9 +1,9 @@
 package com.pathfinder.user.application.excpetion;
 
 
-public class DuplicateUserException {
+public class DuplicateUserException extends RuntimeException {
 
-    public DuplicateUserException(ErrorCode errorCode) {
+    public DuplicateUserException(UserErrorCode errorCode, String duplicateValue) {
         super();
     }
 }

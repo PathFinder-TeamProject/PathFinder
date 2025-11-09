@@ -1,6 +1,6 @@
 package com.pathfinder.user.jwt;
 import com.pathfinder.user.application.UserDetailsServiceImpl;
-import com.pathfinder.user.application.excpetion.ErrorCode;
+import com.pathfinder.user.application.excpetion.UserErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -40,7 +40,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(ErrorCode.INVALID_TOKEN.getMessage());
+                response.getWriter().write(UserErrorCode.INVALID_TOKEN.getMessage());
                 return;
             }
 

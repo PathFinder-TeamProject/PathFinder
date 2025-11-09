@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service
@@ -50,8 +51,9 @@ public class DeliveryManagerServiceV1 {
     public void deleteManager(Long id) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-//        deliveryManager.setDeletedAt(LocalDateTime.now());
-//        deliveryManager.setDeletedBy("system");
+
+        deliveryManager.softDelete(Instant.now(), "system");
+        DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
     }
     @Transactional(readOnly = true)
     public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
@@ -69,5 +71,15 @@ public class DeliveryManagerServiceV1 {
             deliveryManagerPage = deliveryManagerRepository.findAll(pageable);
         }
         return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
+    }
+
+    @Transactional
+    public DeliveryManagerResponseDto updateManager(DeliveryManagerRequestDto requestDto) {
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(requestDto.getDeliveryManagerId())
+                .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
+        deliveryManager.update(requestDto);
+        deliveryManager.setModified(Instant.now(), "system");
+        DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
+        return DeliveryManagerResponseDto.of(savedDeliveryManager);
     }
 }

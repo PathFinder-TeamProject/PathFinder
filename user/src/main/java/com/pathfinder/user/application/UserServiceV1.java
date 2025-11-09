@@ -1,6 +1,7 @@
 package com.pathfinder.user.application;
 
 import com.pathfinder.user.application.dto.request.*;
+import com.pathfinder.user.application.excpetion.*;
 import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceV1 {
@@ -24,22 +27,28 @@ public class UserServiceV1 {
         // 유저네임 중복 확인
         String username = requestDto.getUsername();
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("유저네임 중복");
+            throw new DuplicateUserException(UserErrorCode.DUPLICATE_USER,
+                UserErrorCode.DUPLICATE_USER.getFormattedMessage("유저네임"));
+
         }
         // 이메일 중복 확인
         String email = requestDto.getEmail();
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("이메일 중복");
+            throw new DuplicateUserException(UserErrorCode.DUPLICATE_USER,
+                    UserErrorCode.DUPLICATE_USER.getFormattedMessage("이메일"));
         }
         String slackId = requestDto.getSlackId();
         if (userRepository.findBySlackId(slackId).isPresent()) {
-            throw new RuntimeException("슬랙계정 중복");
+
+            throw new DuplicateUserException(UserErrorCode.DUPLICATE_USER,
+                    UserErrorCode.DUPLICATE_USER.getFormattedMessage("슬랙 계정"));
         }
         // 권한 확인
-        UserRoleEnum role = requestDto.getRole();
+/*        UserRoleEnum role = requestDto.getRole();
         if (role.equals(UserRoleEnum.MASTER)) {
             throw new RuntimeException("마스터 계정 중복");
-        }
+            throw new U(UserErrorCode.DUPLICATE_USER);
+        }*/
 
         UserEntity user = UserEntity.create(requestDto, passwordEncoder.encode(requestDto.getPassword()));
         UserEntity saveUser = userRepository.save(user);
@@ -55,7 +64,7 @@ public class UserServiceV1 {
         }*/
         if(requestDto.getRole()==UserRoleEnum.DELIVERY_MANAGER) {
             deliveryManagerClient.createDeliveryManager(
-                    new DeliveryManagerRequestDto(user.getUsername(),user.gethubId(), requestDto.getDeliveryManagerType()));
+                    new DeliveryManagerRequestDto(user.getUsername(), user.getHubId(), requestDto.getDeliveryManagerType()));
         }
         return SignupResponseDto.of(saveUser);
     }
@@ -74,12 +83,6 @@ public class UserServiceV1 {
     }
     //관리자 기준 유저 조회
     public UserResponseDto getUser(String username, UserEntity user) {
-        // 요청 유저 id와 토큰 유저의 id가 같을 경우 유저 정보 반환
-        if (username.equals(user.getUsername())) {
-            return UserResponseDto.of(user);
-        }
-
-        // 요청 유저 id와 토큰 유저의 id가 다를 경우
         // 토큰 유저의 role이 MASTER인지 판별 후 유저 정보 반환
         UserRoleEnum role = user.getRole();
         if (role.equals(UserRoleEnum.MASTER)) {
@@ -87,23 +90,21 @@ public class UserServiceV1 {
         }
 
         // 토큰 유저의 role이 MASTER와 MANAGER가 아닐 경우 exception 반환
-//        throw new UnauthorizedUserException(ErrorCode.UNAUTHORIZED_USER);
-        throw new RuntimeException();
+        throw new UnauthorizedUserException(UserErrorCode.UNAUTHORIZED_USER);
     }
 
     public UserStatusUpdateResponseDto updateUserStatus(String username, UserStatusUpdateRequestDto userStatusChangeRequestDto, UserEntity user) {
 
         UserEntity targetUser = findUser(username);
         targetUser.updateStatus(userStatusChangeRequestDto.getStatus());
-//        targetUser.markUpdated(user.getUsername());
-
+        targetUser.setModified(Instant.now(), user.getUsername());
         return UserStatusUpdateResponseDto.of(targetUser);
     }
 
     public UserRoleUpdateResponseDto userRoleUpdate (String username, UserRoleUpdateRequestDto userRoleChangeRequestDto, UserEntity user) {
         UserEntity targetUser = findUser(username);
         targetUser.updateRole(userRoleChangeRequestDto.getRole());
-//        targetUser.markUpdated(user.getUsername());
+        targetUser.setModified(Instant.now(), user.getUsername());
 
         return UserRoleUpdateResponseDto.of(targetUser);
     }
@@ -112,12 +113,11 @@ public class UserServiceV1 {
         // 비밀번호가 일치 하는지 확인
         UserEntity targetUser = findUser(username);
         matchPassword(userUpdateRequestDto.getPassword(), targetUser.getPassword());
-        if((targetUser.getUsername().equals(user.getUsername()) && targetUser.getUsername().equals(user.getUsername()))
-                || user.getRole().equals(UserRoleEnum.MASTER)) {
+        if(targetUser.getUsername().equals(user.getUsername())) {
             // 비밀번호가 일치하면 유저 이름과 변경할 패스워드 업데이트
-            user.update(userUpdateRequestDto, passwordEncoder);
+            targetUser.update(userUpdateRequestDto, passwordEncoder);
         }
-//        user.markUpdated(user.getUsername());
+        user.setModified(Instant.now(), user.getUsername());
         UserEntity saveUser = userRepository.save(user);
 
         return UserUpdateResponseDto.of(saveUser);
@@ -125,20 +125,27 @@ public class UserServiceV1 {
 
     public UserDeleteResponseDto deleteUser(UserDeleteRequestDto userDeleteRequestDto, UserEntity user) {
         matchPassword(userDeleteRequestDto.getPassword(), user.getPassword());
-//        user.markDeleted(user.getUsername());
+        user.softDelete(Instant.now(), user.getUsername());
         UserEntity saveUser = userRepository.save(user);
         return UserDeleteResponseDto.of(saveUser);
     }
 
     public UserEntity findUser(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new RuntimeException()
+                () -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND)
         );
     }
 
     private void matchPassword(String rowPassword, String encodedPassword) {
         if (!passwordEncoder.matches(rowPassword, encodedPassword)) {
-            throw new RuntimeException();
+            throw new PasswordNotMatchException(UserErrorCode.PASSWORD_NOT_MATCH);
+        }
+    }
+    public void checkActive(String username) {
+        UserEntity user = findUser(username);
+        if(user.getStatus() != null &&
+                user.getStatus() != com.pathfinder.user.domain.enums.UserStatusEnum.ACTIVE) {
+            throw new NotActiveUser(UserErrorCode.NOT_ACTIVE_USER);
         }
     }
 }

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -31,7 +32,7 @@ public class UserResponseDto {
 
     private UserStatusEnum status;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private boolean isDeleted;
 
@@ -46,8 +47,8 @@ public class UserResponseDto {
                 .slackId(user.getSlackId())
                 .hubId(user.getHubId())
                 .status(user.getStatus())
-//                .createdAt(user.getCreatedAt())
-//                .isDeleted(user.getIsDeleted())
+                .createdAt(user.getCreatedAt())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

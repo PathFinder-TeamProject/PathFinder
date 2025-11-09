@@ -1,8 +1,10 @@
 package com.pathfinder.user.application.excpetion;
 
-public class UnauthorizedUserException {
+import com.pathfinder.global.presentation.handler.GlobalExceptionHandler;
 
-    public UnauthorizedUserException(ErrorCode errorCode) {
+public class UnauthorizedUserException extends RuntimeException {
+
+    public UnauthorizedUserException(UserErrorCode errorCode) {
         super();
     }
 }

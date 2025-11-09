@@ -1,10 +1,11 @@
 package com.pathfinder.user.presentation.controller;
 
+import com.pathfinder.global.presentation.response.ApiResponse;
 import com.pathfinder.user.application.UserServiceV1;
 import com.pathfinder.user.application.dto.request.*;
-import com.pathfinder.user.application.excpetion.ErrorCode;
+import com.pathfinder.user.application.excpetion.UserErrorCode;
+import com.pathfinder.user.application.excpetion.ValidationException;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
-import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.presentation.dto.response.*;
 import org.springframework.http.HttpStatus;
@@ -27,48 +28,50 @@ public class UserControllerV1 {
     private final UserServiceV1 userServiceV1;
     // 회원가입 (더미)
     @PostMapping("/auth/register")
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+    public ApiResponse<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
         if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER
                 && requestDto.getDeliveryManagerType() == null) {
-            throw new RuntimeException(/*ErrorCode.INVALID_REQUEST,*/ "배송 담당자 타입이 필요합니다.");
+            throw new ValidationException(UserErrorCode.MISSING_REQUIRED_FIELD,UserErrorCode.MISSING_REQUIRED_FIELD.getFormattedMessage("배송 담당자 타입"));
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userServiceV1.signup(requestDto));
+        return ApiResponse.success(userServiceV1.signup(requestDto));
     }
     @GetMapping("/users")
-    public ResponseEntity<Page<UserResponseDto>> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
+    public ApiResponse<Page<UserResponseDto>> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
                                                              @RequestParam(value = "size", defaultValue = "10") int size,
                                                              @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
                                                              @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
-        return ResponseEntity.ok(userServiceV1.getUserList(page - 1, size, sortBy, isAsc));
+        return ApiResponse.success(userServiceV1.getUserList(page - 1, size, sortBy, isAsc));
     }
     @PatchMapping("/users/{username}/confirm-member")
-    public ResponseEntity<UserStatusUpdateResponseDto> updateUserConfirm(@PathVariable String username,
+    public ApiResponse<UserStatusUpdateResponseDto> updateUserConfirm(@PathVariable String username,
                                                                                       @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
                                                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.updateUserStatus(username, userStatusUpdateRequestDto, userDetails.getUser()));
+        userServiceV1.checkActive(userDetails.getUsername());
+        return ApiResponse.success(userServiceV1.updateUserStatus(username, userStatusUpdateRequestDto, userDetails.getUser()));
     }
     @PatchMapping("/users/{username}/role")
-    public ResponseEntity<UserRoleUpdateResponseDto> updateUserRole(@PathVariable String username,
+    public ApiResponse<UserRoleUpdateResponseDto> updateUserRole(@PathVariable String username,
                                                                                  @RequestBody @Valid UserRoleUpdateRequestDto userRoleUpdateRequestDto,
                                                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.userRoleUpdate(username, userRoleUpdateRequestDto, userDetails.getUser()));
+        userServiceV1.checkActive(userDetails.getUsername());
+        return ApiResponse.success(userServiceV1.userRoleUpdate(username, userRoleUpdateRequestDto, userDetails.getUser()));
     }
 
     @GetMapping("/users/myInfo")
-    public ResponseEntity<UserResponseDto> getMyUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.getUser(userDetails.getUser().getUsername(), userDetails.getUser()) );
+    public ApiResponse<UserResponseDto> getMyUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ApiResponse.success(userServiceV1.getUser(userDetails.getUser().getUsername(), userDetails.getUser()) );
     }
 
     @GetMapping("/users/{username}")
-    public ResponseEntity<UserResponseDto> getUserInfo(@PathVariable String username,
-                                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.getUser(username, userDetails.getUser()) );
+    public ApiResponse<UserResponseDto> getUserInfo(@PathVariable String username,
+                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ApiResponse.success(userServiceV1.getUser(username, userDetails.getUser()) );
     }
     @PutMapping("/users/{username}")
-    public ResponseEntity<UserUpdateResponseDto> updateUserInfo(@PathVariable String username,
+    public ApiResponse<UserUpdateResponseDto> updateUserInfo(@PathVariable String username,
                                                                         @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
                                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.updateUser(username, userUpdateRequestDto, userDetails.getUser()) );
+        return ApiResponse.success(userServiceV1.updateUser(username, userUpdateRequestDto, userDetails.getUser()) );
     }
 }

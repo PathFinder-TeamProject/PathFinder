@@ -18,7 +18,7 @@ public class UserUpdateResponseDto {
 
     private String name;
 
-    private LocalDateTime updatedAt;
+    private String modifiedBy;
 
     private boolean isDeleted;
     public static UserUpdateResponseDto of(UserEntity user) {
@@ -26,9 +26,8 @@ public class UserUpdateResponseDto {
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
-//                .role(user.getRole())
-//                .createdAt(user.getCreatedAt())
-//                .isDeleted(user.getIsDeleted())
+                .modifiedBy(user.getModifiedBy())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }
