@@ -8,6 +8,8 @@ import com.pathfinder.user.domain.repository.UserRepository;
 import com.pathfinder.user.infrastructure.client.DeliveryManagerClient;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +84,7 @@ public class UserServiceV1 {
         return userList.map(UserResponseDto::of);
     }
     //관리자 기준 유저 조회
+    @Cacheable(value = "users", key = "#username")
     public UserResponseDto getUser(String username, UserEntity user) {
         // 토큰 유저의 role이 MASTER인지 판별 후 유저 정보 반환
         UserRoleEnum role = user.getRole();
@@ -109,6 +112,7 @@ public class UserServiceV1 {
         return UserRoleUpdateResponseDto.of(targetUser);
     }
 
+    @CacheEvict(value = "users", key = "#username")
     public UserUpdateResponseDto updateUser(String username, UserUpdateRequestDto userUpdateRequestDto, UserEntity user) {
         // 비밀번호가 일치 하는지 확인
         UserEntity targetUser = findUser(username);
@@ -123,6 +127,7 @@ public class UserServiceV1 {
         return UserUpdateResponseDto.of(saveUser);
     }
 
+    @CacheEvict(value = "users", key = "#username")
     public UserDeleteResponseDto deleteUser(UserDeleteRequestDto userDeleteRequestDto, UserEntity user) {
         matchPassword(userDeleteRequestDto.getPassword(), user.getPassword());
         user.softDelete(Instant.now(), user.getUsername());
@@ -130,6 +135,7 @@ public class UserServiceV1 {
         return UserDeleteResponseDto.of(saveUser);
     }
 
+    @Cacheable(value = "users", key = "#username")
     public UserEntity findUser(String username) {
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new UserNotFoundException(UserErrorCode.USER_NOT_FOUND)
