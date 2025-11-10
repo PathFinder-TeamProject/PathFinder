@@ -1,15 +1,16 @@
 package com.pathfinder.delivery.application.command.service;
 
-import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommand;
-import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommand;
+import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommandDto;
+import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommandDto;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
+
+import java.util.UUID;
 
 public interface DeliveryCommandService {
     
-    DeliveryDto createDelivery(CreateDeliveryCommand command);
+    DeliveryDto createDelivery(CreateDeliveryCommandDto command);
     
-    DeliveryDto updateDelivery(UpdateDeliveryCommand command);
+    DeliveryDto updateDelivery(UpdateDeliveryCommandDto command);
     
-    void deleteDelivery(Long id);
+    void deleteDelivery(UUID id);
 }
-

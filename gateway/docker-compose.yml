@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  gateway-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=gateway-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config:19000
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    networks:
+      - pathfinder-network
+    depends_on:
+      - eureka
+      - config
+      - zipkin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  pathfinder-network:
+    external: true

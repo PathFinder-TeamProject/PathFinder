@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  config-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: config-service
+    ports:
+      - "19000:19000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker,native
+      - SPRING_APPLICATION_NAME=config-service
+    networks:
+      - pathfinder-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:19000/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  pathfinder-network:
+    external: true
+
