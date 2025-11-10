@@ -1,5 +1,6 @@
 package com.pathfinder.user.domain.entity;
 
+import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import com.pathfinder.user.application.dto.request.SignupRequestDto;
 import com.pathfinder.user.application.dto.request.UserUpdateRequestDto;
 import com.pathfinder.user.domain.enums.*;
@@ -13,7 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity {
+public class UserEntity extends BaseEntity {
 
     @Id
     private String username;

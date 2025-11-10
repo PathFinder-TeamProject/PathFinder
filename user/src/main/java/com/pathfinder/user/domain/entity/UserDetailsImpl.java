@@ -19,7 +19,6 @@ public class UserDetailsImpl implements UserDetails {
     public UserEntity getUser() {
         return user;
     }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         UserRoleEnum role = user.getRole();

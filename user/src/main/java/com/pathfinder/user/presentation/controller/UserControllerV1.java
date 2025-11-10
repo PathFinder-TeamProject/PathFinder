@@ -1,22 +1,22 @@
 package com.pathfinder.user.presentation.controller;
 
+import com.pathfinder.global.presentation.response.ApiResponse;
 import com.pathfinder.user.application.UserServiceV1;
 import com.pathfinder.user.application.dto.request.*;
-import com.pathfinder.user.application.excpetion.ErrorCode;
+import com.pathfinder.user.application.exception.UserErrorCode;
+import com.pathfinder.user.application.exception.ValidationException;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
-import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.presentation.dto.response.*;
-import org.springframework.http.HttpStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 
-
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1")
@@ -25,50 +25,138 @@ public class UserControllerV1 {
     private String serverPort;
 
     private final UserServiceV1 userServiceV1;
-    // 회원가입 (더미)
+
     @PostMapping("/auth/register")
-    public ResponseEntity<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+    public ApiResponse<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
+        log.info("POST /auth/register - 회원가입 요청 - username: {}, email: {}, role: {}",
+                requestDto.getUsername(), requestDto.getEmail(), requestDto.getRole());
+
         if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER
                 && requestDto.getDeliveryManagerType() == null) {
-            throw new RuntimeException(/*ErrorCode.INVALID_REQUEST,*/ "배송 담당자 타입이 필요합니다.");
+            log.warn("회원가입 실패 - 배송 담당자 타입 누락 - username: {}", requestDto.getUsername());
+            throw new ValidationException(UserErrorCode.MISSING_REQUIRED_FIELD,
+                    UserErrorCode.MISSING_REQUIRED_FIELD.getFormattedMessage("배송 담당자 타입"));
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userServiceV1.signup(requestDto));
+        SignupResponseDto response = userServiceV1.signup(requestDto);
+        log.info("POST /auth/register - 회원가입 완료 - username: {}", response.getUsername());
+        return ApiResponse.success(response);
     }
+
     @GetMapping("/users")
-    public ResponseEntity<Page<UserResponseDto>> getUserList(@RequestParam(value = "page", defaultValue = "1") int page,
-                                                             @RequestParam(value = "size", defaultValue = "10") int size,
-                                                             @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
-                                                             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
-        return ResponseEntity.ok(userServiceV1.getUserList(page - 1, size, sortBy, isAsc));
+    public ApiResponse<Page<UserResponseDto>> getUserList(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
+
+        log.info("GET /users - 유저 목록 조회 - page: {}, size: {}, sortBy: {}, isAsc: {}",
+                page, size, sortBy, isAsc);
+
+        Page<UserResponseDto> response = userServiceV1.getUserList(page - 1, size, sortBy, isAsc);
+        log.info("GET /users - 유저 목록 조회 완료 - 총 {}건, 현재 페이지 {}건",
+                response.getTotalElements(), response.getContent().size());
+
+        return ApiResponse.success(response);
     }
+
     @PatchMapping("/users/{username}/confirm-member")
-    public ResponseEntity<UserStatusUpdateResponseDto> updateUserConfirm(@PathVariable String username,
-                                                                                      @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
-                                                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.updateUserStatus(username, userStatusUpdateRequestDto, userDetails.getUser()));
+    public ApiResponse<UserStatusUpdateResponseDto> updateUserConfirm(
+            @PathVariable String username,
+            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 요청 - 변경할 상태: {}, 요청자: {}",
+                username, userStatusUpdateRequestDto.getStatus(), userDetails.getUsername());
+
+        userServiceV1.checkActive(userDetails.getUsername());
+        UserStatusUpdateResponseDto response = userServiceV1.updateUserStatus(
+                username, userStatusUpdateRequestDto, userDetails.getUser());
+
+        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 완료 - 새 상태: {}",
+                username, response.getStatus());
+
+        return ApiResponse.success(response);
     }
+
     @PatchMapping("/users/{username}/role")
-    public ResponseEntity<UserRoleUpdateResponseDto> updateUserRole(@PathVariable String username,
-                                                                                 @RequestBody @Valid UserRoleUpdateRequestDto userRoleUpdateRequestDto,
-                                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.userRoleUpdate(username, userRoleUpdateRequestDto, userDetails.getUser()));
+    public ApiResponse<UserRoleUpdateResponseDto> updateUserRole(
+            @PathVariable String username,
+            @RequestBody @Valid UserRoleUpdateRequestDto userRoleUpdateRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("PATCH /users/{}/role - 유저 권한 변경 요청 - 변경할 권한: {}, 요청자: {}",
+                username, userRoleUpdateRequestDto.getRole(), userDetails.getUsername());
+
+        userServiceV1.checkActive(userDetails.getUsername());
+        UserRoleUpdateResponseDto response = userServiceV1.userRoleUpdate(
+                username, userRoleUpdateRequestDto, userDetails.getUser());
+
+        log.info("PATCH /users/{}/role - 유저 권한 변경 완료 - 새 권한: {}",
+                username, response.getRole());
+
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/users/myInfo")
-    public ResponseEntity<UserResponseDto> getMyUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.getUser(userDetails.getUser().getUsername(), userDetails.getUser()) );
+    public ApiResponse<UserResponseDto> getMyUserInfo(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("GET /users/myInfo - 내 정보 조회 - username: {}", userDetails.getUsername());
+
+        UserResponseDto response = userServiceV1.getUser(
+                userDetails.getUser().getUsername(),
+                userDetails.getUser());
+
+        log.info("GET /users/myInfo - 내 정보 조회 완료 - username: {}", response.getUsername());
+
+        return ApiResponse.success(response);
     }
 
     @GetMapping("/users/{username}")
-    public ResponseEntity<UserResponseDto> getUserInfo(@PathVariable String username,
-                                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.getUser(username, userDetails.getUser()) );
+    public ApiResponse<UserResponseDto> getUserInfo(
+            @PathVariable String username,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("GET /users/{} - 유저 정보 조회 - 요청자: {}", username, userDetails.getUsername());
+
+        UserResponseDto response = userServiceV1.getUser(username, userDetails.getUser());
+
+        log.info("GET /users/{} - 유저 정보 조회 완료", username);
+
+        return ApiResponse.success(response);
     }
+
     @PutMapping("/users/{username}")
-    public ResponseEntity<UserUpdateResponseDto> updateUserInfo(@PathVariable String username,
-                                                                        @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
-                                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(userServiceV1.updateUser(username, userUpdateRequestDto, userDetails.getUser()) );
+    public ApiResponse<UserUpdateResponseDto> updateUserInfo(
+            @PathVariable String username,
+            @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("PUT /users/{} - 유저 정보 수정 요청 - 요청자: {}", username, userDetails.getUsername());
+
+        UserUpdateResponseDto response = userServiceV1.updateUser(
+                username, userUpdateRequestDto, userDetails.getUser());
+
+        log.info("PUT /users/{} - 유저 정보 수정 완료", username);
+
+        return ApiResponse.success(response);
     }
+
+    @DeleteMapping("/users/{username}")
+    public ApiResponse<UserDeleteResponseDto> deleteUser(
+            @PathVariable String username,
+            @RequestBody @Valid UserDeleteRequestDto userDeleteRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        log.info("DELETE /users/{} - 유저 삭제 요청 - 요청자: {}", username, userDetails.getUsername());
+
+        UserDeleteResponseDto response = userServiceV1.deleteUser(
+                userDeleteRequestDto, userDetails.getUser());
+
+        log.info("DELETE /users/{} - 유저 삭제 완료 (Soft Delete)", username);
+
+        return ApiResponse.success(response);
+    }
+
 }

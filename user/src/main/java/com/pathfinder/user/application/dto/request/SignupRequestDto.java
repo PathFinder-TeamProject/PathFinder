@@ -42,7 +42,7 @@ public class SignupRequestDto {
     @NotNull(message = "역할(role)은 필수 입력 값입니다.")
     private UserRoleEnum role;
 
-    private DeliveryManagerTypeEnum DeliveryManagerType;
+    private DeliveryManagerTypeEnum deliveryManagerType;
 
     @NotNull(message = "슬랙 아이디(slackId)는 필수 입력 값입니다.")
     private String slackId;

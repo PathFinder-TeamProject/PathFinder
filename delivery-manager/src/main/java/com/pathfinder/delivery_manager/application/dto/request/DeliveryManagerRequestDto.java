@@ -8,7 +8,11 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class DeliveryManagerRequestDto {
+
+    private Long deliveryManagerId;
+
     private String username;
 
     private Long hubId;

@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -23,11 +24,11 @@ public class UserResponseDto {
 
     private String slackId;
 
-    private UserRoleEnum role;
+    private String role;
 
     private Long hubId;
 
-    private UserStatusEnum status;
+    private String status;
 
     private Instant createdAt;
 
@@ -38,8 +39,8 @@ public class UserResponseDto {
                 .username(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
-                .role(user.getRole())
-                .status(user.getStatus())
+                .role(user.getRole().name())
+                .status(user.getStatus().name())
                 .organization(user.getOrganization())
                 .slackId(user.getSlackId())
                 .createdAt(user.getCreatedAt())

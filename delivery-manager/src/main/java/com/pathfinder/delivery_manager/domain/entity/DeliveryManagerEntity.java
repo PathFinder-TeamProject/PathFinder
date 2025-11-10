@@ -2,6 +2,7 @@ package com.pathfinder.delivery_manager.domain.entity;
 
 import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
+import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,12 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeliveryManagerEntity {
+public class DeliveryManagerEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long deliveryManagerId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
@@ -42,5 +43,13 @@ public class DeliveryManagerEntity {
                 .hubId(requestDto.getHubId())
                 .build();
     }
+    public void setDeliveryOrder(int deliveryOrder) {
+        this.deliveryOrder = deliveryOrder;
+    }
 
+    public void update(DeliveryManagerRequestDto requestDto) {
+        this.type = requestDto.getType() == null ? this.type : requestDto.getType();
+        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder().intValue();
+        this.hubId = requestDto.getHubId() == null ? this.hubId : requestDto.getHubId();
+    }
 }
