@@ -38,7 +38,6 @@ public class OrderServiceV1 {
                 .receiverId(requestDto.getReceiverId())
                 .request(requestDto.getRequest())
                 .orderStatus(OrderStatus.CREATED)
-                .createdAt(LocalDateTime.now())
                 .deadline(requestDto.getDeadline())
                 .build();
 
