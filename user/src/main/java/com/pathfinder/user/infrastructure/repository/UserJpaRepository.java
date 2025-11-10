@@ -33,5 +33,8 @@ public interface UserJpaRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT u FROM UserEntity u WHERE u.organization = :organization AND u.deletedAt IS NULL")
     Page<UserEntity> findByOrganization(String organization, Pageable pageable);
 
+    @Query("SELECT u FROM UserEntity u WHERE u.username = :username AND u.deletedAt IS NULL")
+    Optional<UserEntity> findByUsernameAndDeletedAtIsNull(String username);
+
 //    Optional<UserEntity> findByEmailAndIsDeletedFalse(String email);
 }

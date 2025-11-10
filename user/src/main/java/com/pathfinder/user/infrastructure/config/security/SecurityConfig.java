@@ -1,6 +1,7 @@
 package com.pathfinder.user.infrastructure.config.security;
 
 import com.pathfinder.user.application.UserDetailsServiceImpl;
+import com.pathfinder.user.domain.repository.UserRepository;
 import com.pathfinder.user.jwt.JwtAuthenticationFilter;
 import com.pathfinder.user.jwt.JwtAuthorizationFilter;
 import com.pathfinder.user.jwt.JwtUtil;
@@ -29,6 +30,7 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository;
     private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
@@ -43,7 +45,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, userRepository);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }

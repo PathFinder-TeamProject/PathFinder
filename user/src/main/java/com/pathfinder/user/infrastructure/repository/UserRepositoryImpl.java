@@ -22,6 +22,11 @@ public class UserRepositoryImpl implements UserRepository {
     public Page<UserEntity> findByOrganization(String organization, Pageable pageable) { return userJpaRepository.findByOrganization(organization, pageable); }
 
     @Override
+    public Optional<UserEntity> findByUsernameAndDeletedAtIsNull(String username) {
+        return userJpaRepository.findByUsernameAndDeletedAtIsNull(username);
+    }
+
+    @Override
     public Optional<UserEntity> findByEmail(String email) {
         return userJpaRepository.findByEmail(email);
     }
