@@ -7,6 +7,7 @@ import com.pathfinder.user.domain.entity.UserEntity;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
 import com.pathfinder.user.infrastructure.client.DeliveryManagerClient;
+import com.pathfinder.user.jwt.JwtUserContext;
 import com.pathfinder.user.kafka.UserEventProducer;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
@@ -88,10 +89,13 @@ public class UserServiceV1 {
         if(size != 10 && size != 30 && size != 50) {
             size = 10;
         }
+        if(!sortBy.equals("modifiedAt") || !sortBy.isEmpty() && !sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
 
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page-1, size, sort);
+        Pageable pageable = PageRequest.of(page>0?page-1:page, size, sort);
 
         Page<UserEntity> userList = userRepository.findAll(pageable);
         log.info("유저 목록 조회 완료 - 총 {}건, 현재 페이지: {}", userList.getTotalElements(), page);
@@ -118,13 +122,13 @@ public class UserServiceV1 {
     }
 
     @Transactional
-    public UserStatusUpdateResponseDto updateUserStatus(String username, UserStatusUpdateRequestDto userStatusChangeRequestDto, UserEntity user) {
+    public UserStatusUpdateResponseDto updateUserStatus(String username, UserStatusUpdateRequestDto userStatusChangeRequestDto) {
         log.info("유저 상태 변경 - 대상: {}, 변경할 상태: {}, 요청자: {}",
-                username, userStatusChangeRequestDto.getStatus(), user.getUsername());
+                username, userStatusChangeRequestDto.getStatus(), JwtUserContext.getUsernameFromHeader());
 
         UserEntity targetUser = findUser(username);
         targetUser.updateStatus(userStatusChangeRequestDto.getStatus());
-        targetUser.setModified(Instant.now(), user.getUsername());
+        targetUser.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
 
         log.info("유저 상태 변경 완료 - username: {}, 새 상태: {}", username, userStatusChangeRequestDto.getStatus());
         return UserStatusUpdateResponseDto.of(targetUser);
@@ -212,14 +216,14 @@ public class UserServiceV1 {
         }
     }
 
-    public void checkActive(String username) {
+    public void checkApproved(String username) {
         log.debug("유저 활성화 상태 확인 - username: {}", username);
         UserEntity user = findUser(username);
 
         if(user.getStatus() != null &&
-                user.getStatus() != com.pathfinder.user.domain.enums.UserStatusEnum.ACTIVE) {
+                user.getStatus() != com.pathfinder.user.domain.enums.UserStatusEnum.APPROVED) {
             log.warn("비활성 유저 접근 시도 - username: {}, status: {}", username, user.getStatus());
-            throw new NotActiveUserException(UserErrorCode.NOT_ACTIVE_USER);
+            throw new NotActiveUserException(UserErrorCode.NOT_APPROVED_USER);
         }
 
         log.debug("유저 활성화 상태 확인 완료 - username: {}", username);

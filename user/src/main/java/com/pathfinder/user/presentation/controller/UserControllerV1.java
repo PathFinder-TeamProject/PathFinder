@@ -7,6 +7,7 @@ import com.pathfinder.user.application.exception.UserErrorCode;
 import com.pathfinder.user.application.exception.ValidationException;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
+import com.pathfinder.user.jwt.JwtUserContext;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,7 +48,7 @@ public class UserControllerV1 {
     public ApiResponse<Page<UserResponseDto>> getUserList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
 
         log.info("GET /users - 유저 목록 조회 - page: {}, size: {}, sortBy: {}, isAsc: {}",
@@ -60,20 +61,19 @@ public class UserControllerV1 {
         return ApiResponse.success(response);
     }
 
-    @PatchMapping("/users/{username}/confirm-member")
+    @PostMapping("/users/{username}/confirm-member")
     public ApiResponse<UserStatusUpdateResponseDto> updateUserConfirm(
             @PathVariable String username,
-            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
 
-        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 요청 - 변경할 상태: {}, 요청자: {}",
-                username, userStatusUpdateRequestDto.getStatus(), userDetails.getUsername());
+        log.info("POST /users/{}/confirm-member - 유저 상태 변경 요청 - 변경할 상태: {}, 요청자: {}",
+                username, userStatusUpdateRequestDto.getStatus(), JwtUserContext.getUsernameFromHeader());
 
-        userServiceV1.checkActive(userDetails.getUsername());
+        userServiceV1.checkApproved(JwtUserContext.getUsernameFromHeader());
         UserStatusUpdateResponseDto response = userServiceV1.updateUserStatus(
-                username, userStatusUpdateRequestDto, userDetails.getUser());
+                username, userStatusUpdateRequestDto);
 
-        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 완료 - 새 상태: {}",
+        log.info("POST /users/{}/confirm-member - 유저 상태 변경 완료 - 새 상태: {}",
                 username, response.getStatus());
 
         return ApiResponse.success(response);
@@ -88,7 +88,7 @@ public class UserControllerV1 {
         log.info("PATCH /users/{}/role - 유저 권한 변경 요청 - 변경할 권한: {}, 요청자: {}",
                 username, userRoleUpdateRequestDto.getRole(), userDetails.getUsername());
 
-        userServiceV1.checkActive(userDetails.getUsername());
+        userServiceV1.checkApproved(userDetails.getUsername());
         UserRoleUpdateResponseDto response = userServiceV1.userRoleUpdate(
                 username, userRoleUpdateRequestDto, userDetails.getUser());
 
