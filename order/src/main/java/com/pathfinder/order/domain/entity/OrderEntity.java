@@ -1,5 +1,6 @@
 package com.pathfinder.order.domain.entity;
 
+import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import com.pathfinder.order.application.dto.request.OrderUpdateRequestDto;
 import com.pathfinder.order.domain.enums.OrderStatus;
 import jakarta.persistence.*;
@@ -18,7 +19,7 @@ import java.util.UUID;
 @Table(name = "p_order")
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderEntity {
+public class OrderEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,11 +48,6 @@ public class OrderEntity {
 
     @Column(nullable = false)
     private Timestamp deadline;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
 
     public void changeStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;

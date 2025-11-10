@@ -38,7 +38,7 @@ public class OrderControllerV1 {
     @PutMapping("/{orderId}")
     public ResponseEntity<ApiResponseDto<OrderResponseDto>> updateOrder(@PathVariable UUID orderId, @RequestBody OrderUpdateRequestDto requestDto) {
         return ResponseEntity.status(ApiStatus.OK.getCode())
-                .body(ApiResponseDto.success(ApiStatus.OK, orderService.UpdateOrder(orderId, requestDto), "주문이 수정되었습니다."));
+                .body(ApiResponseDto.success(ApiStatus.OK, orderService.updateOrder(orderId, requestDto), "주문이 수정되었습니다."));
     }
 
     @GetMapping
