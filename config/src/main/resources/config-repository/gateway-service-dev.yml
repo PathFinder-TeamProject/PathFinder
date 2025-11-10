@@ -63,7 +63,7 @@ management:
         include: health,info,metrics,gateway
   endpoint:
     gateway:
-      enabled: true
+      access: unrestricted
   tracing:
     sampling:
       probability: 1.0
@@ -110,10 +110,6 @@ resilience4j:
         timeoutDuration: 5s
         cancelRunningFuture: true
 
-shop:
-  security:
-    jwt:
-      secret: sweetsalt
-      access-expiration-millis: 1800000
-      refresh-expiration-millis: 15552000000
-      refresh-subject: refreshJwt
+jwt:
+  secret:
+    key: s/1o8ta1+r5iIA99VZ31GhEN8y7/e2TPjToC2efI5dY=

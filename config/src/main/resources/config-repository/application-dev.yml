@@ -45,17 +45,13 @@ management:
     health:
       show-details: always
 
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-
 shop:
   security:
     jwt:
       access-header-name: Authorization
       header-prefix: "Bearer "
       access-subject: accessJwt
+
+jwt:
+  secret:
+    key: s/1o8ta1+r5iIA99VZ31GhEN8y7/e2TPjToC2efI5dY=
