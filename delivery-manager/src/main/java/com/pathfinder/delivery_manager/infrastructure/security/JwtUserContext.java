@@ -14,4 +14,16 @@ public class JwtUserContext {
                 .map(req -> req.getHeader("X-User-Username"))
                 .orElse("system");
     }
+    public static String getRoleFromHeader() {
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+                .map(attr -> ((ServletRequestAttributes) attr).getRequest())
+                .map(req -> req.getHeader("X-User-Role"))
+                .orElse("system");
+    }
+    public static boolean isMaster(){
+        return JwtUserContext.getRoleFromHeader().equals("MASTER")||JwtUserContext.getRoleFromHeader().equals("ROLE_MASTER");
+    }
+    public static boolean isHubManager(){
+        return JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER")||JwtUserContext.getRoleFromHeader().equals("ROLE_HUB_MANAGER");
+    }
 }

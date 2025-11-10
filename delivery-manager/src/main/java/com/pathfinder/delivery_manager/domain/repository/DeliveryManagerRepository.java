@@ -4,6 +4,7 @@ import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DeliveryManagerRepository {
@@ -17,5 +18,9 @@ public interface DeliveryManagerRepository {
 
     Page<DeliveryManagerEntity> findByHubId(Long hubId, Pageable pageable);
 
+    List<DeliveryManagerEntity> findByHubId(Long hubId);
+
     Page<DeliveryManagerEntity> findAll(Pageable pageable);
+
+    void saveAll(List<DeliveryManagerEntity> managers);
 }

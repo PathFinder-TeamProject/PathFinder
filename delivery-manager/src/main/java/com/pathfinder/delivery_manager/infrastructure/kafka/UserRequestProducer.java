@@ -1,4 +1,4 @@
-package com.pathfinder.delivery_manager.kafka;
+package com.pathfinder.delivery_manager.infrastructure.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathfinder.delivery_manager.application.dto.request.UserRequestDto;

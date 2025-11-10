@@ -57,7 +57,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             log.info("사용자 조회 성공: {}, 상태: {}", user.getUsername(), user.getStatus());
 
             // 승인 상태 확인
-            if (!user.getStatus().equals(UserStatusEnum.ACTIVE)) {
+            if (!user.getStatus().equals(UserStatusEnum.APPROVED)) {
                 log.warn("승인되지 않은 사용자 로그인 시도: {}", user.getUsername());
                 throw new BadCredentialsException("승인되지 않은 사용자입니다.");
             }

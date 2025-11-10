@@ -75,14 +75,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
 
-                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**").permitAll()
-
-                        // Users - Gateway를 통해 들어오므로 헤더 기반 인증 사용
-                        .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
-                        .requestMatchers("/v1/users/**").hasRole("MASTER")
-                        // Users
-                        .requestMatchers("/v1/users/**").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**", "/internal/**").permitAll()
                         // user
                         .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
