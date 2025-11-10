@@ -1,6 +1,7 @@
 package com.hub_service.domain.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Id;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,8 @@ public class Hub {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
+    private String deletedBy;
 
     @PrePersist
     public void onCreate() {
@@ -42,5 +45,18 @@ public class Hub {
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void update(String name, String address, Double lat, Double lon) {
+        this.hubName = name;
+        this.hubAddress = address;
+        this.latitude = lat;
+        this.longitude = lon;
+    }
+
+
+    public void softDelete(String username) {
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = username;
     }
 }
