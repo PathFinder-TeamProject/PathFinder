@@ -26,13 +26,13 @@ public class HubRouteController {
         return ResponseEntity.ok(hubRouteService.createRoute(hubRoute));
     }
 
-    @DeleteMapping("/{routeId}")
+    @DeleteMapping("/hub-routes/{routeId}")
     public ResponseEntity<Void> deleteRoute(@PathVariable UUID routeId, @RequestHeader("X-User") String user) {
         hubRouteService.deleteRouteLogical(routeId, user);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/path")
+    @GetMapping("/hub-routes/path")
     public ResponseEntity<List<HubRoute>> findPath(
             @RequestParam UUID origin,
             @RequestParam UUID destination
