@@ -1,6 +1,7 @@
 package com.pathfinder.delivery.infrastructure.external;
 
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
+import com.pathfinder.delivery.infrastructure.external.fallback.DeliveryManagerServiceFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,7 +9,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "delivery-manager-service", path = "/api/v1/delivery-managers")
+@FeignClient(
+    name = "delivery-manager-service", 
+    path = "/api/v1/delivery-managers",
+    fallback = DeliveryManagerServiceFallback.class
+)
 public interface DeliveryManagerServiceClient {
     
     @GetMapping("/{deliveryManagerId}")

@@ -1,7 +1,7 @@
 package com.pathfinder.delivery.application.dto.response;
 
-import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
 import com.pathfinder.delivery.domain.enums.DeliveryRouteStatus;
+import com.pathfinder.delivery.presentation.dto.response.DeliveryRouteResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,21 +30,21 @@ public class DeliveryRouteDto {
     private UUID deliveryManagerId;
     private String note;
 
-    public static DeliveryRouteDto fromDeliveryRouteEntity(DeliveryRouteEntity entity) {
-        return DeliveryRouteDto.builder()
-            .routeId(entity.getRouteId())
-            .deliveryId(entity.getDeliveryId())
-            .fromHubId(entity.getFromHubId())
-            .toHubId(entity.getToHubId())
-            .sequence(entity.getSequence())
-            .status(entity.getStatus())
-            .occurredAt(entity.getOccurredAt())
-            .actualTime(entity.getActualTime())
-            .actualDistance(entity.getActualDistance())
-            .expectedTime(entity.getExpectedTime())
-            .expectedDistance(entity.getExpectedDistance())
-            .deliveryManagerId(entity.getDeliveryManagerId())
-            .note(entity.getNote())
+    public DeliveryRouteResponseDto toResponseDto() {
+        return DeliveryRouteResponseDto.builder()
+            .routeId(this.routeId)
+            .deliveryId(this.deliveryId)
+            .fromHubId(this.fromHubId)
+            .toHubId(this.toHubId)
+            .sequence(this.sequence)
+            .status(this.status != null ? this.status.name() : null)
+            .occurredAt(this.occurredAt)
+            .actualTime(this.actualTime)
+            .actualDistance(this.actualDistance)
+            .expectedTime(this.expectedTime)
+            .expectedDistance(this.expectedDistance)
+            .deliveryManagerId(this.deliveryManagerId)
+            .note(this.note)
             .build();
     }
 }

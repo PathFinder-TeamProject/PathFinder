@@ -17,7 +17,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateDeliveryRouteCommand {
+public class CreateDeliveryRouteCommandDto {
     private UUID deliveryId;
     private UUID fromHubId;
     private UUID toHubId;
@@ -30,11 +30,7 @@ public class CreateDeliveryRouteCommand {
     private UUID deliveryManagerId;
     private String note;
 
-    /**
-     * Command를 Entity로 변환 (시퀀스 포함)
-     * 서비스 레이어의 Builder 코드 간소화
-     */
-    public DeliveryRouteEntity toEntity(int sequence) {
+        public DeliveryRouteEntity toEntity(int sequence) {
         return DeliveryRouteEntity.builder()
             .deliveryId(this.deliveryId)
             .fromHubId(this.fromHubId)
@@ -51,9 +47,7 @@ public class CreateDeliveryRouteCommand {
             .build();
     }
 
-    /**
-     * Hub 경로 정보를 반영한 Entity 생성
-     */
+  
     public static DeliveryRouteEntity createRouteWithHubInfo(
         UUID deliveryId,
         UUID fromHubId,

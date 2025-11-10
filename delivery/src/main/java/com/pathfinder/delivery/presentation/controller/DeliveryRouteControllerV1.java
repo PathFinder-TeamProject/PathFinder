@@ -1,17 +1,20 @@
 package com.pathfinder.delivery.presentation.controller;
 
 import com.pathfinder.delivery.application.command.service.DeliveryRouteCommandService;
-import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommand;
-import com.pathfinder.delivery.application.dto.response.DeliveryRouteDto;
 import com.pathfinder.delivery.application.query.service.DeliveryRouteQueryService;
+import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommandDto;
+import com.pathfinder.delivery.presentation.dto.request.DeliveryRouteRequestDto;
+import com.pathfinder.delivery.presentation.dto.response.DeliveryRouteResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 @RestController
@@ -23,38 +26,45 @@ public class DeliveryRouteControllerV1 {
     private final DeliveryRouteQueryService queryService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DeliveryRouteDto>> createRoute(
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryRouteResponseDto>> createRoute(
         @PathVariable UUID deliveryId,
-        @Valid @RequestBody CreateDeliveryRouteCommand command
+        @Valid @RequestBody DeliveryRouteRequestDto request
     ) {
-        command.setDeliveryId(deliveryId);
-        DeliveryRouteDto dto = commandService.createRoute(command);
+        CreateDeliveryRouteCommandDto command = request.toCommand(deliveryId);
+        DeliveryRouteResponseDto dto = commandService.createRoute(command).toResponseDto();
         return ResponseEntity.status(HttpStatus.CREATED)
             .body(ApiResponse.success(dto));
     }
 
     @PutMapping("/{routeId}")
-    public ResponseEntity<ApiResponse<DeliveryRouteDto>> updateRoute(
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryRouteResponseDto>> updateRoute(
         @PathVariable UUID deliveryId,
         @PathVariable UUID routeId,
-        @Valid @RequestBody CreateDeliveryRouteCommand command
+        @Valid @RequestBody DeliveryRouteRequestDto request
     ) {
-        DeliveryRouteDto dto = commandService.updateRoute(routeId, command);
+        DeliveryRouteResponseDto dto = commandService.updateRoute(routeId, request.toCommand(deliveryId))
+            .toResponseDto();
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<DeliveryRouteDto>>> getRoutes(@PathVariable UUID deliveryId) {
-        List<DeliveryRouteDto> routes = queryService.findByDeliveryId(deliveryId);
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER','COMPANY_MANAGER')")
+    public ResponseEntity<ApiResponse<List<DeliveryRouteResponseDto>>> getRoutes(@PathVariable UUID deliveryId) {
+        List<DeliveryRouteResponseDto> routes = queryService.findByDeliveryId(deliveryId).stream()
+            .map(dto -> dto.toResponseDto())
+            .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(routes));
     }
 
     @GetMapping("/{routeId}")
-    public ResponseEntity<ApiResponse<DeliveryRouteDto>> getRoute(
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER','COMPANY_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryRouteResponseDto>> getRoute(
         @PathVariable UUID deliveryId,
         @PathVariable UUID routeId
     ) {
-        DeliveryRouteDto dto = queryService.findById(routeId);
+        DeliveryRouteResponseDto dto = queryService.findById(routeId).toResponseDto();
         return ResponseEntity.ok(ApiResponse.success(dto));
     }
 }

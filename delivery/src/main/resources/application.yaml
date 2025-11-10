@@ -52,6 +52,63 @@ feign:
   circuitbreaker:
     enabled: true
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+          - feign.FeignException
+    instances:
+      order-service:
+        baseConfig: default
+        waitDurationInOpenState: 15s
+      hub-service:
+        baseConfig: default
+        waitDurationInOpenState: 15s
+      delivery-manager-service:
+        baseConfig: default
+        waitDurationInOpenState: 15s
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+    instances:
+      order-service:
+        baseConfig: default
+      hub-service:
+        baseConfig: default
+      delivery-manager-service:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+    instances:
+      order-service:
+        baseConfig: default
+      hub-service:
+        baseConfig: default
+      delivery-manager-service:
+        baseConfig: default
+
 management:
   endpoints:
     web:
@@ -81,6 +138,13 @@ logging:
     org.springframework.cloud: DEBUG
     org.springframework.kafka: INFO
     org.springframework.cloud.openfeign: DEBUG
+
+delivery:
+  outbox:
+    publisher:
+      poll-interval: 5000
+      batch-size: 50
+      max-retries: 5
 
 ---
 spring:

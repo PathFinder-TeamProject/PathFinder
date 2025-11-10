@@ -1,6 +1,5 @@
-package com.pathfinder.delivery.application.dto.request;
+package com.pathfinder.delivery.infrastructure.external.dto;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,14 +11,11 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateHubRouteCommand {
-    @NotNull
-    private UUID depart;
-    
-    @NotNull
-    private UUID arrive;
-    
+public class HubRouteDto {
+    private UUID routeId;
     private Integer time;
     private Double distance;
+    private UUID depart;
+    private UUID arrive;
 }
 

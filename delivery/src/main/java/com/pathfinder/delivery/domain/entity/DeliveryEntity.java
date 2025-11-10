@@ -1,8 +1,9 @@
 package com.pathfinder.delivery.domain.entity;
 
-import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommand;
+import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommandDto;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
+import com.pathfinder.delivery.domain.event.DeliveryEventDto;
 import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -58,17 +59,14 @@ public class DeliveryEntity extends BaseEntity {
     @Column(name = "receiver_slack_id")
     private String receiverSlackId;
 
-    /**
-     * 배달 상태 업데이트
-     */
-    public void updateStatus(DeliveryStatus status) {
-        this.status = status;
-    }
-
-    /**
-     * 배달 전체 정보 업데이트 (Command 패턴)
-     */
-    public void update(UpdateDeliveryCommand command) {
+    public boolean updateWithCommand(UpdateDeliveryCommandDto command, DeliveryStatus validatedStatus) {
+        boolean statusChanged = false;
+        
+        if (validatedStatus != null && this.status != validatedStatus) {
+            this.status = validatedStatus;
+            statusChanged = true;
+        }
+        
         if (command.getExpectedDistance() != null) {
             this.expectedDistance = command.getExpectedDistance();
         }
@@ -93,21 +91,50 @@ public class DeliveryEntity extends BaseEntity {
         if (command.getDeliveryManagerId() != null) {
             this.deliveryManagerId = command.getDeliveryManagerId();
         }
+        
+        return statusChanged;
     }
 
-    /**
-     * 취소로 상태 변경
-     */
     public void cancel() {
         if (this.status != DeliveryStatus.CANCELLED) {
             this.status = DeliveryStatus.CANCELLED;
         }
     }
+    
+    public String determineUpdateEventType(boolean statusChanged) {
+        return statusChanged ? "STATUS_CHANGED" : "UPDATED";
+    }
 
-    /**
-     * Entity를 DTO로 변환
-     */
     public DeliveryDto toDeliveryDto() {
-        return DeliveryDto.fromDeliveryEntity(this);
+        return DeliveryDto.builder()
+            .deliveryId(this.deliveryId)
+            .orderId(this.orderId)
+            .fromHubId(this.fromHubId)
+            .toHubId(this.toHubId)
+            .deliveryManagerId(this.deliveryManagerId)
+            .status(this.status)
+            .expectedDistance(this.expectedDistance)
+            .actualDistance(this.actualDistance)
+            .deliveryAddress(this.deliveryAddress)
+            .receiverName(this.receiverName)
+            .receiverSlackId(this.receiverSlackId)
+            .createdAt(this.getCreatedAt())
+            .modifiedAt(this.getModifiedAt())
+            .build();
+    }
+    
+    public DeliveryEventDto toEvent(String eventType) {
+        return DeliveryEventDto.builder()
+            .deliveryId(this.deliveryId)
+            .orderId(this.orderId)
+            .status(this.status)
+            .fromHubId(this.fromHubId)
+            .toHubId(this.toHubId)
+            .deliveryManagerId(this.deliveryManagerId)
+            .expectedDistance(this.expectedDistance)
+            .actualDistance(this.actualDistance)
+            .occurredAt(java.time.LocalDateTime.now())
+            .eventType(eventType)
+            .build();
     }
 }

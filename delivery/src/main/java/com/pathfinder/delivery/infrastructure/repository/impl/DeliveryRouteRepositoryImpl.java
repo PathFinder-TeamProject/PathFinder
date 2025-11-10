@@ -21,6 +21,11 @@ public class DeliveryRouteRepositoryImpl implements DeliveryRouteRepository {
     }
 
     @Override
+    public List<DeliveryRouteEntity> saveAll(List<DeliveryRouteEntity> entities) {
+        return jpaRepository.saveAll(entities);
+    }
+
+    @Override
     public Optional<DeliveryRouteEntity> findById(UUID id) {
         return jpaRepository.findByRouteIdAndDeletedAtIsNull(id);
     }

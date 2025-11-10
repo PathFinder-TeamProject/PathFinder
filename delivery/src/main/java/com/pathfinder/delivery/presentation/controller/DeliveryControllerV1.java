@@ -3,9 +3,9 @@ package com.pathfinder.delivery.presentation.controller;
 import com.pathfinder.delivery.application.command.service.DeliveryCommandService;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
 import com.pathfinder.delivery.application.query.service.DeliveryQueryService;
-import com.pathfinder.delivery.presentation.dto.request.CreateDeliveryRequest;
-import com.pathfinder.delivery.presentation.dto.request.UpdateDeliveryRequest;
-import com.pathfinder.delivery.presentation.dto.response.DeliveryResponse;
+import com.pathfinder.delivery.presentation.dto.request.CreateDeliveryRequestDto;
+import com.pathfinder.delivery.presentation.dto.request.UpdateDeliveryRequestDto;
+import com.pathfinder.delivery.presentation.dto.response.DeliveryResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import java.util.UUID;
 
 @RestController
@@ -28,41 +30,47 @@ public class DeliveryControllerV1 {
     private final DeliveryQueryService queryService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DeliveryResponse>> createDelivery(@Valid @RequestBody CreateDeliveryRequest request) {
+    @PreAuthorize("hasRole('MASTER')")
+    public ResponseEntity<ApiResponse<DeliveryResponseDto>> createDelivery(@Valid @RequestBody CreateDeliveryRequestDto request) {
         DeliveryDto dto = commandService.createDelivery(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.success(DeliveryResponse.fromDeliveryDto(dto)));
+            .body(ApiResponse.success(dto.toResponseDto()));
     }
 
     @PutMapping("/{deliveryId}")
-    public ResponseEntity<ApiResponse<DeliveryResponse>> updateDelivery(
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryResponseDto>> updateDelivery(
         @PathVariable UUID deliveryId,
-        @Valid @RequestBody UpdateDeliveryRequest request
+        @Valid @RequestBody UpdateDeliveryRequestDto request
     ) {
         DeliveryDto dto = commandService.updateDelivery(request.toCommand(deliveryId));
-        return ResponseEntity.ok(ApiResponse.success(DeliveryResponse.fromDeliveryDto(dto)));
+        return ResponseEntity.ok(ApiResponse.success(dto.toResponseDto()));
     }
 
     @DeleteMapping("/{deliveryId}")
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
     public ResponseEntity<ApiResponse<Void>> deleteDelivery(@PathVariable UUID deliveryId) {
         commandService.deleteDelivery(deliveryId);
         return ResponseEntity.ok(ApiResponse.noContent());
     }
 
     @GetMapping("/{deliveryId}")
-    public ResponseEntity<ApiResponse<DeliveryResponse>> getDelivery(@PathVariable UUID deliveryId) {
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER','COMPANY_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryResponseDto>> getDelivery(@PathVariable UUID deliveryId) {
         DeliveryDto dto = queryService.findById(deliveryId);
-        return ResponseEntity.ok(ApiResponse.success(DeliveryResponse.fromDeliveryDto(dto)));
+        return ResponseEntity.ok(ApiResponse.success(dto.toResponseDto()));
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<ApiResponse<DeliveryResponse>> getDeliveryByOrderId(@PathVariable UUID orderId) {
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER','COMPANY_MANAGER')")
+    public ResponseEntity<ApiResponse<DeliveryResponseDto>> getDeliveryByOrderId(@PathVariable UUID orderId) {
         DeliveryDto dto = queryService.findByOrderId(orderId);
-        return ResponseEntity.ok(ApiResponse.success(DeliveryResponse.fromDeliveryDto(dto)));
+        return ResponseEntity.ok(ApiResponse.success(dto.toResponseDto()));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<DeliveryResponse>>> searchDeliveries(
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER','COMPANY_MANAGER')")
+    public ResponseEntity<ApiResponse<Page<DeliveryResponseDto>>> searchDeliveries(
         @RequestParam(required = false) UUID hubId,
         @RequestParam(required = false) String status,
         @RequestParam(required = false) UUID deliveryManagerId,
@@ -71,7 +79,6 @@ public class DeliveryControllerV1 {
         @RequestParam(defaultValue = "createdAt") String sortBy,
         @RequestParam(defaultValue = "DESC") String sortDir
     ) {
-        // 페이지 크기 제한 (10, 30, 50만 허용)
         if (size != 10 && size != 30 && size != 50) {
             size = 10;
         }
@@ -81,12 +88,12 @@ public class DeliveryControllerV1 {
 
         Page<DeliveryDto> dtoPage = queryService.searchDeliveries(
             hubId,
-            status != null ? com.pathfinder.delivery.domain.enums.DeliveryStatus.valueOf(status) : null,
+            status != null ? DeliveryStatus.valueOf(status) : null,
             deliveryManagerId,
             pageable
         );
 
-        Page<DeliveryResponse> responsePage = dtoPage.map(DeliveryResponse::fromDeliveryDto);
+        Page<DeliveryResponseDto> responsePage = dtoPage.map(DeliveryDto::toResponseDto);
         return ResponseEntity.ok(ApiResponse.success(responsePage));
     }
 }

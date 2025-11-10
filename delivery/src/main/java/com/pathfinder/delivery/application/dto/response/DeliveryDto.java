@@ -1,7 +1,7 @@
 package com.pathfinder.delivery.application.dto.response;
 
-import com.pathfinder.delivery.domain.entity.DeliveryEntity;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
+import com.pathfinder.delivery.presentation.dto.response.DeliveryResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,21 +30,21 @@ public class DeliveryDto {
     private Instant createdAt;
     private Instant modifiedAt;
 
-    public static DeliveryDto fromDeliveryEntity(DeliveryEntity entity) {
-        return DeliveryDto.builder()
-            .deliveryId(entity.getDeliveryId())
-            .orderId(entity.getOrderId())
-            .fromHubId(entity.getFromHubId())
-            .toHubId(entity.getToHubId())
-            .deliveryManagerId(entity.getDeliveryManagerId())
-            .status(entity.getStatus())
-            .expectedDistance(entity.getExpectedDistance())
-            .actualDistance(entity.getActualDistance())
-            .deliveryAddress(entity.getDeliveryAddress())
-            .receiverName(entity.getReceiverName())
-            .receiverSlackId(entity.getReceiverSlackId())
-            .createdAt(entity.getCreatedAt())
-            .modifiedAt(entity.getModifiedAt())
+    public DeliveryResponseDto toResponseDto() {
+        return DeliveryResponseDto.builder()
+            .deliveryId(this.deliveryId)
+            .orderId(this.orderId)
+            .fromHubId(this.fromHubId)
+            .toHubId(this.toHubId)
+            .deliveryManagerId(this.deliveryManagerId)
+            .status(this.status.name())
+            .expectedDistance(this.expectedDistance)
+            .actualDistance(this.actualDistance)
+            .deliveryAddress(this.deliveryAddress)
+            .receiverName(this.receiverName)
+            .receiverSlackId(this.receiverSlackId)
+            .createdAt(this.createdAt)
+            .modifiedAt(this.modifiedAt)
             .build();
     }
 }

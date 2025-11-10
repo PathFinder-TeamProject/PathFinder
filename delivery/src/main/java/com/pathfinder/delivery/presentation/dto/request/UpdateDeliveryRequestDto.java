@@ -1,6 +1,6 @@
 package com.pathfinder.delivery.presentation.dto.request;
 
-import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommand;
+import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommandDto;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateDeliveryRequest {
+public class UpdateDeliveryRequestDto {
     private String status;
     private UUID fromHubId;
     private UUID toHubId;
@@ -25,10 +25,12 @@ public class UpdateDeliveryRequest {
     private String receiverName;
     private String receiverSlackId;
     
-    public UpdateDeliveryCommand toCommand(UUID deliveryId) {
-        return UpdateDeliveryCommand.builder()
+    public UpdateDeliveryCommandDto toCommand(UUID deliveryId) {
+        String normalizedStatus = this.status != null ? DeliveryStatus.valueOf(this.status).name() : null;
+
+        return UpdateDeliveryCommandDto.builder()
             .deliveryId(deliveryId)
-            .status(this.status != null ? DeliveryStatus.valueOf(this.status) : null)
+            .status(normalizedStatus)
             .fromHubId(this.fromHubId)
             .toHubId(this.toHubId)
             .deliveryManagerId(this.deliveryManagerId)

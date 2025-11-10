@@ -1,5 +1,6 @@
 package com.pathfinder.delivery.domain.entity;
 
+import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommandDto;
 import com.pathfinder.delivery.application.dto.response.DeliveryRouteDto;
 import com.pathfinder.delivery.domain.enums.DeliveryRouteStatus;
 import com.pathfinder.global.infrastructure.entity.BaseEntity;
@@ -79,11 +80,58 @@ public class DeliveryRouteEntity extends BaseEntity {
         this.expectedDistance = expectedDistance;
     }
 
-    /**
-     * Entity를 DTO로 변환
-     */
+    public void update(CreateDeliveryRouteCommandDto command) {
+        if (command.getStatus() != null) {
+            this.updateStatus(command.getStatus());
+        }
+
+        if (command.getActualTime() != null || command.getActualDistance() != null) {
+            this.updateActualMetrics(
+                command.getActualTime() != null ? command.getActualTime() : this.actualTime,
+                command.getActualDistance() != null ? command.getActualDistance() : this.actualDistance
+            );
+        }
+
+        if (command.getExpectedTime() != null || command.getExpectedDistance() != null) {
+            this.updateExpectedMetrics(
+                command.getExpectedTime() != null ? command.getExpectedTime() : this.expectedTime,
+                command.getExpectedDistance() != null ? command.getExpectedDistance() : this.expectedDistance
+            );
+        }
+
+        if (command.getFromHubId() != null) {
+            this.fromHubId = command.getFromHubId();
+        }
+
+        if (command.getToHubId() != null) {
+            this.toHubId = command.getToHubId();
+        }
+
+        if (command.getDeliveryManagerId() != null) {
+            this.deliveryManagerId = command.getDeliveryManagerId();
+        }
+
+        if (command.getNote() != null) {
+            this.note = command.getNote();
+        }
+    }
+
     public DeliveryRouteDto toDeliveryRouteDto() {
-        return DeliveryRouteDto.fromDeliveryRouteEntity(this);
+        return DeliveryRouteDto.builder()
+            .routeId(this.routeId)
+            .deliveryId(this.deliveryId)
+            .fromHubId(this.fromHubId)
+            .toHubId(this.toHubId)
+            .sequence(this.sequence)
+            .status(this.status)
+            .occurredAt(this.occurredAt)
+            .actualTime(this.actualTime)
+            .actualDistance(this.actualDistance)
+            .expectedTime(this.expectedTime)
+            .expectedDistance(this.expectedDistance)
+            .deliveryManagerId(this.deliveryManagerId)
+            .note(this.note)
+            .build();
     }
 }
 

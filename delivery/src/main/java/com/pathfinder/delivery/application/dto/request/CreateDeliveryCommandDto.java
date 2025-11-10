@@ -1,6 +1,7 @@
-package com.pathfinder.delivery.presentation.dto.request;
+package com.pathfinder.delivery.application.dto.request;
 
-import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommand;
+import com.pathfinder.delivery.domain.entity.DeliveryEntity;
+import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateDeliveryRequest {
+public class CreateDeliveryCommandDto {
     @NotNull
     private UUID orderId;
     
@@ -28,14 +29,15 @@ public class CreateDeliveryRequest {
     private String deliveryAddress;
     private String receiverName;
     private String receiverSlackId;
-    
-    public CreateDeliveryCommand toCommand() {
-        return CreateDeliveryCommand.builder()
+
+    public DeliveryEntity toEntity(BigDecimal calculatedExpectedDistance) {
+        return DeliveryEntity.builder()
             .orderId(this.orderId)
             .fromHubId(this.fromHubId)
             .toHubId(this.toHubId)
             .deliveryManagerId(this.deliveryManagerId)
-            .expectedDistance(this.expectedDistance)
+            .status(DeliveryStatus.READY)
+            .expectedDistance(calculatedExpectedDistance != null ? calculatedExpectedDistance : this.expectedDistance)
             .deliveryAddress(this.deliveryAddress)
             .receiverName(this.receiverName)
             .receiverSlackId(this.receiverSlackId)

@@ -31,7 +31,11 @@ public enum DeliveryErrorCode implements BaseErrorCode {
     DELIVERY_MANAGER_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "EXTERNAL-400-01", "배송 담당자가 배정 가능한 상태가 아닙니다."),
     HUB_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL-503-01", "허브 서비스에 접근할 수 없습니다."),
     ORDER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL-503-02", "주문 서비스에 접근할 수 없습니다."),
-    DELIVERY_MANAGER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL-503-03", "배송 담당자 서비스에 접근할 수 없습니다.");
+    DELIVERY_MANAGER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL-503-03", "배송 담당자 서비스에 접근할 수 없습니다."),
+
+    // 아웃박스 처리 에러 (OUTBOX-5xx)
+    OUTBOX_SERIALIZATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OUTBOX-500-01", "이벤트 직렬화에 실패했습니다."),
+    OUTBOX_PUBLISH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OUTBOX-500-02", "아웃박스 이벤트 발행에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

@@ -1,7 +1,6 @@
-package com.pathfinder.delivery.application.dto.request;
+package com.pathfinder.delivery.presentation.dto.request;
 
-import com.pathfinder.delivery.domain.entity.DeliveryEntity;
-import com.pathfinder.delivery.domain.enums.DeliveryStatus;
+import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommandDto;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateDeliveryCommand {
+public class CreateDeliveryRequestDto {
     @NotNull
     private UUID orderId;
     
@@ -29,19 +28,14 @@ public class CreateDeliveryCommand {
     private String deliveryAddress;
     private String receiverName;
     private String receiverSlackId;
-
-    /**
-     * Command를 Entity로 변환
-     * 서비스 레이어의 Builder 코드 간소화
-     */
-    public DeliveryEntity toEntity(BigDecimal calculatedExpectedDistance) {
-        return DeliveryEntity.builder()
+    
+    public CreateDeliveryCommandDto toCommand() {
+        return CreateDeliveryCommandDto.builder()
             .orderId(this.orderId)
             .fromHubId(this.fromHubId)
             .toHubId(this.toHubId)
             .deliveryManagerId(this.deliveryManagerId)
-            .status(DeliveryStatus.READY)
-            .expectedDistance(calculatedExpectedDistance != null ? calculatedExpectedDistance : this.expectedDistance)
+            .expectedDistance(this.expectedDistance)
             .deliveryAddress(this.deliveryAddress)
             .receiverName(this.receiverName)
             .receiverSlackId(this.receiverSlackId)
