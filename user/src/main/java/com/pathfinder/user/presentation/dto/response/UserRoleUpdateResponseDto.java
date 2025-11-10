@@ -39,7 +39,6 @@ public class UserRoleUpdateResponseDto {
                 .modifiedAt(user.getModifiedAt())
                 .modifiedBy(user.getModifiedBy())
                 .isDeleted(user.getDeletedBy()==null? false:true)
-
                 .build();
     }
 }

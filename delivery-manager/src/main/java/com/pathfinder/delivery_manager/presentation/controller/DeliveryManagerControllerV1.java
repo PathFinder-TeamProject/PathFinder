@@ -26,12 +26,6 @@ public class DeliveryManagerControllerV1 {
         return ApiResponse.success(deliveryManagerService.createDeliveryManager(requestDto));
     }*/
 
-    // 단일 조회
-    @GetMapping("/{id}")
-//    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER')")
-    public ApiResponse<DeliveryManagerResponseDto> getManagerById(@PathVariable Long id) {
-        return ApiResponse.success(deliveryManagerService.getManagerById(id));
-    }
     @GetMapping("/{username}")
 //    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER')")
     public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable String username) {

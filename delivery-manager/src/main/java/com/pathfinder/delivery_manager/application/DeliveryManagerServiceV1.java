@@ -42,6 +42,7 @@ public class DeliveryManagerServiceV1 {
             log.info("배송 담당자 이미 존재 - Username: {}", dto.getUsername());
             return;
         }
+
         dto.setDeliveryOrder(deliveryManagerRepository.countByHubId(dto.getHubId()));
         DeliveryManagerEntity deliveryManager = DeliveryManagerEntity.create(dto);
         deliveryManager.setCreate(Instant.now(), deliveryManager.getUsername());
@@ -77,23 +78,6 @@ public class DeliveryManagerServiceV1 {
         deliveryManager.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
     }
-/*    @Transactional(readOnly = true)
-    public Page<DeliveryManagerResponseDto> getAllManagers(String keyword, Long hubId, int page, int size, String sortBy, String status, boolean isAsc, boolean isDeleted) {
-        Page<DeliveryManagerEntity> deliveryManagerPage;
-        if(size != 10 && size != 30 && size != 50) {
-            size = 10;
-        }
-
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page-1, size, sort);
-        if (hubId != null) {
-            deliveryManagerPage = deliveryManagerRepository.findByHubId(hubId, pageable);
-        } else {
-            deliveryManagerPage = deliveryManagerRepository.findAll(pageable);
-        }
-        return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
-    }*/
     public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
         Page<DeliveryManagerEntity> deliveryManagerPage;
         if(size != 10 && size != 30 && size != 50) {

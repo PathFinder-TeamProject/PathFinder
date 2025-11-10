@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
-public class DeliveryManagerJpaRepositoryImpl implements DeliveryManagerRepository {
+public class DeliveryManagerRepositoryImpl implements DeliveryManagerRepository {
     private final DeliveryManagerJpaRepository deliveryManagerJpaRepository;
     @Override
     public Optional<DeliveryManagerEntity> findByUsername(String username) {

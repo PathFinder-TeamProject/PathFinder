@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
                         // Users
-                        .requestMatchers("/v1/users/**").hasRole("MASTER")
+                        .requestMatchers("/v1/users/**").hasAnyRole("MASTER", "HUB_MANAGER")
                         // user
                         .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
