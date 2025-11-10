@@ -20,10 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * 로컬 환경용 Mock FeignClient 설정
- * 모든 외부 서비스 호출을 Mock 데이터로 대체
- */
 @Slf4j
 @Configuration
 @Profile("local")

@@ -22,16 +22,12 @@ import java.time.Duration;
 @EnableCaching
 public class CacheConfig {
 
-    /**
-     * Redis 전용 ObjectMapper (HTTP 메시지 컨버터와 분리)
-     * 빈으로 등록하지 않아 Spring MVC에 영향을 주지 않음
-     */
+    
     private ObjectMapper createRedisObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         
-        // 타입 정보를 JSON 속성(@class)으로 포함 - LinkedHashMap 역직렬화 문제 해결
         PolymorphicTypeValidator typeValidator = BasicPolymorphicTypeValidator.builder()
             .allowIfBaseType(Object.class)
             .build();

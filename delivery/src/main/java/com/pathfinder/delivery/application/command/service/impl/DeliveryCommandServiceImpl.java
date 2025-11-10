@@ -130,11 +130,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         deliveryOutboxService.enqueue(event);
     }
 
-    /**
-     * 현재 인증된 사용자 ID를 Long 파싱 가능한 String으로 반환
-     * UUID를 Long으로 변환할 수 없으므로 UUID의 해시코드를 사용
-     * 인증 정보가 없으면 "0" 반환 (시스템 작업)
-     */
+  
     private String getCurrentUserIdAsString() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
@@ -142,7 +138,6 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
             long userId = Math.abs(userDetails.getId().getMostSignificantBits());
             return String.valueOf(userId);
         }
-        // 인증 정보가 없거나 익명 사용자인 경우 시스템 ID (0) 사용
         return "0";
     }
 }
