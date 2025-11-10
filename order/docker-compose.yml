@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  order-service:
+    container_name: order-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_APPLICATION_NAME: order-service
+
+      # ✅ PostgreSQL 연결 정보
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-postgres:5432/order
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+
+      # ✅ Redis 연결 정보
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+
+      # ✅ (선택) 프로필 지정
+      SPRING_PROFILES_ACTIVE: docker
+
+      # ✅ Eureka 사용 중이라면
+      # EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      # SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    depends_on:
+      - order-postgres
+      - redis
+    networks:
+      - msa-network
+    restart: unless-stopped
+
+  # ✅ PostgreSQL (order 전용)
+  order-postgres:
+    image: postgres:17
+    container_name: order-postgres
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5434:5432" # 호스트에서는 5434로 접근
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+    networks:
+      - msa-network
+    restart: unless-stopped
+
+  # ✅ Redis (공통 캐시)
+  redis:
+    image: redis:7
+    container_name: order-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - msa-network
+    restart: unless-stopped
+
+networks:
+  msa-network:
+    driver: bridge
+
+volumes:
+  order_postgres_data:
