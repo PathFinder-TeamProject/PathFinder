@@ -37,7 +37,6 @@ public class SignupResponseDto {
                 .role(userEntity.getRole())
                 .organization(userEntity.getOrganization())
                 .slackId(userEntity.getSlackId())
-                .hubId(userEntity.getHubId())
                 .build();
     }
 }

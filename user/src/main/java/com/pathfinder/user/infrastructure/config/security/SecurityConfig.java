@@ -66,13 +66,19 @@ public class SecurityConfig {
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
 
+        http.sessionManagement((sessionManagement) ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
-                        .requestMatchers("/v1/auth/register",
-                                "/v1/auth/login",
-                                "/v1/auth/logout",
-                                "/v3/api-docs/**").permitAll()
 
+                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**").permitAll()
+
+                        // Users - Gateway를 통해 들어오므로 헤더 기반 인증 사용
+                        .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
+                        .requestMatchers("/v1/users/**").hasRole("MASTER")
                         // Users
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
                         // user
@@ -80,10 +86,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
 
-                        // DeliveryManager
-                        .requestMatchers(HttpMethod.GET, "/v1/delivery-managers", "/v1/delivery-managers/{delivery_manager_id}").hasAnyRole("DELIVERY_MANAGER", "HUB_MANAGER", "MASTER")
+                        // DeliveryManager > 각 서비스로 이동
+                      /*  .requestMatchers(HttpMethod.GET, "/v1/delivery-managers", "/v1/delivery-managers/{delivery_manager_id}").hasAnyRole("DELIVERY_MANAGER", "HUB_MANAGER", "MASTER")
                         .requestMatchers("/v1/delivery-managers/**").hasAnyRole("HUB_MANAGER", "MASTER")
-
+*/
                         // AI
                         .requestMatchers("/api/v1/ai/**").hasRole("MASTER")
                         .requestMatchers(HttpMethod.POST, "/v1/ai").authenticated()
@@ -132,10 +138,11 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
-
         // 필터 관리
         http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+
 
         return http.build();
     }

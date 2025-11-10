@@ -21,8 +21,6 @@ public class UserResponseDto {
 
     private String organization;
 
-    private String eventType;
-
     private String slackId;
 
     private UserRoleEnum role;
@@ -31,7 +29,7 @@ public class UserResponseDto {
 
     private UserStatusEnum status;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private boolean isDeleted;
 
@@ -44,10 +42,8 @@ public class UserResponseDto {
                 .status(user.getStatus())
                 .organization(user.getOrganization())
                 .slackId(user.getSlackId())
-                .hubId(user.getHubId())
-                .status(user.getStatus())
-//                .createdAt(user.getCreatedAt())
-//                .isDeleted(user.getIsDeleted())
+                .createdAt(user.getCreatedAt())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

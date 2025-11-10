@@ -4,6 +4,8 @@ import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRe
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
 import com.pathfinder.delivery_manager.domain.repository.DeliveryManagerRepository;
 import com.pathfinder.delivery_manager.infrastructure.cache.HubCacheRepository;
+import com.pathfinder.delivery_manager.infrastructure.security.JwtUserContext;
+import com.pathfinder.delivery_manager.kafka.UserRequestProducer;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -50,8 +52,9 @@ public class DeliveryManagerServiceV1 {
     public void deleteManager(Long id) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-//        deliveryManager.setDeletedAt(LocalDateTime.now());
-//        deliveryManager.setDeletedBy("system");
+        log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", id, JwtUserContext.getUsernameFromHeader());
+        deliveryManager.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
+        DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
     }
     @Transactional(readOnly = true)
     public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
@@ -69,5 +72,17 @@ public class DeliveryManagerServiceV1 {
             deliveryManagerPage = deliveryManagerRepository.findAll(pageable);
         }
         return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
+    }
+
+    @Transactional
+    public DeliveryManagerResponseDto updateManager(DeliveryManagerRequestDto requestDto) {
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(requestDto.getDeliveryManagerId())
+                .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
+        deliveryManager.update(requestDto);
+        log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", requestDto.getDeliveryManagerId(), JwtUserContext.getUsernameFromHeader());
+        deliveryManager.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
+        DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
+        UserInfoDto userInfoDto = userRequestProducer.requestUserInfo(deliveryManager.getUsername());
+        return DeliveryManagerResponseDto.of(savedDeliveryManager,userInfoDto);
     }
 }

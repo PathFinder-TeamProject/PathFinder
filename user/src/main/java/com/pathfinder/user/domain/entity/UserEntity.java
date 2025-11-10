@@ -27,9 +27,6 @@ public class UserEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = true)
-    private Long hubId;
-
     @Column(nullable = false)
     private String organization;
 
@@ -53,7 +50,6 @@ public class UserEntity {
                 .password(encodingPassword)
                 .organization(requestDto.getOrganization())
                 .role(requestDto.getRole())
-                .hubId(requestDto.getHubId())
                 .status(UserStatusEnum.PENDING)
                 .build();
     }

@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         try {
             LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
 
-            // 이메일과 패스워드를 통해 인증 객체 생성
+            // 유저네임과 패스워드를 통해 인증 객체 생성
             // 인증 매니저의 authenticate 메소드를 통해 인증 진행
             // authenticate 메소드는 내부적으로 loadUserByUsername 메소드를 사용
             return getAuthenticationManager().authenticate(
