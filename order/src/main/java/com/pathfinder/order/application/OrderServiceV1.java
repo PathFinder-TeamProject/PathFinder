@@ -9,6 +9,8 @@ import com.pathfinder.order.domain.enums.OrderStatus;
 import com.pathfinder.order.domain.repository.OrderRepository;
 import com.pathfinder.order.presentation.enums.ApiStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,18 +19,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrderServiceV1 {
 
     private final OrderRepository orderRepository;
 
+    @CacheEvict(value = "orders", allEntries = true)
+    @Transactional
     public OrderResponseDto createOrder(OrderCreateRequestDto requestDto) {
-        //상품 재고 확인 후 부족하면 422
-
         OrderEntity order = OrderEntity.builder()
                 .productId(requestDto.getProductId())
                 .supplierId(requestDto.getSupplierId())
@@ -36,19 +38,19 @@ public class OrderServiceV1 {
                 .receiverId(requestDto.getReceiverId())
                 .request(requestDto.getRequest())
                 .orderStatus(OrderStatus.CREATED)
-                .createdAt(LocalDateTime.now())
                 .deadline(requestDto.getDeadline())
                 .build();
 
         return new OrderResponseDto().fromEntity(orderRepository.save(order));
     }
 
+    @CacheEvict(value = "orders", allEntries = true)
     @Transactional
     public OrderResponseDto cancelOrder(UUID orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
 
-        if(order.getOrderStatus().equals(OrderStatus.CANCELED)) {
+        if (order.getOrderStatus().equals(OrderStatus.CANCELED)) {
             throw new BusinessException(ApiStatus.CONFLICT);
         }
 
@@ -57,12 +59,13 @@ public class OrderServiceV1 {
         return new OrderResponseDto().fromEntity(order);
     }
 
+    @CacheEvict(value = "orders", allEntries = true)
     @Transactional
-    public OrderResponseDto UpdateOrder(UUID orderId, OrderUpdateRequestDto requestDto) {
+    public OrderResponseDto updateOrder(UUID orderId, OrderUpdateRequestDto requestDto) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
 
-        if(order.getOrderStatus().equals(OrderStatus.CANCELED)) {
+        if (order.getOrderStatus().equals(OrderStatus.CANCELED)) {
             throw new BusinessException(ApiStatus.CONFLICT);
         }
 
@@ -71,10 +74,9 @@ public class OrderServiceV1 {
         return new OrderResponseDto().fromEntity(order);
     }
 
-    @Transactional(readOnly = true)
+    @Cacheable(value = "orders", key = "#status != null ? #status.name() : 'all'")
     public Page<OrderResponseDto> getOrders(OrderStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
         Page<OrderEntity> orders;
 
         if (status == null) {
@@ -86,13 +88,12 @@ public class OrderServiceV1 {
         return orders.map(order -> new OrderResponseDto().fromEntity(order));
     }
 
-
-    @Transactional(readOnly = true)
+    @Cacheable(value = "orders", key = "#orderId")
     public OrderResponseDto getOrder(UUID orderId) {
         OrderEntity order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
 
-        if(order.getOrderStatus().equals(OrderStatus.CANCELED)) {
+        if (order.getOrderStatus().equals(OrderStatus.CANCELED)) {
             throw new BusinessException(ApiStatus.CONFLICT);
         }
 
