@@ -6,6 +6,7 @@ import com.pathfinder.user.domain.enums.UserStatusEnum;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -20,9 +21,9 @@ public class UserRoleUpdateResponseDto {
 
     private UserRoleEnum role;
 
-    private LocalDateTime updatedAt;
+    private Instant modifiedAt;
 
-    private String updatedBy;
+    private String modifiedBy;
 
     private boolean isDeleted;
 
@@ -35,10 +36,9 @@ public class UserRoleUpdateResponseDto {
                 .name(user.getName())
                 .role(user.getRole())
                 .status(user.getStatus())
-/*                .updatedAt(user.getUpdatedAt())
-                .updatedBy(user.getUpdatedBy())
-                .isDeleted(user.getIsDeleted())
-                */
+                .modifiedAt(user.getModifiedAt())
+                .modifiedBy(user.getModifiedBy())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

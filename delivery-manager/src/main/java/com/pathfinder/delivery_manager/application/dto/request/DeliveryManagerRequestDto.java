@@ -1,0 +1,23 @@
+package com.pathfinder.delivery_manager.application.dto.request;
+
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
+import lombok.*;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+public class DeliveryManagerRequestDto {
+
+    private Long deliveryManagerId;
+
+    private String username;
+
+    private Long hubId;
+
+    private DeliveryManagerTypeEnum type;
+
+    private Integer deliveryOrder;
+}

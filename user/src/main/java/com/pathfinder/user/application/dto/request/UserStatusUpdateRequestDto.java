@@ -1,7 +1,5 @@
 package com.pathfinder.user.application.dto.request;
-
 import com.pathfinder.user.domain.enums.UserStatusEnum;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class UserStatusUpdateRequestDto {
-    @NotNull
+//    @NotNull
     private UserStatusEnum status;
 }

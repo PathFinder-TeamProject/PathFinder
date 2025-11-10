@@ -40,6 +40,7 @@ public class JwtUtil {
                 .setId(user.getUsername().toString())
                 .setSubject(user.getUsername().toString())
                 .claim(AUTHORIZATION_KEY, user.getRole())
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(new Date().getTime() + TOKEN_TIME))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();

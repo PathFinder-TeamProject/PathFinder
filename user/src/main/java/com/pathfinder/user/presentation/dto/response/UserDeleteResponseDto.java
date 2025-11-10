@@ -5,6 +5,7 @@ import com.pathfinder.user.domain.enums.UserRoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,7 +18,7 @@ public class UserDeleteResponseDto {
 
     private String name;
 
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     private boolean isDeleted;
     public static UserDeleteResponseDto of(UserEntity user) {
@@ -25,8 +26,8 @@ public class UserDeleteResponseDto {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .name(user.getName())
-/*                .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getIsDeleted())*/
+                .deletedAt(user.getDeletedAt())
+                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

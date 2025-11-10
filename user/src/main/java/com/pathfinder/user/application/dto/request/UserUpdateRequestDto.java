@@ -33,4 +33,6 @@ public class UserUpdateRequestDto {
     private String newPassword;
 
     private String organization;
+    private String slackId;
+    private Long hubId;
 }
