@@ -59,7 +59,7 @@ public class HubRouteService {
 
         // 허브 간 그래프 구성 (노드: 허브ID, 간선: 거리)
         Map<UUID, List<Edge>> graph = new HashMap<>();
-        for (HubRoute r : all) {
+        for(HubRoute r : all) {
             graph.computeIfAbsent(r.getOriginHubId(), k -> new ArrayList<>())
                     .add(new Edge(r.getDestinationHubId(), r.getDistanceKm(), r.getRouteId()));
             // 양방향 이동 허용 (A→B, B→A)
@@ -69,11 +69,11 @@ public class HubRouteService {
 
         // Dijkstra 실행
         List<UUID> nodePath = dijkstra(origin, destination, graph);
-        if (nodePath.isEmpty()) return Collections.emptyList();
+        if(nodePath.isEmpty()) return Collections.emptyList();
 
         // 노드 시퀀스를 실제 HubRoute 리스트로 변환
         List<HubRoute> routePath = new ArrayList<>();
-        for (int i = 0; i < nodePath.size() - 1; i++) {
+        for(int i = 0; i < nodePath.size() - 1; i++) {
             UUID a = nodePath.get(i);
             UUID b = nodePath.get(i + 1);
             Optional<HubRoute> route = all.stream()
@@ -100,19 +100,19 @@ public class HubRouteService {
         dist.put(src, 0.0);
         pq.add(new Node(src, 0.0));
 
-        while (!pq.isEmpty()) {
+        while(!pq.isEmpty()) {
             Node cur = pq.poll();
 
             // 현재 노드까지의 거리가 기존 dist보다 크면 스킵 (더 좋은 경로 있음)
-            if (cur.dist > dist.getOrDefault(cur.node, Double.MAX_VALUE)) continue;
+            if(cur.dist > dist.getOrDefault(cur.node, Double.MAX_VALUE)) continue;
 
             // 도착 노드에 도달 시 종료
-            if (cur.node.equals(target)) break;
+            if(cur.node.equals(target)) break;
 
             // 인접 노드들 탐색
-            for (Edge e : graph.getOrDefault(cur.node, List.of())) {
+            for(Edge e : graph.getOrDefault(cur.node, List.of())) {
                 double nd = cur.dist + e.weight; // 현재 거리 + 간선 거리
-                if (nd < dist.getOrDefault(e.to, Double.MAX_VALUE)) {
+                if(nd < dist.getOrDefault(e.to, Double.MAX_VALUE)) {
                     dist.put(e.to, nd);
                     prev.put(e.to, cur.node);
                     pq.add(new Node(e.to, nd));
@@ -131,6 +131,55 @@ public class HubRouteService {
             at = prev.get(at);
         }
         return path;
+    }
+
+    public List<HubRoute> findPathWithRelay(UUID origin, UUID destination, Map<UUID, Coordinate> hubCoordinates) {
+        if(origin.equals(destination)) return Collections.emptyList();
+        List<HubRoute> all = findAllActiveRoutes();
+
+        Optional<HubRoute> direct = all.stream()
+                .filter(hubRoute -> hubRoute.getOriginHubId().equals(origin) && hubRoute.getDestinationHubId().equals(destination))
+                .findFirst();
+        if(direct.isPresent()) return List.of(direct.get());
+
+        Coordinate o = hubCoordinates.get(origin);
+        Coordinate d = hubCoordinates.get(destination);
+        if(o == null || d == null) {
+            return findPath(origin, destination);
+        }
+
+        double straightDist = Coordinate.haversineDistanceKm(o, d);
+        if(straightDist < RELAY_DISTANCE_THRESHOLD_KM){
+            return findPath(origin, destination);
+        }
+
+        Coordinate mid = new Coordinate((o.lat + d.lat) / 2.0, (o.lon + d.lon) / 2.0);
+        List<Map.Entry<UUID, Coordinate>> candidates = new ArrayList<>();
+        for (Map.Entry<UUID, Coordinate> e : hubCoordinates.entrySet()) {
+            UUID id = e.getKey();
+            if (id.equals(origin) || id.equals(destination)) continue;
+            candidates.add(e);
+        }
+
+        candidates.sort(Comparator.comparingDouble(e -> Coordinate.haversineDistanceKm(mid, e.getValue())));
+
+        int maxCandidates = Math.min(5, candidates.size());
+        for (int i = 0; i < maxCandidates; i++) {
+            UUID candidateId = candidates.get(i).getKey();
+
+            List<HubRoute> part1 = findPath(origin, candidateId);
+            if (part1.isEmpty()) continue;
+
+            List<HubRoute> part2 = findPath(candidateId, destination);
+            if (part2.isEmpty()) continue;
+
+            List<HubRoute> merged = new ArrayList<>();
+            merged.addAll(part1);
+            merged.addAll(part2);
+
+            return merged;
+        }
+        return findPath(origin, destination);
     }
 
 
@@ -152,6 +201,30 @@ public class HubRouteService {
         Node(UUID node, double dist) {
             this.node = node;
             this.dist = dist;
+        }
+    }
+
+    public static class Coordinate {
+        public final double lat;
+        public final double lon;
+
+        public Coordinate(double lat, double lon) {
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        private static double haversineDistanceKm(Coordinate a, Coordinate b) {
+            final int EARTH_RADIUS_KM = 6371; // 지구 반지름 (km)
+            double dLat = Math.toRadians(b.lat - a.lat);
+            double dLon = Math.toRadians(b.lon - a.lon);
+            double lat1 = Math.toRadians(a.lat);
+            double lat2 = Math.toRadians(b.lat);
+
+            double h = Math.pow(Math.sin(dLat / 2), 2)
+                    + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+            double c = 2 * Math.asin(Math.sqrt(h));
+
+            return EARTH_RADIUS_KM * c;
         }
     }
 
