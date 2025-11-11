@@ -1,0 +1,20 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/delivery_manager_db
+    username: pathfinder
+    password: pathfinder123
+  data:
+    redis:
+      database: 4
+  kafka:
+    consumer:
+      group-id: delivery-manager-service-group
+
+logging:
+  level:
+    com.pathfinder.delivery_manager: DEBUG
+    org.springframework.cloud: DEBUG
+    org.springframework.kafka: INFO
