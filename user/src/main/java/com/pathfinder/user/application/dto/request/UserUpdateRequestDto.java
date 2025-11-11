@@ -19,7 +19,6 @@ public class UserUpdateRequestDto {
 
     private String name;
 
-    @NotBlank
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,15}$",
             message = "password는 최소 8자 이상, 15자 이하이며, 알파벳 대소문자(a~z, A-Z), 숫자(0-9), 특수문자(@$!%*?&)를 모두 포함해야 합니다."
@@ -34,5 +33,4 @@ public class UserUpdateRequestDto {
 
     private String organization;
     private String slackId;
-    private Long hubId;
 }

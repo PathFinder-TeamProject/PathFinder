@@ -36,6 +36,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
                         // DeliveryManager 권한 설정
+                        .requestMatchers("/v3/api-docs/**", "/internal/**").permitAll()
+
                         .requestMatchers(HttpMethod.GET,
                                 "/v1/delivery-managers",
                                 "/v1/delivery-managers/{delivery_manager_id}")

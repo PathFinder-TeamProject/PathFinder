@@ -11,7 +11,6 @@ import com.pathfinder.delivery_manager.domain.repository.DeliveryManagerReposito
 import com.pathfinder.delivery_manager.infrastructure.cache.HubCacheRepository;
 import com.pathfinder.delivery_manager.infrastructure.client.UserServiceClient;
 import com.pathfinder.delivery_manager.infrastructure.security.JwtUserContext;
-import com.pathfinder.delivery_manager.infrastructure.kafka.UserRequestProducer;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import com.pathfinder.delivery_manager.presentation.dto.response.UserInfoDto;
 import jakarta.persistence.EntityNotFoundException;
@@ -33,7 +32,6 @@ import java.util.List;
 public class DeliveryManagerServiceV1 {
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final HubCacheRepository hubCacheRepository;
-    private final UserRequestProducer userRequestProducer;
     private final UserServiceClient userServiceClient;
 
     @Transactional
@@ -45,9 +43,10 @@ public class DeliveryManagerServiceV1 {
         if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER")|| JwtUserContext.getRoleFromHeader().equals("ROLE_HUB_MANAGER")) {
            checkHubManager(JwtUserContext.getUsernameFromHeader(), dto.getHubId());
         }
+        log.info("Inside createDeliveryManager method - DeliveryManager getUsername: {}", dto.getUsername());
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(dto.getUsername());
-        if(userInfoDto == null) {
-            throw new EntityNotFoundException("사용자 서비스에서 해당 사용자를 찾을 수 없습니다.");
+        if (userInfoDto == null || !userInfoDto.getRole().equals("DELIVERY_MANAGER")) {
+            throw new EntityNotFoundException("등록 가능한 사용자 정보가 아닙니다.");
         }
         log.info("Inside createDeliveryManager method - DeliveryManager ID: {}", dto);
         if (deliveryManagerRepository.findByUsername(dto.getUsername()).isPresent()) {
@@ -67,6 +66,9 @@ public class DeliveryManagerServiceV1 {
         DeliveryManagerEntity deliveryManager = DeliveryManagerEntity.create(dto);
         deliveryManager.setCreate(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity saved = deliveryManagerRepository.save(deliveryManager);
+
+        userServiceClient.approveUser(saved.getUsername());
+
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
 
@@ -74,20 +76,18 @@ public class DeliveryManagerServiceV1 {
     public DeliveryManagerResponseDto getManagerById(Long id) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-       // 2. Kafka Request-Reply를 사용하여 User Service에 사용자 정보 요청 및 응답 받기
        UserInfoDto userInfoDto = userServiceClient.getUserInfo(deliveryManager.getUsername());
-       // 3. 응답 받은 정보를 DTO에 담아 반환
        return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
+
     @Transactional(readOnly = true)
     public DeliveryManagerResponseDto getManagerByUsername(String username) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-        // 2. Kafka Request-Reply를 사용하여 User Service에 사용자 정보 요청 및 응답 받기
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(username);
-        // 3. 응답 받은 정보를 DTO에 담아 반환
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
+
     @Transactional
     public void deleteManager(Long id) {
         if(JwtUserContext.isHubManager()) {
@@ -99,6 +99,25 @@ public class DeliveryManagerServiceV1 {
         deliveryManager.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
     }
+    @Transactional
+    public void deleteManagerByUsername(String username) {
+        log.info("[배송담당자 서비스] 유저 서비스로부터 배송담당자 삭제 요청 - username: {}", username);
+
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.warn("[배송담당자 서비스] 배송담당자를 찾을 수 없음 - username: {}", username);
+                    return new EntityNotFoundException("배송 담당자를 찾을 수 없습니다: " + username);
+                });
+
+        log.info("[배송담당자 서비스] 배송담당자 삭제 수행 - ID: {}, username: {}, 삭제 시각: {}",
+                deliveryManager.getDeliveryManagerId(), username, Instant.now());
+
+        deliveryManager.softDelete(Instant.now(), "SYSTEM_USER_DELETE");
+        deliveryManagerRepository.save(deliveryManager);
+
+        log.info("[배송담당자 서비스] 배송담당자 삭제 완료 - username: {}", username);
+    }
+    @Transactional(readOnly = true)
     public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
         Page<DeliveryManagerEntity> deliveryManagerPage;
 
@@ -127,8 +146,12 @@ public class DeliveryManagerServiceV1 {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(deliveryManagerId)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
         if (JwtUserContext.isMaster()) {
+            if(requestDto.getType().equals("HUB")){
+                if(deliveryManagerRepository.countByHubId(0L) >= 10) {
+                    throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
+                }
+            }
             deliveryManager.update(requestDto);
-
         } else if (JwtUserContext.isHubManager()) {
             // 허브 관리자는 같은 허브 소속인 경우 hubId만 수정 가능
             checkHubManager(JwtUserContext.getUsernameFromHeader(), deliveryManager.getHubId());
@@ -144,8 +167,11 @@ public class DeliveryManagerServiceV1 {
         log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", deliveryManagerId, JwtUserContext.getUsernameFromHeader());
         deliveryManager.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
-        UserInfoDto userInfoDto = userRequestProducer.requestUserInfo(deliveryManager.getUsername());
-        return DeliveryManagerResponseDto.of(savedDeliveryManager,userInfoDto);
+//        UserInfoDto userInfoDto = userRequestProducer.requestUserInfo(deliveryManager.getUsername());
+        UserInfoDto userInfo = UserInfoDto.builder()
+                .username(deliveryManager.getUsername())
+                .build();
+        return DeliveryManagerResponseDto.of(savedDeliveryManager,userInfo);
     }
     @Transactional
     public void deleteManagersByHubId(Long hubId) {
@@ -166,7 +192,7 @@ public class DeliveryManagerServiceV1 {
         deliveryManagerRepository.saveAll(managers);
     }
 
-    public void checkHubManager(String username, Long hubId) {
+    private void checkHubManager(String username, Long hubId) {
         Long userHubId = 0L;
 //        hubId = hubCacheRepository.getHubIdByManagerUsername(username);
         if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER") && userHubId.equals(hubId)) {

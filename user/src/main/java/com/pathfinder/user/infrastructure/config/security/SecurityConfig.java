@@ -81,10 +81,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
 
-                        // DeliveryManager > 각 서비스로 이동
-                      /*  .requestMatchers(HttpMethod.GET, "/v1/delivery-managers", "/v1/delivery-managers/{delivery_manager_id}").hasAnyRole("DELIVERY_MANAGER", "HUB_MANAGER", "MASTER")
-                        .requestMatchers("/v1/delivery-managers/**").hasAnyRole("HUB_MANAGER", "MASTER")
-*/
                         // AI
                         .requestMatchers("/api/v1/ai/**").hasRole("MASTER")
                         .requestMatchers(HttpMethod.POST, "/v1/ai").authenticated()

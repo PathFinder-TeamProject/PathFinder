@@ -6,11 +6,14 @@ import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerUp
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/delivery-managers")
 public class DeliveryManagerControllerV1 {
@@ -22,7 +25,6 @@ public class DeliveryManagerControllerV1 {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('MASTER') or hasRole('HUB_MANAGER')")
     public ApiResponse<DeliveryManagerResponseDto> createManager(
             @Valid @RequestBody DeliveryManagerRequestDto requestDto) {
         return ApiResponse.success(deliveryManagerService.createDeliveryManager(requestDto));
@@ -67,6 +69,7 @@ public class DeliveryManagerControllerV1 {
     public ApiResponse<DeliveryManagerResponseDto> updateManager(
             @PathVariable Long deliveryManagerId,
             @Valid @RequestBody DeliveryManagerUpdateRequestDto requestDto) {
+        System.out.println("requestDto : " + requestDto);
         return ApiResponse.success(deliveryManagerService.updateManager(deliveryManagerId, requestDto));
     }
 
@@ -76,4 +79,5 @@ public class DeliveryManagerControllerV1 {
         deliveryManagerService.deleteManager(deliveryManagerId);
         return ApiResponse.noContent();
     }
+
 }

@@ -13,7 +13,9 @@ import com.pathfinder.user.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ public class UserServiceV1 {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserEventProducer userEventProducer;
+    private final DeliveryManagerClient deliveryManagerClient;
 
     public SignupResponseDto signup(SignupRequestDto requestDto) {
         log.info("회원가입 시도 - username: {}, email: {}", requestDto.getUsername(), requestDto.getEmail());
@@ -65,7 +68,7 @@ public class UserServiceV1 {
                 user.getUsername(), user.getRole());
 
         // 5. 배송 담당자 역할인 경우 Kafka 이벤트 발행
-        if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER) {
+        /*if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER) {
 
             NewDeliveryManagerEvent event = NewDeliveryManagerEvent.builder()
                     .username(user.getUsername())
@@ -78,7 +81,7 @@ public class UserServiceV1 {
 
             log.info("[User Service] 배송 담당자 등록 이벤트 발행 - Username: {}",
                     user.getUsername());
-        }
+        }*/
         log.info("회원가입 성공 - username: {}, role: {}", saveUser.getUsername(), saveUser.getRole());
         return SignupResponseDto.of(saveUser);
     }
@@ -105,20 +108,11 @@ public class UserServiceV1 {
 
     //관리자 기준 유저 조회
     @Cacheable(value = "users", key = "#username")
-    public UserResponseDto getUser(String username, UserEntity user) {
-        log.info("유저 조회 - 대상: {}, 요청자: {}, 요청자 권한: {}", username, user.getUsername(), user.getRole());
+    public UserResponseDto getUser(String username) {
+        log.info("유저 조회 - 대상: {}, 요청자: {}, 요청자 권한: {}", username, JwtUserContext.getUsernameFromHeader(), JwtUserContext.getRoleFromHeader());
 
         // 토큰 유저의 role이 MASTER인지 판별 후 유저 정보 반환
-        UserRoleEnum role = user.getRole();
-        if (role.equals(UserRoleEnum.MASTER)) {
-            UserResponseDto response = UserResponseDto.of(findUser(username));
-            log.info("유저 조회 성공 - 캐시에서 조회: {}", username);
-            return response;
-        }
-
-        // 토큰 유저의 role이 MASTER와 MANAGER가 아닐 경우 exception 반환
-        log.warn("유저 조회 실패 - 권한 없음. 요청자: {}, 대상: {}", user.getUsername(), username);
-        throw new UnauthorizedUserException(UserErrorCode.UNAUTHORIZED_USER);
+        return UserResponseDto.of(findUser(username));
     }
 
     @Transactional
@@ -148,54 +142,103 @@ public class UserServiceV1 {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#username")
-    public UserUpdateResponseDto updateUser(String username, UserUpdateRequestDto userUpdateRequestDto, UserEntity user) {
-        log.info("유저 정보 수정 - 대상: {}, 요청자: {}", username, user.getUsername());
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#username"),  // 기존 캐시 제거
+            @CacheEvict(value = "userList", allEntries = true) // 전체 목록 캐시도 무효화
+    }, put = {
+            @CachePut(value = "users", key = "#username")      // 수정 후 캐시 재저장
+    })
+    public UserUpdateResponseDto updateUser(String username, UserUpdateRequestDto userUpdateRequestDto, String loginUsername) {
+        log.info("유저 정보 수정 - 대상: {}, 요청자: {}", username, loginUsername);
 
-        // 비밀번호가 일치 하는지 확인
         UserEntity targetUser = findUser(username);
-        matchPassword(userUpdateRequestDto.getPassword(), targetUser.getPassword());
 
-        if(targetUser.getUsername().equals(user.getUsername())) {
+        // 이메일 중복 확인
+        String email = userUpdateRequestDto.getEmail();
+        if (email != null && !email.equals(targetUser.getEmail())) {
+            userRepository.findByEmail(email).ifPresent(existingUser -> {
+                throw new DuplicateUserException(
+                        UserErrorCode.DUPLICATE_USER,
+                        UserErrorCode.DUPLICATE_USER.getFormattedMessage("이메일")
+                );
+            });
+        }
+
+        // 슬랙 ID 중복 검증
+        String slackId = userUpdateRequestDto.getSlackId();
+        if (slackId != null && !slackId.equals(targetUser.getSlackId())) {
+            userRepository.findBySlackId(slackId).ifPresent(existingUser -> {
+                throw new DuplicateUserException(
+                        UserErrorCode.DUPLICATE_USER,
+                        UserErrorCode.DUPLICATE_USER.getFormattedMessage("슬랙 계정")
+                );
+            });
+        }
+        log.debug("JWT role value = {}", JwtUserContext.getRoleFromHeader());
+        if (JwtUserContext.getRoleFromHeader().equals("MASTER")) {
+            log.info("관리자에 의한 타인 정보 수정 - 대상: {}, 요청자: {}", username, loginUsername);
+            targetUser.update(userUpdateRequestDto, passwordEncoder);
+        } else if (targetUser.getUsername().equals(loginUsername)) {
+            //만약 본인 인 경우
+            matchPassword(userUpdateRequestDto.getPassword(), targetUser.getPassword());
             log.debug("비밀번호 검증 완료 - username: {}", username);
             // 비밀번호가 일치하면 유저 이름과 변경할 패스워드 업데이트
             targetUser.update(userUpdateRequestDto, passwordEncoder);
+        } else{
+            log.warn("권한 없는 유저 정보 수정 시도 - 대상: {}, 요청자: {}", username, loginUsername);
+            throw new UnauthorizedUserException(UserErrorCode.UNAUTHORIZED_USER);
         }
-
-        user.setModified(Instant.now(), user.getUsername());
-        UserEntity saveUser = userRepository.save(user);
+        targetUser.setModified(Instant.now(), loginUsername);
+        UserEntity saveUser = userRepository.save(targetUser);
 
         log.info("유저 정보 수정 완료 및 캐시 무효화 - username: {}", username);
         return UserUpdateResponseDto.of(saveUser);
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#user.username")
-    public UserDeleteResponseDto deleteUser(UserDeleteRequestDto userDeleteRequestDto, UserEntity user) {
-        log.info("유저 삭제 시작 - username: {}, 요청 시각: {}", user.getUsername(), Instant.now());
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#username"),
+            @CacheEvict(value = "userList", allEntries = true)
+    })
+    public void deleteUser(String username, String masterUsername) {
+        log.info("유저 삭제 시작 - username: {}, 요청 시각: {}", username, Instant.now());
 
         try {
-            // 비밀번호 검증
-            log.debug("비밀번호 검증 중 - username: {}", user.getUsername());
-            matchPassword(userDeleteRequestDto.getPassword(), user.getPassword());
-            log.debug("비밀번호 검증 완료 - username: {}", user.getUsername());
-
             // Soft Delete 수행
-            Instant deleteTime = Instant.now();
-            user.softDelete(deleteTime, user.getUsername());
-            UserEntity saveUser = userRepository.save(user);
+            UserEntity targetUser = findUser(username);
+            targetUser.softDelete( Instant.now(), masterUsername);
+            UserEntity saveUser = userRepository.save(targetUser);
 
             log.info("유저 삭제 완료 (Soft Delete) - username: {}, 삭제 시각: {}, 삭제자: {}",
-                    user.getUsername(), deleteTime, user.getUsername());
-            log.info("캐시 무효화 완료 - username: {}", user.getUsername());
+                    saveUser.getUsername(), saveUser.getDeletedAt(), masterUsername);
+            log.info("캐시 무효화 완료 - username: {}", saveUser.getUsername());
+            if(saveUser.getRole() == UserRoleEnum.DELIVERY_MANAGER) {
+                log.info("[유저 서비스] 배송담당자 유저 삭제로 인한 배송담당자 서비스 연동 시작 - username: {}",
+                        saveUser.getUsername());
 
-            return UserDeleteResponseDto.of(saveUser);
+                try {
+                    // Feign Retryer 설정에 의해 실패 시 자동으로 최대 3회 재시도
+                    deliveryManagerClient.deleteDeliveryManager(saveUser.getUsername());
 
-        } catch (PasswordNotMatchException e) {
-            log.warn("유저 삭제 실패 - 비밀번호 불일치. username: {}", user.getUsername());
-            throw e;
+                    log.info("[유저 서비스] 배송담당자 서비스에 삭제 요청 완료 - username: {}",
+                            saveUser.getUsername());
+
+                } catch (Exception e) {
+                    // 3회 재시도 후에도 실패한 경우
+                    log.error("========================================");
+                    log.error("[유저 서비스] ⚠️ 배송담당자 서비스 연동 최종 실패 (Feign 재시도 3회 완료)");
+                    log.error("[유저 서비스] Username: {}", saveUser.getUsername());
+                    log.error("[유저 서비스] Error: {}", e.getMessage());
+                    log.error("[유저 서비스] ⚠️ 수동 처리 필요: 배송담당자 서비스에서 username [{}]를 직접 삭제해주세요",
+                            saveUser.getUsername());
+                    log.error("========================================");
+
+                    // 유저 삭제는 성공했지만 배송담당자 삭제는 실패
+                    // 트랜잭션 롤백하지 않음 (유저 삭제는 유지)
+                }
+            }
         } catch (Exception e) {
-            log.error("유저 삭제 중 예외 발생 - username: {}, error: {}", user.getUsername(), e.getMessage(), e);
+            log.error("유저 삭제 중 예외 발생 - username: {}, error: {}", username, e.getMessage(), e);
             throw e;
         }
     }

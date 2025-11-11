@@ -18,4 +18,7 @@ public interface UserServiceClient {
      */
     @GetMapping("/{username}")
     UserInfoDto getUserInfo(@PathVariable("username") String username);
+
+    @GetMapping("/{username}/confirm-member")
+    void approveUser(String username);
 }

@@ -31,14 +31,6 @@ public class UserControllerV1 {
     public ApiResponse<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
         log.info("POST /auth/register - 회원가입 요청 - username: {}, email: {}, role: {}",
                 requestDto.getUsername(), requestDto.getEmail(), requestDto.getRole());
-
-        if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER
-                && requestDto.getDeliveryManagerType() == null) {
-            log.warn("회원가입 실패 - 배송 담당자 타입 누락 - username: {}", requestDto.getUsername());
-            throw new ValidationException(UserErrorCode.MISSING_REQUIRED_FIELD,
-                    UserErrorCode.MISSING_REQUIRED_FIELD.getFormattedMessage("배송 담당자 타입"));
-        }
-
         SignupResponseDto response = userServiceV1.signup(requestDto);
         log.info("POST /auth/register - 회원가입 완료 - username: {}", response.getUsername());
         return ApiResponse.success(response);
@@ -99,14 +91,11 @@ public class UserControllerV1 {
     }
 
     @GetMapping("/users/myInfo")
-    public ApiResponse<UserResponseDto> getMyUserInfo(
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<UserResponseDto> getMyUserInfo() {
 
-        log.info("GET /users/myInfo - 내 정보 조회 - username: {}", userDetails.getUsername());
+        log.info("GET /users/myInfo - 내 정보 조회 - username: {}", JwtUserContext.getUsernameFromHeader());
 
-        UserResponseDto response = userServiceV1.getUser(
-                userDetails.getUser().getUsername(),
-                userDetails.getUser());
+        UserResponseDto response = userServiceV1.getUser(JwtUserContext.getUsernameFromHeader());
 
         log.info("GET /users/myInfo - 내 정보 조회 완료 - username: {}", response.getUsername());
 
@@ -115,12 +104,11 @@ public class UserControllerV1 {
 
     @GetMapping("/users/{username}")
     public ApiResponse<UserResponseDto> getUserInfo(
-            @PathVariable String username,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @PathVariable String username) {
 
-        log.info("GET /users/{} - 유저 정보 조회 - 요청자: {}", username, userDetails.getUsername());
+        log.info("GET /users/{} - 유저 정보 조회 - 요청자: {}", username, JwtUserContext.getUsernameFromHeader());
 
-        UserResponseDto response = userServiceV1.getUser(username, userDetails.getUser());
+        UserResponseDto response = userServiceV1.getUser(username);
 
         log.info("GET /users/{} - 유저 정보 조회 완료", username);
 
@@ -130,13 +118,10 @@ public class UserControllerV1 {
     @PutMapping("/users/{username}")
     public ApiResponse<UserUpdateResponseDto> updateUserInfo(
             @PathVariable String username,
-            @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        log.info("PUT /users/{} - 유저 정보 수정 요청 - 요청자: {}", username, userDetails.getUsername());
+            @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto) {
 
         UserUpdateResponseDto response = userServiceV1.updateUser(
-                username, userUpdateRequestDto, userDetails.getUser());
+                username, userUpdateRequestDto, JwtUserContext.getUsernameFromHeader());
 
         log.info("PUT /users/{} - 유저 정보 수정 완료", username);
 
@@ -145,18 +130,14 @@ public class UserControllerV1 {
 
     @DeleteMapping("/users/{username}")
     public ApiResponse<UserDeleteResponseDto> deleteUser(
-            @PathVariable String username,
-            @RequestBody @Valid UserDeleteRequestDto userDeleteRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @PathVariable String username) {
 
-        log.info("DELETE /users/{} - 유저 삭제 요청 - 요청자: {}", username, userDetails.getUsername());
+        log.info("DELETE /users/{} - 유저 삭제 요청 - 요청자: {}", username, JwtUserContext.getUsernameFromHeader());
 
-        UserDeleteResponseDto response = userServiceV1.deleteUser(
-                userDeleteRequestDto, userDetails.getUser());
+        userServiceV1.deleteUser(username, JwtUserContext.getUsernameFromHeader());
 
         log.info("DELETE /users/{} - 유저 삭제 완료 (Soft Delete)", username);
-
-        return ApiResponse.success(response);
+        return ApiResponse.noContent();
     }
 
 }

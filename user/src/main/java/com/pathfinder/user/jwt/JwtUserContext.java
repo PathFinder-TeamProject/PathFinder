@@ -14,4 +14,10 @@ public class JwtUserContext {
                 .map(req -> req.getHeader("X-User-Username"))
                 .orElse("system");
     }
+    public static String getRoleFromHeader() {
+        return Optional.ofNullable(RequestContextHolder.getRequestAttributes())
+                .map(attr -> ((ServletRequestAttributes) attr).getRequest())
+                .map(req -> req.getHeader("X-User-Role"))
+                .orElse("system");
+    }
 }
