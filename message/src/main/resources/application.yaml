@@ -11,4 +11,4 @@ spring:
 
 slack:
   webhook:
-    url: https://hooks.slack.com/services/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
+    url: ${SLACK_WEBHOOK_KEY}
