@@ -1,11 +1,13 @@
 package com.pathfinder.delivery_manager.infrastructure.client;
+import com.pathfinder.delivery_manager.infrastructure.config.FeignClientConfig;
 import com.pathfinder.delivery_manager.presentation.dto.response.UserInfoDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(
         name = "user-service",      // Eureka에 등록된 서비스 이름
-        path = "/internal/users"    // 기본 경로: Controller의 @RequestMapping과 일치
+        path = "/internal/users",    // 기본 경로: Controller의 @RequestMapping과 일치
+        configuration = FeignClientConfig .class
 )
 public interface UserServiceClient {
 
@@ -18,7 +20,4 @@ public interface UserServiceClient {
      */
     @GetMapping("/{username}")
     UserInfoDto getUserInfo(@PathVariable("username") String username);
-
-    @GetMapping("/{username}/confirm-member")
-    void approveUser(String username);
 }

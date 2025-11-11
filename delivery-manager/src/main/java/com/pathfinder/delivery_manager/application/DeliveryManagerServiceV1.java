@@ -67,8 +67,6 @@ public class DeliveryManagerServiceV1 {
         deliveryManager.setCreate(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity saved = deliveryManagerRepository.save(deliveryManager);
 
-        userServiceClient.approveUser(saved.getUsername());
-
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
 
