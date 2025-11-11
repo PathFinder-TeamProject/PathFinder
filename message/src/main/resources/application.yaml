@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: message
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/message
+    username: postgres
+    password: 1234
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  cloud:
+    config:
+      enabled: false
+    import-check:
+      enabled:false
+
+slack:
+  bot-tocker:
+  base-url: https://slack.com/api
