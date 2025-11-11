@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/delivery_manager
-    username: postgres
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/delivery_manager_db
+    username: pathfinder
+    password: pathfinder123
   data:
     redis:
       database: 4

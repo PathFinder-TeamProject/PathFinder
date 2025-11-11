@@ -3,9 +3,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/order
-    username: postgres
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: pathfinder
+    password: pathfinder123
   data:
     redis:
       database: 3

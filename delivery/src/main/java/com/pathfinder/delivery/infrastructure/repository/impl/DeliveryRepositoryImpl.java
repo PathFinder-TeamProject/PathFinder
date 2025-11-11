@@ -39,7 +39,7 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
     @Override
     public void softDelete(UUID id, String deletedBy) {
         jpaRepository.findById(id).ifPresent(entity -> {
-            entity.softDelete(Instant.now(), Long.parseLong(deletedBy));
+            entity.softDelete(Instant.now(), deletedBy);
             jpaRepository.save(entity);
         });
     }
