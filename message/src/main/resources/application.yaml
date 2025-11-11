@@ -1,23 +1,14 @@
 spring:
   application:
-    name: message
-
-  datasource:
-    url: jdbc:postgresql://localhost:5434/message
-    username: postgres
-    password: 1234
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
+    name: message-service
+  config:
+    import: "configserver:http://localhost:19000"
   cloud:
     config:
-      enabled: false
-    import-check:
-      enabled:false
+      name: order-service
+      profile: dev
+      fail-fast: true
 
 slack:
-  bot-tocker:
-  base-url: https://slack.com/api
+  webhook:
+    url: https://hooks.slack.com/services/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

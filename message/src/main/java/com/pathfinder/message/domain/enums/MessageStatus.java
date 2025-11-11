@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 public enum MessageStatus {
-    scheduled,
-    sent,
-    failed,
-    deleted
+    SCHEDULED,
+    SENT,
+    FAILED,
+    DELETED
 }

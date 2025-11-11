@@ -41,4 +41,12 @@ public class MessageEntity extends BaseEntity {
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private MessageStatus status;
+
+    public void delete(){
+        this.status = MessageStatus.DELETED;
+    }
+
+    public void changeStatus(MessageStatus newStatus){
+        this.status = newStatus;
+    }
 }

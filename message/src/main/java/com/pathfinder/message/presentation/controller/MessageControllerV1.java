@@ -58,6 +58,6 @@ public class MessageControllerV1 {
     public ResponseEntity<ApiResponse<Void>> deleteMessage(@PathVariable UUID messageId) {
         messageService.deleteMessage(messageId);
         return ResponseEntity
-                .ok(ApiResponse.success(null));
+                .ok(ApiResponse.successMessage("200", "삭제 완료"));
     }
 }

@@ -1,0 +1,11 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/message_db
+    username: pathfinder
+    password: pathfinder123
+  data:
+    redis:
+      database: 3
