@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/user_db
+    username: pathfinder
+    password: pathfinder123
+  data:
+    redis:
+      database: 0
+  kafka:
+    consumer:
+      group-id: user-service-group
+
+logging:
+  level:
+    com.pathfinder.user: DEBUG
+    org.springframework.cloud: DEBUG
+    org.springframework.kafka: INFO

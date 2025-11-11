@@ -1,67 +1,37 @@
-version: '3.8'
+version: "3.8"
 
 services:
   order-service:
-    container_name: order-service
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: order-service
     ports:
-      - "8082:8080"
+      - "8084:8080"
     environment:
-      SPRING_APPLICATION_NAME: order-service
-
-      # ✅ PostgreSQL 연결 정보
-      SPRING_DATASOURCE_URL: jdbc:postgresql://order-postgres:5432/order
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234
-
-      # ✅ Redis 연결 정보
-      SPRING_DATA_REDIS_HOST: redis
-      SPRING_DATA_REDIS_PORT: 6379
-
-      # ✅ (선택) 프로필 지정
-      SPRING_PROFILES_ACTIVE: docker
-
-      # ✅ Eureka 사용 중이라면
-      # EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      # SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=order-service
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
+      - SPRING_DATASOURCE_USERNAME=pathfinder
+      - SPRING_DATASOURCE_PASSWORD=pathfinder123
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
+    networks:
+      - pathfinder-network
     depends_on:
-      - order-postgres
+      - postgres
       - redis
-    networks:
-      - msa-network
-    restart: unless-stopped
-
-  # ✅ PostgreSQL (order 전용)
-  order-postgres:
-    image: postgres:17
-    container_name: order-postgres
-    environment:
-      POSTGRES_DB: order
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-    ports:
-      - "5434:5432" # 호스트에서는 5434로 접근
-    volumes:
-      - order_postgres_data:/var/lib/postgresql/data
-    networks:
-      - msa-network
-    restart: unless-stopped
-
-  # ✅ Redis (공통 캐시)
-  redis:
-    image: redis:7
-    container_name: order-redis
-    ports:
-      - "6379:6379"
-    networks:
-      - msa-network
-    restart: unless-stopped
+      - kafka
+      - zipkin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
-  msa-network:
-    driver: bridge
-
-volumes:
-  order_postgres_data:
+  pathfinder-network:
+    external: true
