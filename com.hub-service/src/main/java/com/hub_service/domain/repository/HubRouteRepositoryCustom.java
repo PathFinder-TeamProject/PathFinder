@@ -5,5 +5,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface HubRouteRepositoryCustom {
-    Page<HubRoute> searchRoute(String originName, Double minDistance, Double maxDistance, Pageable pageable);
+    Page<HubRoute> searchRoutes(String originName, String destinationName, Double minDistance, Double maxDistance, Pageable pageable);
 }
