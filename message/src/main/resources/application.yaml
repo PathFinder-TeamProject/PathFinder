@@ -5,9 +5,9 @@ spring:
     import: "configserver:http://localhost:19000"
   cloud:
     config:
-      name: order-service
-      profile: dev
-      fail-fast: true
+      enabled: false
+    import-check:
+      enabled:false
 
 slack:
   webhook:

@@ -73,7 +73,6 @@ public class MessageService {
         MessageEntity entity = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 메시지입니다. id=" + messageId));
 
-        entity.delete();
         entity.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
     }
 }
