@@ -1,0 +1,14 @@
+server:
+  port: 8083
+
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hub_db
+    username: pathfinder
+    password: pathfinder123
+  data:
+    redis:
+      database: 2

@@ -40,6 +40,7 @@ public class UserEntity extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private UserStatusEnum status = UserStatusEnum.PENDING;
 
     public static UserEntity create(SignupRequestDto requestDto, String encodingPassword) {
