@@ -10,6 +10,9 @@ CREATE DATABASE delivery_db;
 -- Hub Service Database
 CREATE DATABASE hub_db;
 
+-- Order Service Database
+CREATE DATABASE order_db;
+
 -- Delivery Manager Service Database
 CREATE DATABASE delivery_manager_db;
 
@@ -17,5 +20,6 @@ CREATE DATABASE delivery_manager_db;
 GRANT ALL PRIVILEGES ON DATABASE user_db TO pathfinder;
 GRANT ALL PRIVILEGES ON DATABASE delivery_db TO pathfinder;
 GRANT ALL PRIVILEGES ON DATABASE hub_db TO pathfinder;
+GRANT ALL PRIVILEGES ON DATABASE order_db TO pathfinder;
 GRANT ALL PRIVILEGES ON DATABASE delivery_manager_db TO pathfinder;
 
