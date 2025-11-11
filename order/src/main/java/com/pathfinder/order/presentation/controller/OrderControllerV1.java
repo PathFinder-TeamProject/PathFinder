@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderControllerV1 {
 
@@ -27,7 +27,7 @@ public class OrderControllerV1 {
 
     @PostMapping
     public ResponseEntity<ApiResponseDto<OrderResponseDto>> createOrder(@RequestBody OrderCreateRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
-        orderService.createOrder(requestDto, userDetails);
+        orderService.createOrder(requestDto);
         return ResponseEntity.status(ApiStatus.CREATED.getCode())
                 .body(ApiResponseDto.success(ApiStatus.CREATED, "생성 완료"));
     }
@@ -36,14 +36,14 @@ public class OrderControllerV1 {
     @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
     public ResponseEntity<ApiResponseDto<OrderResponseDto>> deleteOrders(@PathVariable UUID orderId, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.status(ApiStatus.OK.getCode())
-                .body(ApiResponseDto.success(ApiStatus.OK, orderService.cancelOrder(orderId, userDetails), "주문이 취소되었습니다."));
+                .body(ApiResponseDto.success(ApiStatus.OK, orderService.cancelOrder(orderId), "주문이 취소되었습니다."));
     }
 
     @PutMapping("/{orderId}")
     @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
     public ResponseEntity<ApiResponseDto<OrderResponseDto>> updateOrder(@PathVariable UUID orderId, @RequestBody OrderUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.status(ApiStatus.OK.getCode())
-                .body(ApiResponseDto.success(ApiStatus.OK, orderService.updateOrder(orderId, requestDto, userDetails), "주문이 수정되었습니다."));
+                .body(ApiResponseDto.success(ApiStatus.OK, orderService.updateOrder(orderId, requestDto), "주문이 수정되었습니다."));
     }
 
     @GetMapping

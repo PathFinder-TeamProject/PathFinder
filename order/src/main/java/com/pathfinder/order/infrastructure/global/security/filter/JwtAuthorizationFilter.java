@@ -18,50 +18,73 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class JwtAuthorizationFilter extends OncePerRequestFilter {
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-    private final JwtProperties jwtProperties;
+import java.io.IOException;
+import java.util.Collections;
+
+@Component
+@Slf4j
+public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String authorizationHeader = request.getHeader(jwtProperties.getAccessHeaderName());
-        log.info("JwtAuthorizationFilter executing for path: {}", request.getRequestURI());
-        log.info("Authorization header present: {}", authorizationHeader != null);
 
-        if (!StringUtils.hasText(authorizationHeader) || !authorizationHeader.startsWith(jwtProperties.getHeaderPrefix())) {
-            log.info("Missing or invalid Authorization header. Expected prefix: '{}'", jwtProperties.getHeaderPrefix());
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String requestURI = request.getRequestURI();
 
-        String accessJwt = authorizationHeader.substring(jwtProperties.getHeaderPrefix().length()).trim();
-        log.info("Extracted JWT token (length: {})", accessJwt.length());
+        log.info("=== JWT Authorization Filter (Delivery-Manager) ===");
+        log.info("요청 URI: {}", requestURI);
 
-        try {
-            DecodedJWT decodedAccessJwt = JWT.decode(accessJwt);
-            log.info("JWT decoded successfully. Claims: id={}, username={}, roles={}", 
-                decodedAccessJwt.getClaim("id"), 
-                decodedAccessJwt.getClaim("username"),
-                decodedAccessJwt.getClaim("roleList"));
-            
-            CustomUserDetails userDetails = CustomUserDetails.of(decodedAccessJwt);
-            log.info("UserDetails created: username={}, authorities={}", 
-                userDetails.getUsername(), 
-                userDetails.getAuthorities());
+        // Gateway에서 전달한 헤더 확인
+        String gatewayUsername = request.getHeader("X-User-Username");
+        String gatewayRole = request.getHeader("X-User-Role");
 
-            UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            log.info("Authentication set in SecurityContext for user: {}", userDetails.getUsername());
-        } catch (RuntimeException exception) {
-            log.error("Failed to decode or process JWT: {}", exception.getMessage(), exception);
-            SecurityContextHolder.clearContext();
+        log.info("Gateway 헤더 - Username: {}, Role: {}", gatewayUsername, gatewayRole);
+
+        if (StringUtils.hasText(gatewayUsername) && StringUtils.hasText(gatewayRole)) {
+            // Gateway가 이미 JWT를 검증했으므로, 헤더 정보로 인증 설정
+            log.info("Gateway 검증 사용 - 사용자: {}, 역할: {}", gatewayUsername, gatewayRole);
+            setAuthenticationFromGateway(gatewayUsername, gatewayRole);
+        } else {
+            log.warn("Gateway 헤더 없음 - 인증되지 않은 요청");
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    // Gateway 헤더 기반 인증 설정
+    private void setAuthenticationFromGateway(String username, String role) {
+        log.info("Gateway 인증 설정 시작 - Username: {}, Role: {}", username, role);
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+
+        // ROLE_ 접두사 확인 및 추가
+        String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
+        log.info("최종 Authority: {}", authority);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                username,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority(authority))
+        );
+
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+
+        log.info("인증 설정 완료 - Principal: {}, Authorities: {}",
+                authentication.getPrincipal(),
+                authentication.getAuthorities());
     }
 }

@@ -1,3 +1,6 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: order-service
@@ -25,7 +28,3 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
-eureka:
-  client:
-    enabled: false

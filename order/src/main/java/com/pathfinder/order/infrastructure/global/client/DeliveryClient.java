@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.UUID;
 
 @FeignClient(
-        name = "company-service",
+        name = "delivery-service",
         path = "/v1/deliveries",
         fallback = DeliveryClientFallback.class
 )

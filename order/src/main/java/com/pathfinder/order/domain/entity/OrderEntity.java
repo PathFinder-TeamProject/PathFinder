@@ -69,8 +69,8 @@ public class OrderEntity extends BaseEntity {
         }
     }
 
-    public void cancel(UserDetails userDetails) {
+    public void cancel(String username) {
         this.orderStatus = OrderStatus.CANCELED;
-        this.softDelete(Instant.now(),userDetails.getUsername());
+        this.softDelete(Instant.now(),username);
     }
 }
