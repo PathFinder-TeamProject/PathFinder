@@ -1,4 +1,4 @@
-package com.pathfinder.delivery_manager.kafka;
+package com.pathfinder.delivery_manager.infrastructure.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathfinder.delivery_manager.application.dto.request.UserRequestDto;
@@ -56,7 +56,7 @@ public class UserRequestProducer {
             return objectMapper.readValue(jsonResponse, UserInfoDto.class);
 
         } catch (Exception e) {
-            log.error("[DM Service] Kafka Request-Reply 오류 발생", e);
+//            log.error("[DM Service] Kafka Request-Reply 오류 발생", e);
             throw new RuntimeException("사용자 서비스로부터 정보를 가져오는 중 오류가 발생했습니다.", e);
         }
     }

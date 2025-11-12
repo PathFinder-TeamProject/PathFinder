@@ -2,13 +2,18 @@ package com.pathfinder.delivery_manager.presentation.controller;
 
 import com.pathfinder.delivery_manager.application.DeliveryManagerServiceV1;
 import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
+import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerUpdateRequestDto;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/v1/delivery-managers")
 public class DeliveryManagerControllerV1 {
@@ -20,14 +25,17 @@ public class DeliveryManagerControllerV1 {
     }
 
     @PostMapping
-//    @PreAuthorize("hasRole('MASTER') or hasRole('HUB_MANAGER')")
-/*    public ApiResponse<DeliveryManagerResponseDto> createManager(
+    public ApiResponse<DeliveryManagerResponseDto> createManager(
             @Valid @RequestBody DeliveryManagerRequestDto requestDto) {
         return ApiResponse.success(deliveryManagerService.createDeliveryManager(requestDto));
-    }*/
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable Long id) {
+        return ApiResponse.success(deliveryManagerService.getManagerById(id));
+    }
 
     @GetMapping("/{username}")
-//    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER','DELIVERY_MANAGER')")
     public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable String username) {
         return ApiResponse.success(deliveryManagerService.getManagerByUsername(username));
     }
@@ -57,18 +65,19 @@ public class DeliveryManagerControllerV1 {
     }
 
     // 수정
-    @PutMapping("/{id}")
+    @PutMapping("/{deliveryManagerId}")
     public ApiResponse<DeliveryManagerResponseDto> updateManager(
-            @PathVariable Long id,
-            @Valid @RequestBody DeliveryManagerRequestDto requestDto) {
-        requestDto.setDeliveryManagerId(id);
-        return ApiResponse.success(deliveryManagerService.updateManager(requestDto));
+            @PathVariable Long deliveryManagerId,
+            @Valid @RequestBody DeliveryManagerUpdateRequestDto requestDto) {
+        System.out.println("requestDto : " + requestDto);
+        return ApiResponse.success(deliveryManagerService.updateManager(deliveryManagerId, requestDto));
     }
 
     // 삭제 (논리적 삭제)
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteManager(@PathVariable Long id) {
-        deliveryManagerService.deleteManager(id);
+    @DeleteMapping("/{deliveryManagerId}")
+    public ApiResponse<Void> deleteManager(@PathVariable Long deliveryManagerId) {
+        deliveryManagerService.deleteManager(deliveryManagerId);
         return ApiResponse.noContent();
     }
+
 }

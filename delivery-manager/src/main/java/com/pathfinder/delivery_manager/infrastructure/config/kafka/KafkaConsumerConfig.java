@@ -1,4 +1,4 @@
-package com.pathfinder.delivery_manager.kafka;
+package com.pathfinder.delivery_manager.infrastructure.config.kafka;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
