@@ -86,6 +86,12 @@ public class OrderServiceV1 {
         order.changeStatus(OrderStatus.CANCELED);
         order.cancel(JwtUserContext.getUsernameFromHeader());
 
+        ApiResponse<Void> response = productClient.decreaseStock(order.getProductId(), order.getQuantity() * -1);
+
+        if (!"200".equals(response.getCode())) {
+            throw new IllegalStateException("상품 재고 차감 실패: " + response.getMessage());
+        }
+
         return new OrderResponseDto().fromEntity(order);
     }
 
@@ -103,6 +109,12 @@ public class OrderServiceV1 {
 
         if(stock == 0 || stock < requestDto.getQuantity()) {
             throw new RuntimeException("재고가 부족합니다.");
+        }
+
+        ApiResponse<Void> response = productClient.decreaseStock(order.getProductId(), requestDto.getQuantity() - order.getQuantity());
+
+        if (!"200".equals(response.getCode())) {
+            throw new IllegalStateException("상품 재고 차감 실패: " + response.getMessage());
         }
 
         order.update(requestDto);
