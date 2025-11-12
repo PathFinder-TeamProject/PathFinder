@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/v1/delivery-managers")
+@RequestMapping("/api/v1/delivery-managers")
 public class DeliveryManagerControllerV1 {
 
     private final DeliveryManagerServiceV1 deliveryManagerService;
@@ -32,12 +32,12 @@ public class DeliveryManagerControllerV1 {
         return ApiResponse.success(deliveryManagerService.createDeliveryManager(requestDto));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable UUID id) {
         return ApiResponse.success(deliveryManagerService.getManagerById(id));
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable String username) {
         return ApiResponse.success(deliveryManagerService.getManagerByUsername(username));
     }
@@ -45,15 +45,6 @@ public class DeliveryManagerControllerV1 {
     // 전체 목록 조회 + 검색
     @GetMapping
     public ApiResponse<Page<DeliveryManagerResponseDto>> getAllManagers(
-          /*  @RequestParam(required = false) Long hubId,
-            @RequestParam(value = "keyword", defaultValue = "name") String keyword,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "username") String sortBy,
-            @RequestParam(value = "status", defaultValue = "approve") String status,
-            @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc,
-            @RequestParam(value = "isDeleted", defaultValue = "false") boolean isDeleted
-*/
             @RequestParam(required = false) UUID hubId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,

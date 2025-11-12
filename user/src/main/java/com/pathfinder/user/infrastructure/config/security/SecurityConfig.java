@@ -75,11 +75,11 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
 
-                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**", "/internal/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/internal/**").permitAll()
                         // user
-                        .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
-                        .requestMatchers("/v1/users/**").hasRole("MASTER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/myInfo").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").authenticated()
+                        .requestMatchers("/api/v1/users/**").hasRole("MASTER")
 
                         // AI
                         .requestMatchers("/api/v1/ai/**").hasRole("MASTER")

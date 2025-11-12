@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/api/v1")
 public class UserControllerV1 {
     @Value("${server.port}") // 애플리케이션이 실행 중인 포트를 주입받습니다.
     private String serverPort;

@@ -9,9 +9,11 @@ import com.pathfinder.delivery_manager.application.excpetion.UnauthorizedDeliver
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
 import com.pathfinder.delivery_manager.domain.repository.DeliveryManagerRepository;
 import com.pathfinder.delivery_manager.infrastructure.cache.HubCacheRepository;
+import com.pathfinder.delivery_manager.infrastructure.client.HubServiceClient;
 import com.pathfinder.delivery_manager.infrastructure.client.UserServiceClient;
 import com.pathfinder.delivery_manager.infrastructure.security.JwtUserContext;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
+import com.pathfinder.delivery_manager.presentation.dto.response.HubInfoDto;
 import com.pathfinder.delivery_manager.presentation.dto.response.UserInfoDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,7 @@ public class DeliveryManagerServiceV1 {
     private final DeliveryManagerRepository deliveryManagerRepository;
     private final HubCacheRepository hubCacheRepository;
     private final UserServiceClient userServiceClient;
+    private final HubServiceClient hubServiceClient;
 
     @Transactional
     public DeliveryManagerResponseDto createDeliveryManager(DeliveryManagerRequestDto dto) {
@@ -41,9 +45,10 @@ public class DeliveryManagerServiceV1 {
     /*    if (!hubCacheRepository.exists(dto.getHubId())) {
             throw new IllegalArgumentException("허브 서비스에서 존재하지 않는 허브입니다.");
         }*/
-        if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER")|| JwtUserContext.getRoleFromHeader().equals("ROLE_HUB_MANAGER")) {
-            checkHubManager(JwtUserContext.getUsernameFromHeader(), dto.getHubId());
+        if(hubServiceClient.getHubInfo(dto.getHubId()) == null) {
+            throw new IllegalArgumentException("허브 조회에 실패했습니다.");
         }
+        validateHubAccess(dto.getHubId());
         log.info("Inside createDeliveryManager method - DeliveryManager getUsername: {}", dto.getUsername());
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(dto.getUsername());
         if (userInfoDto == null || !userInfoDto.getRole().equals("DELIVERY_MANAGER")) {
@@ -71,6 +76,10 @@ public class DeliveryManagerServiceV1 {
     public DeliveryManagerResponseDto getManagerById(UUID id) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
+        if(!deliveryManager.getUsername().equals(JwtUserContext.getUsernameFromHeader())) {
+            validateHubAccess(deliveryManager.getHubId());
+        }
+        validateHubAccess(deliveryManager.getHubId());
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(deliveryManager.getUsername());
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
@@ -79,17 +88,19 @@ public class DeliveryManagerServiceV1 {
     public DeliveryManagerResponseDto getManagerByUsername(String username) {
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByUsername(username)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
+        if(!username.equals(JwtUserContext.getUsernameFromHeader())) {
+            validateHubAccess(deliveryManager.getHubId());
+        }
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(username);
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
 
     @Transactional
     public void deleteManager(UUID id) {
-        if(JwtUserContext.isHubManager()) {
-            checkHubManager(JwtUserContext.getUsernameFromHeader(), id);
-        }
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
+
+        validateHubAccess(deliveryManager.getHubId());
         log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", id, JwtUserContext.getUsernameFromHeader());
         deliveryManager.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
@@ -103,6 +114,7 @@ public class DeliveryManagerServiceV1 {
                     log.warn("[배송담당자 서비스] 배송담당자를 찾을 수 없음 - username: {}", username);
                     return new EntityNotFoundException("배송 담당자를 찾을 수 없습니다: " + username);
                 });
+        validateHubAccess(deliveryManager.getHubId());
 
         log.info("[배송담당자 서비스] 배송담당자 삭제 수행 - ID: {}, username: {}, 삭제 시각: {}",
                 deliveryManager.getDeliveryManagerId(), username, Instant.now());
@@ -126,8 +138,14 @@ public class DeliveryManagerServiceV1 {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page>0?page-1:page, size, sort);
         if (hubId != null) {
+            validateHubAccess(hubId);
             deliveryManagerPage = deliveryManagerRepository.findByHubId(hubId, pageable);
         } else {
+            if(JwtUserContext.isHubManager()) {
+                UUID managerHubId = hubServiceClient.getHubInfo(hubId).getHubId();
+                deliveryManagerPage = deliveryManagerRepository.findByHubId(managerHubId, pageable);
+                return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
+            }
             deliveryManagerPage = deliveryManagerRepository.findAll(pageable);
         }
         return deliveryManagerPage.map(DeliveryManagerResponseDto::forList);
@@ -135,9 +153,7 @@ public class DeliveryManagerServiceV1 {
 
     @Transactional
     public DeliveryManagerResponseDto updateManager(UUID deliveryManagerId, DeliveryManagerUpdateRequestDto requestDto) {
-        if(JwtUserContext.getUsernameFromHeader().equals("HUB_MANAGER")) {
-            checkHubManager(JwtUserContext.getUsernameFromHeader(), requestDto.getHubId());
-        }
+        validateHubAccess(requestDto.getHubId());
         DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(deliveryManagerId)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
         if (JwtUserContext.isMaster()) {
@@ -149,7 +165,7 @@ public class DeliveryManagerServiceV1 {
                 deliveryManager.update(requestDto);
         } else if (JwtUserContext.isHubManager()) {
             // 허브 관리자는 같은 허브 소속인 경우 hubId만 수정 가능
-            checkHubManager(JwtUserContext.getUsernameFromHeader(), deliveryManager.getHubId());
+            validateHubAccess(deliveryManager.getHubId());
             if(requestDto.getType()!=null) {
                 throw new UnauthorizedDeliveryManagerException(DeliveryManagerErrorCode.UNAUTHORIZED_USER);
             }
@@ -192,11 +208,15 @@ public class DeliveryManagerServiceV1 {
         deliveryManagerRepository.saveAll(managers);
     }
 
-    private void checkHubManager(String username, UUID hubId) {
-/*        UUID userHubId = 0L;
-       hubId = hubCacheRepository.getHubIdByManagerUsername(username);
-        if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER") && userHubId.equals(hubId)) {
-            throw new IllegalArgumentException("허브 매니저는 자신의 허브에 속한 배송 담당자만 관리할 수 있습니다.");
-        }*/
+    private void validateHubAccess(UUID hubId) {
+        String role = JwtUserContext.getRoleFromHeader();
+        String username = JwtUserContext.getUsernameFromHeader();
+
+        if ("HUB_MANAGER".equals(role)) {
+            HubInfoDto hubInfo = hubServiceClient.getHubInfo(hubId);
+            if (!hubInfo.getHubManagerUsername().equals(username)) {
+                throw new AccessDeniedException("허브관리자는 자신의 허브 데이터만 접근 가능합니다.");
+            }
+        }
     }
 }

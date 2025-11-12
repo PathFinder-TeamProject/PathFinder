@@ -27,9 +27,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
     // 인증이 필요 없는 Public 경로 목록
     private static final List<String> PUBLIC_PATHS = Arrays.asList(
-            "/v1/auth/register",
-            "/v1/auth/login",
-            "/v1/auth/logout",
+            "/api/v1/auth/register",
+            "/api/v1/auth/login",
+            "/api/v1/auth/logout",
             "/v3/api-docs"
     );
 

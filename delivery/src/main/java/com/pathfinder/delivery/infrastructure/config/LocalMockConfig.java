@@ -137,7 +137,7 @@ public class LocalMockConfig {
                 log.info("[MOCK] DeliveryManagerServiceClient.getDeliveryManager called with deliveryManagerId: {}", deliveryManagerId);
                 return DeliveryManagerDto.builder()
                         .deliveryManagerId(deliveryManagerId)
-                        .userId(UUID.randomUUID())
+                        .username("UUID.randomUUID()")
                         .type("HUB_DELIVERY")
                         .deliveryOrder(1)
                         .hubId(UUID.randomUUID())
@@ -150,7 +150,7 @@ public class LocalMockConfig {
                 List<DeliveryManagerDto> managers = new ArrayList<>();
                 managers.add(DeliveryManagerDto.builder()
                         .deliveryManagerId(UUID.randomUUID())
-                        .userId(UUID.randomUUID())
+                        .username("UUID.randomUUID()")
                         .type("HUB_DELIVERY")
                         .deliveryOrder(1)
                         .hubId(hubId)
@@ -164,7 +164,7 @@ public class LocalMockConfig {
                 List<DeliveryManagerDto> managers = new ArrayList<>();
                 managers.add(DeliveryManagerDto.builder()
                         .deliveryManagerId(UUID.randomUUID())
-                        .userId(UUID.randomUUID())
+                        .username("UUID.randomUUID()")
                         .type(type)
                         .deliveryOrder(1)
                         .hubId(hubId)

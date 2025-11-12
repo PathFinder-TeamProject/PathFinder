@@ -6,22 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
-@RequestMapping("/internal/delivery-managers")
+@RequestMapping("/internal")
 @RequiredArgsConstructor
 @Slf4j
 public class DeliveryManagerInternalController {
 
     private final DeliveryManagerServiceV1 deliveryManagerService;
 
-    /**
-     * 내부 서비스용 사용자 정보 조회 API
-     * DeliveryManager 서비스에서 FeignClient로 호출
-     * @param username 조회할 사용자명
-     * @return 사용자 정보 DTO
-     */
-
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/delivery-managers/{username}")
     public ResponseEntity<Void> deleteDeliveryManagerByUsername(@PathVariable String username) {
         log.info("[배송담당자 컨트롤러] 배송담당자 삭제 요청 - username: {}", username);
 
@@ -36,7 +31,28 @@ public class DeliveryManagerInternalController {
             throw e;
         }
     }
-    /*@GetMapping("/{hubId}/count")
+    /**
+     * 허브 삭제 알림 수신 - Hub 서비스에서 호출
+     * @param hubId 삭제된 허브 ID
+     * @return 응답 엔티티
+     */
+    @DeleteMapping("/hubs/{hubId}")
+    public ResponseEntity<Void> handleHubDeletion(@PathVariable String hubId) {
+        log.info("[배송담당자 컨트롤러] 허브 삭제 알림 수신 - hubId: {}", hubId);
+
+        try {
+            deliveryManagerService.deleteManagersByHubId(UUID.fromString(hubId));
+            log.info("[배송담당자 컨트롤러] 허브 삭제 처리 완료 - hubId: {}", hubId);
+            return ResponseEntity.noContent().build();
+
+        } catch (Exception e) {
+            log.error("[배송담당자 컨트롤러] 허브 삭제 처리 실패 - hubId: {}, error: {}",
+                    hubId, e.getMessage());
+            throw e;
+        }
+    }
+    /*@GetMapping("/delivery-managers/{username}/exists")
+    @GetMapping("/{hubId}/count")
     public ResponseEntity<Long> countDeliveryManagersByHubId(@PathVariable Long hubId) {
         log.info("[배송담당자 컨트롤러] 허브 ID로 배송담당자 수 조회 요청 - hubId: {}", hubId);
         try {

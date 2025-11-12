@@ -12,4 +12,6 @@ import java.util.UUID;
 public class HubInfoDto {
     private UUID hubId;
     private String hubName;
+    private String hubAddress;
+    private String hubManagerUsername;
 }
