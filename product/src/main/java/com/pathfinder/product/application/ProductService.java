@@ -29,7 +29,13 @@ public class ProductService {
 
 	private final ProductRepository productRepository;
 
-	/* ============= CREATE ============= */
+    @Transactional
+    public void decreaseStock(UUID productId, int quantity) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+        product.updateProduct(product.getProductName(), product.getPrice(), product.getStock() - quantity);
+    };
+
+    /* ============= CREATE ============= */
 	@Transactional
 	@CacheEvict(value = {"product", "productList"}, allEntries = true)
 	public GetProductRes createProduct(CreateProductReq req) {

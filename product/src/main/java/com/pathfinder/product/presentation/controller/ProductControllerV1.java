@@ -2,6 +2,7 @@ package com.pathfinder.product.presentation.controller;
 
 import java.util.UUID;
 
+import com.pathfinder.product.domain.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/products")
+@RequestMapping("/api/v1/products")
 public class ProductControllerV1 {
 
 	private final ProductService productService;
@@ -101,4 +102,10 @@ public class ProductControllerV1 {
 		}
 		return 10; // 기본값
 	}
+
+    @PutMapping("/{productId}/order")
+    public ResponseEntity<ApiResponse<Void>> decreaseStock(@PathVariable UUID productId, @RequestParam int quantity){
+        productService.decreaseStock(productId, quantity);
+        return ResponseEntity.ok(ApiResponse.successMessage("200","수량 차감 완료"));
+    }
 }
