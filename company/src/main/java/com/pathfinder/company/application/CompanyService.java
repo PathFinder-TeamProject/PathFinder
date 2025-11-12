@@ -51,7 +51,7 @@ public class CompanyService {
 	}
 
 	@Transactional(readOnly = true)
-	@Cacheable(value = "company", key = "#companyId")
+	@Cacheable(value = "company", key = "#p0")
 	public GetCompanyRes getCompanyById(UUID id) {
 		Company company = companyRepository.findById(id)
 			.orElseThrow(() -> new CompanyException(CompanyErrorCode.COMPANY_NOT_FOUND));

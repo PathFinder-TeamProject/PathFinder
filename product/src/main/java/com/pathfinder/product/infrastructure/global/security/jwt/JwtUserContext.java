@@ -1,4 +1,4 @@
-package com.pathfinder.product.infrastructure.security.jwt;
+package com.pathfinder.product.infrastructure.global.security.jwt;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;

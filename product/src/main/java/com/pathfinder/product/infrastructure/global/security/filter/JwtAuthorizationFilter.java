@@ -1,4 +1,4 @@
-package com.pathfinder.product.infrastructure.security.filter;
+package com.pathfinder.product.infrastructure.global.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

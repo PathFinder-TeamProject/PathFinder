@@ -28,6 +28,7 @@ spring:
           predicates:
             - Path=/api/v1/deliveries/**, /api/v1/delivery-routes/**, /springdoc/openapi3-delivery-service.json
           filters:
+            - JwtAuthenticationFilter
             - RewritePath=/api/v1/(?<segment>.*), /api/v1/${segment}
 
         # Hub Service Routes
@@ -52,6 +53,25 @@ spring:
           predicates:
             - Path=/api/v1/orders/**, /springdoc/openapi3-order-service.json
           filters:
+            - JwtAuthenticationFilter
+            - RewritePath=/api/v1/(?<segment>.*), /api/v1/${segment}
+
+        # Product Service Routes
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/v1/products/**, /springdoc/openapi3-product-service.json
+          filters:
+            - JwtAuthenticationFilter
+            - RewritePath=/api/v1/(?<segment>.*), /api/v1/${segment}
+
+        # Company Service Routes
+        - id: company-service
+          uri: lb://company-service
+          predicates:
+            - Path=/api/v1/companies/**, /springdoc/openapi3-company-service.json
+          filters:
+            - JwtAuthenticationFilter
             - RewritePath=/api/v1/(?<segment>.*), /api/v1/${segment}
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
@@ -110,6 +130,6 @@ resilience4j:
         timeoutDuration: 5s
         cancelRunningFuture: true
 
-jwt:
-  secret:
-    key: s/1o8ta1+r5iIA99VZ31GhEN8y7/e2TPjToC2efI5dY=
+#jwt:
+#  secret:
+#    key: s/1o8ta1+r5iIA99VZ31GhEN8y7/e2TPjToC2efI5dY=
