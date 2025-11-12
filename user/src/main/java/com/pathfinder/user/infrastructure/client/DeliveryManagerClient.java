@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(
         name = "delivery-manager-service",
-        path = "/internal/delivery-managers",
+        path = "/internal",
         configuration = UserFeignClientConfig.class)
 public interface DeliveryManagerClient {
     /**
@@ -24,6 +24,6 @@ public interface DeliveryManagerClient {
      * 유저가 삭제될 때 해당 배송담당자 정보도 삭제
      * @param username 삭제할 배송담당자의 사용자명
      */
-    @DeleteMapping("/{username}")
+    @DeleteMapping("/user/{username}")
     void deleteDeliveryManager(@PathVariable("username") String username);
 }

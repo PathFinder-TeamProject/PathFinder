@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
         name = "delivery-manager-service",
-        path = "/internal/delivery-managers",
+        path = "/internal",
         configuration = FeignClientConfig.class)
 public interface DeliveryManagerClient {
     @DeleteMapping("/hubs/{hubId}")

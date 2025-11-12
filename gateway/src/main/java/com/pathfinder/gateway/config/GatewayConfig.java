@@ -36,13 +36,10 @@ public class GatewayConfig {
                         .uri("lb://DELIVERY-MANAGER-SERVICE"))
 
                 // Hub Service
-/*                .route("hub-service", r -> r.path("/api/v1/hubs/**")
-//                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
-                        .uri("lb://HUB-SERVICE"))*/
-                .route("hub-service", r -> r
-                        .path("/api/v1/hubs/**")
-                        // 필터 제거
+                .route("hub-service", r -> r.path("/api/v1/hubs/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
                         .uri("lb://HUB-SERVICE"))
+
                 // Company Service
                 .route("company-service", r -> r.path("/api/v1/companys/**")
                         .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
@@ -52,6 +49,10 @@ public class GatewayConfig {
                 .route("delivery-service", r -> r.path("/api/v1/deliverys/**")
                         .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
                         .uri("lb://DELIVERY-SERVICE"))
+
+                .route("order-service", r -> r.path("/api/v1/orders/**")
+                        .filters(f -> f.filter(jwtAuthenticationFilter.apply(new JwtAuthenticationFilter.Config())))
+                        .uri("lb://ORDER-SERVICE"))
 
                 // Product Service
                 .route("product-service", r -> r.path("/api/v1/products/**")
