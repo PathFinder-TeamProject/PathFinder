@@ -33,18 +33,26 @@ public class DeliveryQueryServiceImpl implements DeliveryQueryService {
     @Cacheable(value = "delivery", key = "#id")
     public DeliveryDto findById(UUID id) {
         log.debug("Finding delivery by id: {}", id);
-        return deliveryRepository.findById(id)
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND))
-            .toDeliveryDto();
+        DeliveryEntity delivery = findDeliveryEntityById(id);
+        return delivery.toDeliveryDto();
     }
 
     @Override
     @Transactional(readOnly = true)
     public DeliveryDto findByOrderId(UUID orderId) {
         log.debug("Finding delivery by orderId: {}", orderId);
+        DeliveryEntity delivery = findDeliveryEntityByOrderId(orderId);
+        return delivery.toDeliveryDto();
+    }
+
+    private DeliveryEntity findDeliveryEntityById(UUID id) {
+        return deliveryRepository.findById(id)
+            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
+    }
+
+    private DeliveryEntity findDeliveryEntityByOrderId(UUID orderId) {
         return deliveryRepository.findByOrderId(orderId)
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND))
-            .toDeliveryDto();
+            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
     }
 
     @Override

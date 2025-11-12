@@ -1,39 +1,10 @@
-server:
-  port: 8081
-
 spring:
   application:
     name: product-service
-
-  datasource:
-    url: jdbc:postgresql://localhost:5432/pathfinder
-    username: localhost
-    password: 1234
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        show_sql: true
-
-  cache:
-    type: redis
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      timeout: 6000
-      connect-timeout: 6000
-
-management:
-  tracing:
-    sampling:
-      probability: 1.0
-    exporter:
-      zipkin:
-        endpoint: "http://localhost:9411/api/v2/spans"
+  config:
+    import: "configserver:http://localhost:19000"
+  cloud:
+    config:
+      name: product-service
+      profile: dev
+      fail-fast: true

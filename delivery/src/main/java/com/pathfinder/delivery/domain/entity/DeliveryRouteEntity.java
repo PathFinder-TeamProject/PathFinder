@@ -81,38 +81,56 @@ public class DeliveryRouteEntity extends BaseEntity {
     }
 
     public void update(CreateDeliveryRouteCommandDto command) {
-        if (command.getStatus() != null) {
-            this.updateStatus(command.getStatus());
-        }
+        updateStatusIfPresent(command.getStatus());
+        updateActualMetricsIfPresent(command);
+        updateExpectedMetricsIfPresent(command);
+        updateHubIdsIfPresent(command);
+        updateManagerIdIfPresent(command.getDeliveryManagerId());
+        updateNoteIfPresent(command.getNote());
+    }
 
+    private void updateStatusIfPresent(DeliveryRouteStatus status) {
+        if (status != null) {
+            this.updateStatus(status);
+        }
+    }
+
+    private void updateActualMetricsIfPresent(CreateDeliveryRouteCommandDto command) {
         if (command.getActualTime() != null || command.getActualDistance() != null) {
             this.updateActualMetrics(
                 command.getActualTime() != null ? command.getActualTime() : this.actualTime,
                 command.getActualDistance() != null ? command.getActualDistance() : this.actualDistance
             );
         }
+    }
 
+    private void updateExpectedMetricsIfPresent(CreateDeliveryRouteCommandDto command) {
         if (command.getExpectedTime() != null || command.getExpectedDistance() != null) {
             this.updateExpectedMetrics(
                 command.getExpectedTime() != null ? command.getExpectedTime() : this.expectedTime,
                 command.getExpectedDistance() != null ? command.getExpectedDistance() : this.expectedDistance
             );
         }
+    }
 
+    private void updateHubIdsIfPresent(CreateDeliveryRouteCommandDto command) {
         if (command.getFromHubId() != null) {
             this.fromHubId = command.getFromHubId();
         }
-
         if (command.getToHubId() != null) {
             this.toHubId = command.getToHubId();
         }
+    }
 
-        if (command.getDeliveryManagerId() != null) {
-            this.deliveryManagerId = command.getDeliveryManagerId();
+    private void updateManagerIdIfPresent(UUID deliveryManagerId) {
+        if (deliveryManagerId != null) {
+            this.deliveryManagerId = deliveryManagerId;
         }
+    }
 
-        if (command.getNote() != null) {
-            this.note = command.getNote();
+    private void updateNoteIfPresent(String note) {
+        if (note != null) {
+            this.note = note;
         }
     }
 
