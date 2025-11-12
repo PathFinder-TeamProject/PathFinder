@@ -3,6 +3,8 @@ package com.pathfinder.delivery_manager.application.dto.request;
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Builder
@@ -11,11 +13,11 @@ import lombok.*;
 @ToString
 public class DeliveryManagerRequestDto {
 
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
 
     private String username;
 
-    private Long hubId;
+    private UUID hubId;
 
     private DeliveryManagerTypeEnum type;
 

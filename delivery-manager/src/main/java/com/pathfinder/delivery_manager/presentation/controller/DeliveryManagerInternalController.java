@@ -36,4 +36,18 @@ public class DeliveryManagerInternalController {
             throw e;
         }
     }
+    /*@GetMapping("/{hubId}/count")
+    public ResponseEntity<Long> countDeliveryManagersByHubId(@PathVariable Long hubId) {
+        log.info("[배송담당자 컨트롤러] 허브 ID로 배송담당자 수 조회 요청 - hubId: {}", hubId);
+        try {
+            Long count = deliveryManagerService.countManagersByHubId(hubId);
+            log.info("[배송담당자 컨트롤러] 허브 ID로 배송담당자 수 조회 완료 - hubId: {}, count: {}", hubId, count);
+            return ResponseEntity.ok(count);
+
+        } catch (Exception e) {
+            log.error("[배송담당자 컨트롤러] 허브 ID로 배송담당자 수 조회 실패 - hubId: {}, error: {}",
+                    hubId, e.getMessage());
+            throw e;
+        }
+    }*/
 }

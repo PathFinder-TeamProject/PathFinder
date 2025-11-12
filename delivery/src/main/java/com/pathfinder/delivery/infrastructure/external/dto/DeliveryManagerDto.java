@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class DeliveryManagerDto {
     private UUID deliveryManagerId;
-    private UUID userId;
+    private String username;
     private String type;
     private Integer deliveryOrder;
     private UUID hubId;

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Repository
@@ -20,27 +21,29 @@ public class DeliveryManagerRepositoryImpl implements DeliveryManagerRepository 
     }
 
     @Override
-    public int countByHubId(Long hubId) {
+    public int countByHubId(UUID hubId) {
         return deliveryManagerJpaRepository.countByHubId(hubId);
     }
 
     @Override
-    public Optional<DeliveryManagerEntity> findById(Long id) {
-        return deliveryManagerJpaRepository.findById(id);
-    }
+    public int maxDeliveryOrderByHubId(UUID hubId) { return deliveryManagerJpaRepository.findMaxDeliverySeqByHubId(hubId);}
 
+    @Override
+    public Optional<DeliveryManagerEntity> findByDeliveryManagerId(UUID id) {
+        return deliveryManagerJpaRepository.findByDeliveryManagerId(id);
+    }
     @Override
     public DeliveryManagerEntity save(DeliveryManagerEntity entity) {
         return deliveryManagerJpaRepository.save(entity);
     }
 
     @Override
-    public Page<DeliveryManagerEntity> findByHubId(Long hubId, Pageable pageable) {
+    public Page<DeliveryManagerEntity> findByHubId(UUID hubId, Pageable pageable) {
         return deliveryManagerJpaRepository.findByHubId(hubId, pageable);
     }
 
     @Override
-    public List<DeliveryManagerEntity> findByHubId(Long hubId) {
+    public List<DeliveryManagerEntity> findByHubId(UUID hubId) {
         return deliveryManagerJpaRepository.findByHubId(hubId);
     }
 

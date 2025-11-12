@@ -88,7 +88,35 @@ services:
       - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-server:19000
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=pathfinder
+      - SPRING_DATASOURCE_PASSWORD=pathfinder123
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    networks:
+      - pathfinder-network
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  hub-service:
+    build:
+      context: ../com.hub-service
+      dockerfile: ../docker/Dockerfile
+    container_name: hub-service
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-server:19000
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hub
       - SPRING_DATASOURCE_USERNAME=pathfinder
       - SPRING_DATASOURCE_PASSWORD=pathfinder123
       - SPRING_REDIS_HOST=redis
@@ -116,6 +144,7 @@ services:
       - "8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-server:19000
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/delivery_db
       - SPRING_DATASOURCE_USERNAME=pathfinder
       - SPRING_DATASOURCE_PASSWORD=pathfinder123
@@ -144,6 +173,7 @@ services:
       - "8083:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - CONFIG_SERVER_URL=http://config-server:19000
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/delivery_manager_db
       - SPRING_DATASOURCE_USERNAME=pathfinder
       - SPRING_DATASOURCE_PASSWORD=pathfinder123

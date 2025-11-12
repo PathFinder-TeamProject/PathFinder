@@ -27,6 +27,7 @@ public class DeliveryManagerConsumer {
     /**
      * 새로운 배송 담당자 등록 이벤트 수신 및 처리
      */
+    /*
     @KafkaListener(
             topics = TOPIC_NEW_DM,
             groupId = GROUP_ID
@@ -71,5 +72,5 @@ public class DeliveryManagerConsumer {
             // TODO: 재처리 로직 구현
             // TODO: 알림 발송 등의 오류 처리
         }
-    }
+    }*/
 }

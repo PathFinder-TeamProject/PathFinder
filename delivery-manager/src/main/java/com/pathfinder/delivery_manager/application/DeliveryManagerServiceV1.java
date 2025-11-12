@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -41,7 +42,7 @@ public class DeliveryManagerServiceV1 {
             throw new IllegalArgumentException("허브 서비스에서 존재하지 않는 허브입니다.");
         }*/
         if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER")|| JwtUserContext.getRoleFromHeader().equals("ROLE_HUB_MANAGER")) {
-           checkHubManager(JwtUserContext.getUsernameFromHeader(), dto.getHubId());
+            checkHubManager(JwtUserContext.getUsernameFromHeader(), dto.getHubId());
         }
         log.info("Inside createDeliveryManager method - DeliveryManager getUsername: {}", dto.getUsername());
         UserInfoDto userInfoDto = userServiceClient.getUserInfo(dto.getUsername());
@@ -53,14 +54,10 @@ public class DeliveryManagerServiceV1 {
             log.info("배송 담당자 이미 존재 - Username: {}", dto.getUsername());
             throw new DuplicateDeliveryManagerException(DeliveryManagerErrorCode.DUPLICATE_DELIVERY_MANAGER);
         }
-        if(dto.getType().equals("HUB_MANAGER")) {
-            if(deliveryManagerRepository.countByHubId(0L) < 10) {
-                dto.setDeliveryOrder(deliveryManagerRepository.countByHubId(0L) + 1);
-            } else {
-                throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
-            }
-        } else {
+        if(deliveryManagerRepository.countByHubId(dto.getHubId()) < 10) {
             dto.setDeliveryOrder(deliveryManagerRepository.countByHubId(dto.getHubId()) + 1);
+        } else {
+            throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
         }
 
         DeliveryManagerEntity deliveryManager = DeliveryManagerEntity.create(dto);
@@ -70,12 +67,12 @@ public class DeliveryManagerServiceV1 {
         return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
 
-   @Transactional(readOnly = true)
-    public DeliveryManagerResponseDto getManagerById(Long id) {
-        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
+    @Transactional(readOnly = true)
+    public DeliveryManagerResponseDto getManagerById(UUID id) {
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
-       UserInfoDto userInfoDto = userServiceClient.getUserInfo(deliveryManager.getUsername());
-       return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
+        UserInfoDto userInfoDto = userServiceClient.getUserInfo(deliveryManager.getUsername());
+        return DeliveryManagerResponseDto.of(deliveryManager, userInfoDto);
     }
 
     @Transactional(readOnly = true)
@@ -87,11 +84,11 @@ public class DeliveryManagerServiceV1 {
     }
 
     @Transactional
-    public void deleteManager(Long id) {
+    public void deleteManager(UUID id) {
         if(JwtUserContext.isHubManager()) {
             checkHubManager(JwtUserContext.getUsernameFromHeader(), id);
         }
-        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(id)
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(id)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
         log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", id, JwtUserContext.getUsernameFromHeader());
         deliveryManager.softDelete(Instant.now(), JwtUserContext.getUsernameFromHeader());
@@ -116,7 +113,7 @@ public class DeliveryManagerServiceV1 {
         log.info("[배송담당자 서비스] 배송담당자 삭제 완료 - username: {}", username);
     }
     @Transactional(readOnly = true)
-    public Page<DeliveryManagerResponseDto> getAllManagers(Long hubId, int page, int size, String sortBy, boolean isAsc) {
+    public Page<DeliveryManagerResponseDto> getAllManagers(UUID hubId, int page, int size, String sortBy, boolean isAsc) {
         Page<DeliveryManagerEntity> deliveryManagerPage;
 
         if(size != 10 && size != 30 && size != 50) {
@@ -137,24 +134,29 @@ public class DeliveryManagerServiceV1 {
     }
 
     @Transactional
-    public DeliveryManagerResponseDto updateManager(Long deliveryManagerId, DeliveryManagerUpdateRequestDto requestDto) {
+    public DeliveryManagerResponseDto updateManager(UUID deliveryManagerId, DeliveryManagerUpdateRequestDto requestDto) {
         if(JwtUserContext.getUsernameFromHeader().equals("HUB_MANAGER")) {
             checkHubManager(JwtUserContext.getUsernameFromHeader(), requestDto.getHubId());
         }
-        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findById(deliveryManagerId)
+        DeliveryManagerEntity deliveryManager = deliveryManagerRepository.findByDeliveryManagerId(deliveryManagerId)
                 .orElseThrow(() -> new EntityNotFoundException("배송 담당자를 찾을 수 없습니다."));
         if (JwtUserContext.isMaster()) {
-            if(requestDto.getType().equals("HUB")){
-                if(deliveryManagerRepository.countByHubId(0L) >= 10) {
-                    throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
-                }
+            if(deliveryManagerRepository.countByHubId(requestDto.getHubId()) >= 10) {
+                throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
+            } else{
+                deliveryManager.setDeliveryOrder(deliveryManagerRepository.maxDeliveryOrderByHubId(requestDto.getHubId()) + 1);
             }
-            deliveryManager.update(requestDto);
+                deliveryManager.update(requestDto);
         } else if (JwtUserContext.isHubManager()) {
             // 허브 관리자는 같은 허브 소속인 경우 hubId만 수정 가능
             checkHubManager(JwtUserContext.getUsernameFromHeader(), deliveryManager.getHubId());
             if(requestDto.getType()!=null) {
                 throw new UnauthorizedDeliveryManagerException(DeliveryManagerErrorCode.UNAUTHORIZED_USER);
+            }
+            if(deliveryManagerRepository.countByHubId(requestDto.getHubId()) >= 10) {
+                throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
+            } else{
+                deliveryManager.setDeliveryOrder(deliveryManagerRepository.maxDeliveryOrderByHubId(requestDto.getHubId()) + 1);
             }
             deliveryManager.update(requestDto);
         } else {
@@ -172,7 +174,7 @@ public class DeliveryManagerServiceV1 {
         return DeliveryManagerResponseDto.of(savedDeliveryManager,userInfo);
     }
     @Transactional
-    public void deleteManagersByHubId(Long hubId) {
+    public void deleteManagersByHubId(UUID hubId) {
         List<DeliveryManagerEntity> managers = deliveryManagerRepository.findByHubId(hubId);
         if (managers.isEmpty()) {
             throw new EntityNotFoundException("해당 허브에 소속된 배송담당자가 없습니다.");
@@ -190,11 +192,11 @@ public class DeliveryManagerServiceV1 {
         deliveryManagerRepository.saveAll(managers);
     }
 
-    private void checkHubManager(String username, Long hubId) {
-        Long userHubId = 0L;
-//        hubId = hubCacheRepository.getHubIdByManagerUsername(username);
+    private void checkHubManager(String username, UUID hubId) {
+/*        UUID userHubId = 0L;
+       hubId = hubCacheRepository.getHubIdByManagerUsername(username);
         if(JwtUserContext.getRoleFromHeader().equals("HUB_MANAGER") && userHubId.equals(hubId)) {
             throw new IllegalArgumentException("허브 매니저는 자신의 허브에 속한 배송 담당자만 관리할 수 있습니다.");
-        }
+        }*/
     }
 }

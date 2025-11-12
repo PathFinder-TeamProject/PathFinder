@@ -7,13 +7,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DeliveryManagerResponseDto {
 
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     private String username;
     private Integer deliveryOrder;
     private DeliveryManagerTypeEnum type;

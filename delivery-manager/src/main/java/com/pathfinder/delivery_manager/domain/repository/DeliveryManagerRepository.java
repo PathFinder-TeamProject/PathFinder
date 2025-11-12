@@ -6,19 +6,22 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface DeliveryManagerRepository {
     Optional<DeliveryManagerEntity> findByUsername(String username);
 
-    int countByHubId(Long hubId);
+    int countByHubId(UUID hubId);
 
-    Optional<DeliveryManagerEntity> findById(Long id);
+    int maxDeliveryOrderByHubId(UUID hubId);
+
+    Optional<DeliveryManagerEntity> findByDeliveryManagerId(UUID id);
 
     DeliveryManagerEntity save(DeliveryManagerEntity entity);
 
-    Page<DeliveryManagerEntity> findByHubId(Long hubId, Pageable pageable);
+    Page<DeliveryManagerEntity> findByHubId(UUID hubId, Pageable pageable);
 
-    List<DeliveryManagerEntity> findByHubId(Long hubId);
+    List<DeliveryManagerEntity> findByHubId(UUID hubId);
 
     Page<DeliveryManagerEntity> findAll(Pageable pageable);
 

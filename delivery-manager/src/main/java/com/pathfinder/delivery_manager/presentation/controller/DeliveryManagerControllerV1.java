@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/v1/delivery-managers")
@@ -31,7 +33,7 @@ public class DeliveryManagerControllerV1 {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable Long id) {
+    public ApiResponse<DeliveryManagerResponseDto> getManagerByUsername(@PathVariable UUID id) {
         return ApiResponse.success(deliveryManagerService.getManagerById(id));
     }
 
@@ -52,7 +54,7 @@ public class DeliveryManagerControllerV1 {
             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc,
             @RequestParam(value = "isDeleted", defaultValue = "false") boolean isDeleted
 */
-            @RequestParam(required = false) Long hubId,
+            @RequestParam(required = false) UUID hubId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
@@ -67,7 +69,7 @@ public class DeliveryManagerControllerV1 {
     // 수정
     @PutMapping("/{deliveryManagerId}")
     public ApiResponse<DeliveryManagerResponseDto> updateManager(
-            @PathVariable Long deliveryManagerId,
+            @PathVariable UUID deliveryManagerId,
             @Valid @RequestBody DeliveryManagerUpdateRequestDto requestDto) {
         System.out.println("requestDto : " + requestDto);
         return ApiResponse.success(deliveryManagerService.updateManager(deliveryManagerId, requestDto));
@@ -75,7 +77,7 @@ public class DeliveryManagerControllerV1 {
 
     // 삭제 (논리적 삭제)
     @DeleteMapping("/{deliveryManagerId}")
-    public ApiResponse<Void> deleteManager(@PathVariable Long deliveryManagerId) {
+    public ApiResponse<Void> deleteManager(@PathVariable UUID deliveryManagerId) {
         deliveryManagerService.deleteManager(deliveryManagerId);
         return ApiResponse.noContent();
     }

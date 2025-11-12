@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "p_delivery_manager")
 @Getter
@@ -19,8 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Builder
 public class DeliveryManagerEntity extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long deliveryManagerId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID deliveryManagerId;
 
     @Column(nullable = false, updatable = false, unique = true)
     private String username;
@@ -33,8 +35,7 @@ public class DeliveryManagerEntity extends BaseEntity {
     private int deliveryOrder;
 
     @Column(nullable = false)
-    private Long hubId;
-
+    private UUID hubId;
 
     public static DeliveryManagerEntity create(DeliveryManagerRequestDto requestDto) {
         return DeliveryManagerEntity.builder()
