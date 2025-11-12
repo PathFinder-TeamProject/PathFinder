@@ -1,9 +1,11 @@
 server:
-  port: 8085
+  port: 8086
 
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/product_db
+    username: pathfinder
+    password: pathfinder123
   redis:
     database: 5
   kafka:
