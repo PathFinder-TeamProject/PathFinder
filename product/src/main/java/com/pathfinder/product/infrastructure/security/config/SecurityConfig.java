@@ -1,8 +1,9 @@
-package com.pathfinder.order.infrastructure.global.security.config;
+package com.pathfinder.product.infrastructure.security.config;
 
-import com.pathfinder.order.infrastructure.global.security.auth.CustomAccessDeniedHandler;
-import com.pathfinder.order.infrastructure.global.security.auth.CustomAuthenticationEntryPoint;
-import com.pathfinder.order.infrastructure.global.security.filter.JwtAuthorizationFilter;
+
+import com.pathfinder.product.infrastructure.security.auth.CustomAccessDeniedHandler;
+import com.pathfinder.product.infrastructure.security.auth.CustomAuthenticationEntryPoint;
+import com.pathfinder.product.infrastructure.security.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -64,8 +65,8 @@ public class SecurityConfig {
             configuration.setAllowedHeaders(Collections.singletonList("*"));
             configuration.setAllowedMethods(Collections.singletonList("*"));
             configuration.setAllowedOriginPatterns(List.of(
-                "http://127.0.0.1:[*]",
-                "http://localhost:[*]"
+                    "http://127.0.0.1:[*]",
+                    "http://localhost:[*]"
             ));
             configuration.setAllowCredentials(true);
             return configuration;

@@ -43,7 +43,7 @@ public class OrderEntity extends BaseEntity {
     private OrderStatus orderStatus;
 
     @Column(nullable = false)
-    private long quantity;
+    private int quantity;
 
     @Column(nullable = false)
     private String request;
@@ -72,5 +72,9 @@ public class OrderEntity extends BaseEntity {
     public void cancel(String username) {
         this.orderStatus = OrderStatus.CANCELED;
         this.softDelete(Instant.now(),username);
+    }
+
+    public void setDelivery(UUID deliveryId) {
+        this.deliveryId = deliveryId;
     }
 }

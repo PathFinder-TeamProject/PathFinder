@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @Builder
 public class OrderUpdateRequestDto {
 
-    private long quantity;
+    private int quantity;
 
     private String request;
 
