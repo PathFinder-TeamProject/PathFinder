@@ -75,23 +75,12 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
 
-                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**").permitAll()
-
-                        // Users - Gateway를 통해 들어오므로 헤더 기반 인증 사용
-                        .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
-                        .requestMatchers("/v1/users/**").hasRole("MASTER")
-                        // Users
-                        .requestMatchers("/v1/users/**").hasAnyRole("MASTER", "HUB_MANAGER")
+                        .requestMatchers("/v1/auth/**", "/v3/api-docs/**", "/internal/**").permitAll()
                         // user
                         .requestMatchers(HttpMethod.GET, "/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/v1/users/*").authenticated()
                         .requestMatchers("/v1/users/**").hasRole("MASTER")
 
-                        // DeliveryManager > 각 서비스로 이동
-                      /*  .requestMatchers(HttpMethod.GET, "/v1/delivery-managers", "/v1/delivery-managers/{delivery_manager_id}").hasAnyRole("DELIVERY_MANAGER", "HUB_MANAGER", "MASTER")
-                        .requestMatchers("/v1/delivery-managers/**").hasAnyRole("HUB_MANAGER", "MASTER")
-*/
                         // AI
                         .requestMatchers("/api/v1/ai/**").hasRole("MASTER")
                         .requestMatchers(HttpMethod.POST, "/v1/ai").authenticated()

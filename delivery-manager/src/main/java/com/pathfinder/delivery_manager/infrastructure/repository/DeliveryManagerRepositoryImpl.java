@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -39,7 +40,17 @@ public class DeliveryManagerRepositoryImpl implements DeliveryManagerRepository 
     }
 
     @Override
+    public List<DeliveryManagerEntity> findByHubId(Long hubId) {
+        return deliveryManagerJpaRepository.findByHubId(hubId);
+    }
+
+    @Override
     public Page<DeliveryManagerEntity> findAll(Pageable pageable) {
         return deliveryManagerJpaRepository.findAll(pageable);
+    }
+
+    @Override
+    public void saveAll(List<DeliveryManagerEntity> managers) {
+        deliveryManagerJpaRepository.saveAll(managers);
     }
 }

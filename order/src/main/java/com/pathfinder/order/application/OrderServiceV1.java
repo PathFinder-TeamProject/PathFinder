@@ -7,6 +7,12 @@ import com.pathfinder.order.application.exception.BusinessException;
 import com.pathfinder.order.domain.entity.OrderEntity;
 import com.pathfinder.order.domain.enums.OrderStatus;
 import com.pathfinder.order.domain.repository.OrderRepository;
+import com.pathfinder.order.infrastructure.global.client.CompanyClient;
+import com.pathfinder.order.infrastructure.global.client.ProductClient;
+import com.pathfinder.order.infrastructure.global.dto.CompanyDto;
+import com.pathfinder.order.infrastructure.global.dto.OrderCreatedEvent;
+import com.pathfinder.order.infrastructure.global.dto.ProductDto;
+import com.pathfinder.order.infrastructure.global.security.jwt.JwtUserContext;
 import com.pathfinder.order.presentation.enums.ApiStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,10 +21,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -27,10 +34,21 @@ import java.util.UUID;
 public class OrderServiceV1 {
 
     private final OrderRepository orderRepository;
+    private final CompanyClient companyClient;
+    private final ProductClient productClient;
 
     @CacheEvict(value = "orders", allEntries = true)
     @Transactional
     public OrderResponseDto createOrder(OrderCreateRequestDto requestDto) {
+//        validateCompany(requestDto.getSupplierId());
+//        validateCompany(requestDto.getReceiverId());
+//
+//        int stock = validateProduct(requestDto.getProductId());
+//
+//        if(stock == 0 || stock < requestDto.getQuantity()) {
+//            throw new RuntimeException("재고가 부족합니다.");
+//        }
+
         OrderEntity order = OrderEntity.builder()
                 .productId(requestDto.getProductId())
                 .supplierId(requestDto.getSupplierId())
@@ -40,6 +58,9 @@ public class OrderServiceV1 {
                 .orderStatus(OrderStatus.CREATED)
                 .deadline(requestDto.getDeadline())
                 .build();
+
+        order.setCreate(Instant.now(), JwtUserContext.getUsernameFromHeader());
+
 
         return new OrderResponseDto().fromEntity(orderRepository.save(order));
     }
@@ -55,6 +76,7 @@ public class OrderServiceV1 {
         }
 
         order.changeStatus(OrderStatus.CANCELED);
+        order.cancel(JwtUserContext.getUsernameFromHeader());
 
         return new OrderResponseDto().fromEntity(order);
     }
@@ -69,7 +91,14 @@ public class OrderServiceV1 {
             throw new BusinessException(ApiStatus.CONFLICT);
         }
 
+//        int stock = validateProduct(order.getProductId());
+
+//        if(stock == 0 || stock < requestDto.getQuantity()) {
+//            throw new RuntimeException("재고가 부족합니다.");
+//        }
+
         order.update(requestDto);
+        order.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
 
         return new OrderResponseDto().fromEntity(order);
     }
@@ -99,4 +128,21 @@ public class OrderServiceV1 {
 
         return new OrderResponseDto().fromEntity(order);
     }
+
+//    public void validateCompany(UUID companyId) {
+//        CompanyDto company = companyClient.getCompanyById(companyId);
+//
+//        if (company == null) {
+//            throw new IllegalArgumentException("존재하지 않는 회사 ID입니다: " + companyId);
+//        }
+//    }
+//
+//    public int validateProduct(UUID productId) {
+//        ProductDto product = productClient.getProductById(productId);
+//
+//        if (product == null || product.getProductName().equals("UNKNOWN")) {
+//            throw new IllegalArgumentException("존재하지 않는 상품 ID입니다: " + productId);
+//        }
+//        return product.getStock();
+//    }
 }

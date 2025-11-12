@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -24,11 +25,9 @@ public class UserResponseDto {
 
     private String role;
 
-    private Long hubId;
-
     private String status;
 
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     private boolean isDeleted;
 
