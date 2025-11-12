@@ -1,10 +1,7 @@
 package com.pathfinder.company.application;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,7 +20,6 @@ import com.pathfinder.company.domain.entity.Company;
 import com.pathfinder.company.infrastructure.repositry.CompanyRepository;
 import com.pathfinder.company.presentation.dto.response.GetCompanyRes;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
