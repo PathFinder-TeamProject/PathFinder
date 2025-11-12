@@ -8,8 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -65,5 +67,10 @@ public class OrderEntity extends BaseEntity {
         if (requestDto.getDeadline() != null) {
             this.deadline = requestDto.getDeadline();
         }
+    }
+
+    public void cancel(String username) {
+        this.orderStatus = OrderStatus.CANCELED;
+        this.softDelete(Instant.now(),username);
     }
 }

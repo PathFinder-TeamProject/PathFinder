@@ -10,33 +10,38 @@ import com.pathfinder.order.presentation.enums.ApiStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderControllerV1 {
 
     private final OrderServiceV1 orderService;
 
     @PostMapping
-    public ResponseEntity<ApiResponseDto<OrderResponseDto>> createOrder(@RequestBody OrderCreateRequestDto requestDto) {
+    public ResponseEntity<ApiResponseDto<OrderResponseDto>> createOrder(@RequestBody OrderCreateRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
         orderService.createOrder(requestDto);
         return ResponseEntity.status(ApiStatus.CREATED.getCode())
                 .body(ApiResponseDto.success(ApiStatus.CREATED, "생성 완료"));
     }
 
     @DeleteMapping("/{orderId}/cancel")
-    public ResponseEntity<ApiResponseDto<OrderResponseDto>> deleteOrders(@PathVariable UUID orderId) {
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
+    public ResponseEntity<ApiResponseDto<OrderResponseDto>> deleteOrders(@PathVariable UUID orderId, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.status(ApiStatus.OK.getCode())
                 .body(ApiResponseDto.success(ApiStatus.OK, orderService.cancelOrder(orderId), "주문이 취소되었습니다."));
     }
 
     @PutMapping("/{orderId}")
-    public ResponseEntity<ApiResponseDto<OrderResponseDto>> updateOrder(@PathVariable UUID orderId, @RequestBody OrderUpdateRequestDto requestDto) {
+    @PreAuthorize("hasAnyRole('MASTER','HUB_MANAGER')")
+    public ResponseEntity<ApiResponseDto<OrderResponseDto>> updateOrder(@PathVariable UUID orderId, @RequestBody OrderUpdateRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.status(ApiStatus.OK.getCode())
                 .body(ApiResponseDto.success(ApiStatus.OK, orderService.updateOrder(orderId, requestDto), "주문이 수정되었습니다."));
     }
