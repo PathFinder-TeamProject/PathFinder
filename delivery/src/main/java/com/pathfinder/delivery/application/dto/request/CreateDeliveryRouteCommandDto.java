@@ -27,7 +27,7 @@ public class CreateDeliveryRouteCommandDto {
     private BigDecimal expectedDistance;
     private Integer actualTime;
     private BigDecimal actualDistance;
-    private UUID deliveryManagerId;
+    private Long deliveryManagerId;
     private String note;
 
         public DeliveryRouteEntity toEntity(int sequence) {
@@ -55,7 +55,7 @@ public class CreateDeliveryRouteCommandDto {
         int sequence,
         Integer expectedTime,
         BigDecimal expectedDistance,
-        UUID deliveryManagerId
+        Long deliveryManagerId
     ) {
         return DeliveryRouteEntity.builder()
             .deliveryId(deliveryId)

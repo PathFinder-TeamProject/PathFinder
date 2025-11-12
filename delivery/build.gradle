@@ -24,8 +24,12 @@ ext {
 }
 
 dependencies {
-	// Common Module (JitPack)
-	implementation 'com.github.PathFinder-TeamProject:common-repo:0.0.3'
+
+	// global
+	// implementation 'com.github.PathFinder-TeamProject:common-repo:0.0.3'
+
+	// Common Module (Local)
+	implementation 'com.pathfinder:global:0.0.1-SNAPSHOT'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -54,6 +58,11 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JJWT for JWT token handling
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 }
 
 dependencyManagement {

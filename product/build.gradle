@@ -25,19 +25,59 @@ repositories {
     maven { url 'https://jitpack.io'}
 }
 
+ext {
+	set('springCloudVersion', "2025.0.0")
+}
+
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
-    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+    // global
     implementation 'com.github.PathFinder-TeamProject:common-repo:0.0.3'
+
+    // web
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+
+    // lombok
     compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // client
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
+    // db
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     runtimeOnly 'org.postgresql:postgresql'
+
+    // cache
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // circuit breaker
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+
+    // jwt
+    implementation 'com.auth0:java-jwt:4.4.0'
+
+    // monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation "io.micrometer:micrometer-tracing-bridge-brave"
+    implementation "io.zipkin.reporter2:zipkin-reporter-brave"
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
 }
 
 tasks.named('test') {

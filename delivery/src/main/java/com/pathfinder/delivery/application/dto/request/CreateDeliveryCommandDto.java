@@ -22,13 +22,25 @@ public class CreateDeliveryCommandDto {
     private UUID fromHubId;
     private UUID toHubId;
     
-    @NotNull
-    private UUID deliveryManagerId;
+    private Long deliveryManagerId;
     
     private BigDecimal expectedDistance;
     private String deliveryAddress;
     private String receiverName;
     private String receiverSlackId;
+
+    public CreateDeliveryCommandDto withDeliveryManagerId(Long deliveryManagerId) {
+        return CreateDeliveryCommandDto.builder()
+                .orderId(this.orderId)
+                .fromHubId(this.fromHubId)
+                .toHubId(this.toHubId)
+                .deliveryManagerId(deliveryManagerId)
+                .expectedDistance(this.expectedDistance)
+                .deliveryAddress(this.deliveryAddress)
+                .receiverName(this.receiverName)
+                .receiverSlackId(this.receiverSlackId)
+                .build();
+    }
 
     public DeliveryEntity toEntity(BigDecimal calculatedExpectedDistance) {
         return DeliveryEntity.builder()

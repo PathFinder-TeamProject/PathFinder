@@ -21,8 +21,7 @@ public class CreateDeliveryRequestDto {
     private UUID fromHubId;
     private UUID toHubId;
     
-    @NotNull
-    private UUID deliveryManagerId;
+    private Long deliveryManagerId;
     
     private BigDecimal expectedDistance;
     private String deliveryAddress;

@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface DeliveryManagerServiceClient {
     
     @GetMapping("/{deliveryManagerId}")
-    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
+    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") Long deliveryManagerId);
     
     @GetMapping("/hub/{hubId}")
     List<DeliveryManagerDto> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
