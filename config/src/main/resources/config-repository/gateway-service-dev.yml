@@ -64,12 +64,6 @@ management:
   endpoint:
     gateway:
       access: unrestricted
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
 
 springdoc:
   swagger-ui:
@@ -86,29 +80,26 @@ springdoc:
         url: /springdoc/openapi3-delivery-manager-service.json
     path: /docs
 
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    reactor.netty: DEBUG
-
+# Resilience4j 서비스별 설정 (기본값 override)
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        registerHealthIndicator: true
         slidingWindowType: COUNT_BASED
         slidingWindowSize: 20
         minimumNumberOfCalls: 20
         slowCallRateThreshold: 80
         slowCallDurationThreshold: 6000
-        failureRateThreshold: 50
-        permittedNumberOfCallsInHalfOpenState: 3
         waitDurationInOpenState: 20s
   timelimiter:
     configs:
       default:
-        timeoutDuration: 5s
         cancelRunningFuture: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
 
 jwt:
   secret:

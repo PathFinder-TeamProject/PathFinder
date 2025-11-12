@@ -1,0 +1,29 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/company_db
+  redis:
+    database: 6
+  kafka:
+    consumer:
+      group-id: company-service
+
+logging:
+  level:
+    com.pathfinder.company: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.cache: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.web.client: DEBUG
+  file:
+    name: logs/company-service.log
+
+# External Service URLs
+services:
+  hub-service:
+    url: http://localhost:8084
+  user-service:
+    url: http://localhost:8081

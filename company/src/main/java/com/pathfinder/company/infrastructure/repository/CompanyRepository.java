@@ -1,4 +1,4 @@
-package com.pathfinder.company.infrastructure.repositry;
+package com.pathfinder.company.infrastructure.repository;
 
 import java.util.Optional;
 import java.util.UUID;

@@ -4,12 +4,6 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/delivery_db
-    username: pathfinder
-    password: pathfinder123
-  jpa:
-    properties:
-      hibernate:
-        format_sql: true
   data:
     redis:
       database: 1
@@ -17,27 +11,15 @@ spring:
     consumer:
       group-id: delivery-service-group
 
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: full
-  circuitbreaker:
-    enabled: true
-
+# Resilience4j 서비스별 설정 (기본값 override)
 resilience4j:
   circuitbreaker:
     configs:
       default:
-        registerHealthIndicator: true
         slidingWindowSize: 10
         minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
         automaticTransitionFromOpenToHalfOpenEnabled: true
         waitDurationInOpenState: 10s
-        failureRateThreshold: 50
         eventConsumerBufferSize: 10
         recordExceptions:
           - org.springframework.web.client.HttpServerErrorException
@@ -65,6 +47,7 @@ resilience4j:
           - org.springframework.web.client.HttpServerErrorException
           - java.util.concurrent.TimeoutException
           - java.io.IOException
+          - feign.FeignException
     instances:
       order-service:
         baseConfig: default
@@ -89,19 +72,10 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
-  tracing:
-    sampling:
-      probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
 
 logging:
   level:
     com.pathfinder.delivery: DEBUG
-    org.springframework.cloud: DEBUG
-    org.springframework.kafka: INFO
-    org.springframework.cloud.openfeign: DEBUG
 
 delivery:
   outbox:

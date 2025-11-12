@@ -17,11 +17,25 @@ echo -e "${BLUE}=====================================${NC}"
 build_service() {
     local service_name=$1
     local service_path=$2
-    
+
     echo -e "\n${YELLOW}📦 Building $service_name...${NC}"
+
+    # 경로 존재 확인
+    if [ ! -d "$service_path" ]; then
+        echo -e "${RED}❌ Service path not found: $service_path${NC}"
+        return 1
+    fi
+
     cd "$service_path"
+
+    # gradlew 존재 및 실행 권한 확인
+    if [ ! -x "./gradlew" ]; then
+        echo -e "${RED}❌ gradlew not found or not executable in $service_path${NC}"
+        return 1
+    fi
+
     ./gradlew clean build -x test
-    
+
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}✅ $service_name build success${NC}"
         return 0
@@ -109,10 +123,12 @@ echo -e "${BLUE}================================================${NC}"
 build_service "Config Server" "$BASE_PATH/config" || exit 1
 build_service "Eureka Server" "$BASE_PATH/eureka" || exit 1
 build_service "Gateway Service" "$BASE_PATH/gateway" || exit 1
-build_service "Delivery Service" "$BASE_PATH/delivery" || exit 1
 build_service "User Service" "$BASE_PATH/user" || exit 1
 build_service "Hub Service" "$BASE_PATH/com.hub-service" || exit 1
+build_service "Company Service" "$BASE_PATH/company" || exit 1
+build_service "Product Service" "$BASE_PATH/product" || exit 1
 build_service "Order Service" "$BASE_PATH/order" || exit 1
+build_service "Delivery Service" "$BASE_PATH/delivery" || exit 1
 build_service "Delivery Manager Service" "$BASE_PATH/delivery-manager" || exit 1
 
 echo -e "\n${GREEN}✅ All services built successfully!${NC}"
@@ -142,12 +158,14 @@ check_health "Eureka Server" "19100"
 start_service "gateway-service" "$BASE_PATH/gateway" "19200" "15"
 check_health "Gateway Service" "19200"
 
-# 4. 비즈니스 서비스들 시작
+# 4. 비즈니스 서비스들 시작 (도메인 순서로)
 start_service "user-service" "$BASE_PATH/user" "8081" "10"
+start_service "hub-service" "$BASE_PATH/com.hub-service" "8084" "10"
+start_service "company-service" "$BASE_PATH/company" "8086" "10"
+start_service "product-service" "$BASE_PATH/product" "8085" "10"
+start_service "order-service" "$BASE_PATH/order" "8087" "10"
 start_service "delivery-service" "$BASE_PATH/delivery" "8082" "10"
-start_service "hub-service" "$BASE_PATH/com.hub-service" "8083" "10"
-start_service "order-service" "$BASE_PATH/order" "8084" "10"
-start_service "delivery-manager-service" "$BASE_PATH/delivery-manager" "8085" "10"
+start_service "delivery-manager-service" "$BASE_PATH/delivery-manager" "8083" "10"
 
 echo -e "\n${BLUE}================================================${NC}"
 echo -e "${BLUE}   STEP 3: Service Status${NC}"
@@ -163,9 +181,11 @@ echo -e "  Gateway:              http://localhost:19200"
 echo -e "  Swagger UI:           http://localhost:19200/docs"
 echo -e "  User Service:         http://localhost:8081"
 echo -e "  Delivery Service:     http://localhost:8082"
-echo -e "  Hub Service:          http://localhost:8083"
-echo -e "  Order Service:        http://localhost:8084"
-echo -e "  Delivery Manager:     http://localhost:8085"
+echo -e "  Delivery Manager:     http://localhost:8083"
+echo -e "  Hub Service:          http://localhost:8084"
+echo -e "  Product Service:      http://localhost:8085"
+echo -e "  Company Service:      http://localhost:8086"
+echo -e "  Order Service:        http://localhost:8087"
 
 echo -e "\n${YELLOW}📋 Log files:${NC}"
 for logfile in /tmp/*-service*.log /tmp/*-server.log; do

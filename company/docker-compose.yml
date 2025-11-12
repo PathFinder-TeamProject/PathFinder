@@ -1,29 +1,25 @@
 services:
-  order-service:
+  company-service:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: order-service
+    container_name: company-service
     ports:
-      - "8087:8080"
+      - "8086:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_APPLICATION_NAME=order-service
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/order_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/company_db
       - SPRING_DATASOURCE_USERNAME=pathfinder
       - SPRING_DATASOURCE_PASSWORD=pathfinder123
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     networks:
       - pathfinder-network
     depends_on:
       - postgres
       - redis
       - kafka
-      # zipkin은 메인 docker-compose.yml에서 실행되므로 external network를 통해 접근
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s

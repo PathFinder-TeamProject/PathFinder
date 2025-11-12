@@ -37,7 +37,7 @@ done
 
 # 포트로 프로세스 찾아서 종료
 echo -e "\n${YELLOW}Checking for services on known ports...${NC}"
-ports=(19000 19100 19200 8081 8082 8083 8084 8085)
+ports=(19000 19100 19200 8081 8082 8083 8084 8085 8086 8087)
 
 for port in "${ports[@]}"; do
     pid=$(lsof -ti:$port 2>/dev/null)

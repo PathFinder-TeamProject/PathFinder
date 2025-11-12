@@ -47,25 +47,42 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     @Transactional
     public DeliveryDto createDelivery(CreateDeliveryCommandDto command) {
         log.info("Creating delivery for orderId: {}", command.getOrderId());
-        
+
+        validateDeliveryCreation(command);
+        RouteCalculationResult routeResult = calculateRoute(command);
+        DeliveryEntity savedDelivery = createAndSaveDelivery(command, routeResult);
+        createAndSaveDeliveryRoutes(savedDelivery, command, routeResult);
+        publishDeliveryCreatedEvent(savedDelivery);
+
+        return savedDelivery.toDeliveryDto();
+    }
+
+    private void validateDeliveryCreation(CreateDeliveryCommandDto command) {
         deliveryValidator.validateAndGetOrder(command.getOrderId());
-
         deliveryValidator.validateAndGetHub(command.getFromHubId());
-
         deliveryValidator.validateAndGetDeliveryManager(command.getDeliveryManagerId());
+    }
 
-        RouteCalculationResult routeResult = 
-            routeFactory.calculateRoute(command.getFromHubId(), command.getToHubId(), command.getExpectedDistance());
+    private RouteCalculationResult calculateRoute(CreateDeliveryCommandDto command) {
+        return routeFactory.calculateRoute(
+            command.getFromHubId(),
+            command.getToHubId(),
+            command.getExpectedDistance()
+        );
+    }
 
+    private DeliveryEntity createAndSaveDelivery(CreateDeliveryCommandDto command, RouteCalculationResult routeResult) {
         DeliveryEntity delivery = command.toEntity(routeResult.getTotalExpectedDistance());
-        DeliveryEntity savedDelivery = deliveryRepository.save(delivery);
+        return deliveryRepository.save(delivery);
+    }
 
+    private void createAndSaveDeliveryRoutes(DeliveryEntity savedDelivery, CreateDeliveryCommandDto command, RouteCalculationResult routeResult) {
         if (routeResult.hasValidPath()) {
             List<DeliveryRouteEntity> routes = routeFactory.createRoutes(
-                    savedDelivery.getDeliveryId(),
+                savedDelivery.getDeliveryId(),
                 routeResult.getPath(),
-                    command.getDeliveryManagerId()
-                );
+                command.getDeliveryManagerId()
+            );
             routeRepository.saveAll(routes);
         } else {
             DeliveryRouteEntity initialRoute = routeFactory.createInitialRoute(
@@ -77,11 +94,11 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
             );
             routeRepository.save(initialRoute);
         }
+    }
 
-        DeliveryEventDto event = savedDelivery.toEvent("CREATED");
+    private void publishDeliveryCreatedEvent(DeliveryEntity delivery) {
+        DeliveryEventDto event = delivery.toEvent("CREATED");
         deliveryOutboxService.enqueue(event);
-
-        return savedDelivery.toDeliveryDto();
     }
 
     @Override
@@ -89,28 +106,44 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     @CacheEvict(value = "delivery", key = "#command.deliveryId")
     public DeliveryDto updateDelivery(UpdateDeliveryCommandDto command) {
         log.info("Updating delivery: {}", command.getDeliveryId());
-        
-        DeliveryEntity delivery = deliveryRepository.findById(command.getDeliveryId())
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
+        DeliveryEntity delivery = findDeliveryById(command.getDeliveryId());
+        validateDeliveryManagerIfPresent(command);
+        DeliveryStatus validatedStatus = validateAndGetNewStatus(command, delivery);
+        boolean statusChanged = updateDeliveryEntity(delivery, command, validatedStatus);
+        publishDeliveryUpdatedEvent(delivery, statusChanged);
+
+        return delivery.toDeliveryDto();
+    }
+
+    private DeliveryEntity findDeliveryById(UUID deliveryId) {
+        return deliveryRepository.findById(deliveryId)
+            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
+    }
+
+    private void validateDeliveryManagerIfPresent(UpdateDeliveryCommandDto command) {
         if (command.getDeliveryManagerId() != null) {
             deliveryValidator.validateAndGetDeliveryManager(command.getDeliveryManagerId());
         }
+    }
 
-        DeliveryStatus validatedStatus = null;
+    private DeliveryStatus validateAndGetNewStatus(UpdateDeliveryCommandDto command, DeliveryEntity delivery) {
         if (command.getStatus() != null) {
             DeliveryStatus newStatus = DeliveryStatus.valueOf(command.getStatus());
-                statusValidator.validateStatusTransition(delivery.getStatus(), newStatus);
-            validatedStatus = newStatus;
-            }
+            statusValidator.validateStatusTransition(delivery.getStatus(), newStatus);
+            return newStatus;
+        }
+        return null;
+    }
 
-        boolean statusChanged = delivery.updateWithCommand(command, validatedStatus);
+    private boolean updateDeliveryEntity(DeliveryEntity delivery, UpdateDeliveryCommandDto command, DeliveryStatus validatedStatus) {
+        return delivery.updateWithCommand(command, validatedStatus);
+    }
 
+    private void publishDeliveryUpdatedEvent(DeliveryEntity delivery, boolean statusChanged) {
         String eventType = delivery.determineUpdateEventType(statusChanged);
         DeliveryEventDto event = delivery.toEvent(eventType);
         deliveryOutboxService.enqueue(event);
-
-        return delivery.toDeliveryDto();
     }
 
     @Override
@@ -118,14 +151,18 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     @CacheEvict(value = "delivery", key = "#id")
     public void deleteDelivery(UUID id) {
         log.info("Deleting delivery: {}", id);
-        
-        DeliveryEntity delivery = deliveryRepository.findById(id)
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
+        DeliveryEntity delivery = findDeliveryById(id);
+        cancelAndSoftDeleteDelivery(delivery, id);
+        publishDeliveryCancelledEvent(delivery);
+    }
+
+    private void cancelAndSoftDeleteDelivery(DeliveryEntity delivery, UUID id) {
         delivery.cancel();
-        // 현재 인증된 사용자 ID 사용 (시스템 작업의 경우 "0")
         deliveryRepository.softDelete(id, getCurrentUserIdAsString());
+    }
 
+    private void publishDeliveryCancelledEvent(DeliveryEntity delivery) {
         DeliveryEventDto event = delivery.toEvent("CANCELLED");
         deliveryOutboxService.enqueue(event);
     }

@@ -1,11 +1,47 @@
 server:
-  port: 8084
+  port: 8087
 
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/order_db
-    username: pathfinder
-    password: pathfinder123
   data:
     redis:
       database: 3
+  kafka:
+    consumer:
+      group-id: order-service-group
+
+# Resilience4j 서비스별 설정 (기본값 override)
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 10s
+        recordExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+
+logging:
+  level:
+    com.pathfinder.order: DEBUG

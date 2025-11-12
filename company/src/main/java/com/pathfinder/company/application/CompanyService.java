@@ -20,7 +20,7 @@ import com.pathfinder.company.application.dto.request.UpdateCompanyReq;
 import com.pathfinder.company.application.exception.CompanyErrorCode;
 import com.pathfinder.company.application.exception.CompanyException;
 import com.pathfinder.company.domain.entity.Company;
-import com.pathfinder.company.infrastructure.repositry.CompanyRepository;
+import com.pathfinder.company.infrastructure.repository.CompanyRepository;
 import com.pathfinder.company.presentation.dto.response.GetCompanyRes;
 
 import jakarta.validation.Valid;
