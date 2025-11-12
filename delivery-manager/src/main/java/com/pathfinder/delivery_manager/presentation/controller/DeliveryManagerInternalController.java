@@ -16,7 +16,7 @@ public class DeliveryManagerInternalController {
 
     private final DeliveryManagerServiceV1 deliveryManagerService;
 
-    @DeleteMapping("/delivery-managers/{username}")
+    @DeleteMapping("/user/{username}")
     public ResponseEntity<Void> deleteDeliveryManagerByUsername(@PathVariable String username) {
         log.info("[배송담당자 컨트롤러] 배송담당자 삭제 요청 - username: {}", username);
 

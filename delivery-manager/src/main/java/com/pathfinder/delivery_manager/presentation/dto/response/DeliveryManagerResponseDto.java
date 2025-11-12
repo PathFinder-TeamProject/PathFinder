@@ -46,9 +46,12 @@ public class DeliveryManagerResponseDto {
     }
 
     // 상세보기용 DTO (추후 UserService, HubService 연동 시 확장)
-    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager, UserInfoDto userInfoDto) {
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager,HubInfoDto hubInfoDto, UserInfoDto userInfoDto) {
         HubInfoDto hubInfo = HubInfoDto.builder()
                 .hubId(deliveryManager.getHubId())
+                .hubName(hubInfoDto.getHubName())
+                .hubAddress(hubInfoDto.getHubAddress())
+                .hubManagerUsername(hubInfoDto.getHubManagerUsername())
                 .build();
 
         return DeliveryManagerResponseDto.builder()
