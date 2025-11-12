@@ -10,9 +10,6 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @EnableCaching
@@ -30,8 +27,6 @@ public class CacheConfig {
 
 		return RedisCacheManager.builder(redisConnectionFactory)
 			.cacheDefaults(config)
-			.withCacheConfiguration("company", config.entryTtl(Duration.ofHours(2)))
-			.withCacheConfiguration("companyList", config.entryTtl(Duration.ofMinutes(30)))
 			.build();
 	}
 }
