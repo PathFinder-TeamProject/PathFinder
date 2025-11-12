@@ -24,8 +24,12 @@ ext {
 }
 
 dependencies {
-	// Common Module (JitPack)
-	implementation 'com.github.PathFinder-TeamProject:common-repo:0.0.3'
+
+	// global
+	// implementation 'com.github.PathFinder-TeamProject:common-repo:0.0.3'
+
+	// Common Module (Local)
+	implementation 'com.pathfinder:global:0.0.1-SNAPSHOT'
 
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

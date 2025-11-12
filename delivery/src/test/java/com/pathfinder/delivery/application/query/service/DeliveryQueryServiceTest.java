@@ -3,6 +3,7 @@ package com.pathfinder.delivery.application.query.service;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
 import com.pathfinder.delivery.domain.entity.DeliveryEntity;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
+import com.pathfinder.delivery.application.query.service.impl.DeliveryQueryServiceImpl;
 import com.pathfinder.delivery.domain.repository.DeliveryQueryRepository;
 import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ class DeliveryQueryServiceTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        UUID deliveryManagerId = UUID.randomUUID();
+        Long deliveryManagerId = 1L;
 
         DeliveryEntity deliveryEntity = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -100,7 +101,7 @@ class DeliveryQueryServiceTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
-        UUID deliveryManagerId = UUID.randomUUID();
+        Long deliveryManagerId = 1L;
 
         DeliveryEntity deliveryEntity = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -145,7 +146,7 @@ class DeliveryQueryServiceTest {
     void searchDeliveries_shouldReturnPagedDeliveryDtos_whenSearchConditionsProvided() {
         // given
         UUID hubId = UUID.randomUUID();
-        UUID deliveryManagerId = UUID.randomUUID();
+        Long deliveryManagerId = 1L;
         Pageable pageable = PageRequest.of(0, 10);
 
         List<DeliveryEntity> deliveryEntities = Arrays.asList(

@@ -12,7 +12,7 @@ public interface DeliveryQueryRepository {
     Page<DeliveryEntity> searchDeliveries(
         UUID hubId,
         DeliveryStatus status,
-        UUID deliveryManagerId,
+        Long deliveryManagerId,
         Pageable pageable
     );
 }

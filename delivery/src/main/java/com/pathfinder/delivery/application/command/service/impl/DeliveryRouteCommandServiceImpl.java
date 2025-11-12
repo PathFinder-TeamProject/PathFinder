@@ -5,9 +5,14 @@ import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteComman
 import com.pathfinder.delivery.application.dto.response.DeliveryRouteDto;
 import com.pathfinder.delivery.domain.entity.DeliveryEntity;
 import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
+import com.pathfinder.delivery.domain.enums.DeliveryRouteStatus;
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
 import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import com.pathfinder.delivery.domain.repository.DeliveryRouteRepository;
+import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClient;
+import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
+import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
 import com.pathfinder.global.presentation.exception.PathException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +31,8 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
 
     private final DeliveryRouteRepository routeRepository;
     private final DeliveryRepository deliveryRepository;
+    private final DeliveryManagerServiceClient deliveryManagerServiceClient;
+    private final MessageServiceClient messageServiceClient;
 
     @Override
     @Transactional
@@ -57,9 +64,117 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
         DeliveryRouteEntity route = routeRepository.findById(routeId)
             .orElseThrow(() -> new PathException(DeliveryErrorCode.ROUTE_NOT_FOUND));
 
+        DeliveryRouteStatus previousStatus = route.getStatus();
         route.update(command);
+        DeliveryRouteStatus newStatus = route.getStatus();
+
+        sendSlackNotificationIfStatusChanged(route, previousStatus, newStatus);
 
         return route.toDeliveryRouteDto();
+    }
+
+    private void sendSlackNotificationIfStatusChanged(
+            DeliveryRouteEntity route, 
+            DeliveryRouteStatus previousStatus, 
+            DeliveryRouteStatus newStatus) {
+        
+        if (previousStatus == newStatus) {
+            return;
+        }
+
+        try {
+            if (newStatus == DeliveryRouteStatus.PICKED_UP || newStatus == DeliveryRouteStatus.IN_TRANSIT) {
+                sendDepartureNotification(route);
+            } else if (newStatus == DeliveryRouteStatus.DELIVERED) {
+                sendArrivalNotification(route);
+            }
+        } catch (Exception e) {
+            log.error("Failed to send slack notification for route: {}", route.getRouteId(), e);
+        }
+    }
+
+    private void sendDepartureNotification(DeliveryRouteEntity route) {
+        if (route.getFromHubId() == null || route.getToHubId() == null) {
+            return;
+        }
+
+        List<DeliveryManagerDto> fromHubManagers = 
+            deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getFromHubId(), "HUB");
+        List<DeliveryManagerDto> toHubManagers = 
+            deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getToHubId(), "HUB");
+
+        if ((fromHubManagers != null && !fromHubManagers.isEmpty()) && 
+            (toHubManagers != null && !toHubManagers.isEmpty())) {
+            DeliveryManagerDto senderManager = fromHubManagers.get(0);
+            DeliveryManagerDto receiverManager = toHubManagers.get(0);
+            String message = buildDepartureMessage(route);
+            
+            MessageRequestDto messageRequest = MessageRequestDto.builder()
+                .request(message)
+                .senderId(senderManager.getUsername())
+                .receiverId(receiverManager.getUsername())
+                .build();
+
+            messageServiceClient.sendSlackMessage(messageRequest);
+            log.info("Departure notification sent for route: {} from {} to {}", 
+                route.getRouteId(), senderManager.getUsername(), receiverManager.getUsername());
+        }
+    }
+
+    private void sendArrivalNotification(DeliveryRouteEntity route) {
+        if (route.getFromHubId() == null || route.getToHubId() == null) {
+            return;
+        }
+
+        List<DeliveryManagerDto> fromHubManagers = 
+            deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getFromHubId(), "HUB");
+        List<DeliveryManagerDto> toHubManagers = 
+            deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getToHubId(), "HUB");
+
+        if ((fromHubManagers != null && !fromHubManagers.isEmpty()) && 
+            (toHubManagers != null && !toHubManagers.isEmpty())) {
+            DeliveryManagerDto senderManager = fromHubManagers.get(0);
+            DeliveryManagerDto receiverManager = toHubManagers.get(0);
+            String message = buildArrivalMessage(route);
+            
+            MessageRequestDto messageRequest = MessageRequestDto.builder()
+                .request(message)
+                .senderId(senderManager.getUsername())
+                .receiverId(receiverManager.getUsername())
+                .build();
+
+            messageServiceClient.sendSlackMessage(messageRequest);
+            log.info("Arrival notification sent for route: {} from {} to {}", 
+                route.getRouteId(), senderManager.getUsername(), receiverManager.getUsername());
+        }
+    }
+
+    private String buildDepartureMessage(DeliveryRouteEntity route) {
+        return String.format(
+            "배송이 출발했습니다.\n" +
+            "경로 ID: %s\n" +
+            "출발 허브: %s\n" +
+            "도착 허브: %s\n" +
+            "시퀀스: %d",
+            route.getRouteId(),
+            route.getFromHubId(),
+            route.getToHubId(),
+            route.getSequence()
+        );
+    }
+
+    private String buildArrivalMessage(DeliveryRouteEntity route) {
+        return String.format(
+            "배송이 도착했습니다.\n" +
+            "경로 ID: %s\n" +
+            "출발 허브: %s\n" +
+            "도착 허브: %s\n" +
+            "시퀀스: %d",
+            route.getRouteId(),
+            route.getFromHubId(),
+            route.getToHubId(),
+            route.getSequence()
+        );
     }
 }
 

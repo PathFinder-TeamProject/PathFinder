@@ -12,8 +12,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeliveryManagerDto {
-    private UUID deliveryManagerId;
-    private UUID userId;
+    private Long deliveryManagerId;
+    private String username;
     private String type;
     private Integer deliveryOrder;
     private UUID hubId;
