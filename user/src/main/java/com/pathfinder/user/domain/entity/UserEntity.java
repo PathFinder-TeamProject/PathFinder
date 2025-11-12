@@ -40,6 +40,7 @@ public class UserEntity extends BaseEntity {
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
+    @Builder.Default
     private UserStatusEnum status = UserStatusEnum.PENDING;
 
     public static UserEntity create(SignupRequestDto requestDto, String encodingPassword) {
@@ -58,6 +59,9 @@ public class UserEntity extends BaseEntity {
     public void update(UserUpdateRequestDto requestDto, PasswordEncoder passwordEncoder) {
         this.name = requestDto.getName() == null ? this.name : requestDto.getName();
         this.password = requestDto.getNewPassword() == null ? this.password : passwordEncoder.encode(requestDto.getNewPassword());
+        this.email = requestDto.getEmail() == null ? this.email : requestDto.getEmail();
+        this.organization = requestDto.getOrganization() == null ? this.organization : requestDto.getOrganization();
+        this.slackId = requestDto.getSlackId() == null ? this.slackId : requestDto.getSlackId();
     }
 
     public void updateStatus(UserStatusEnum status) {

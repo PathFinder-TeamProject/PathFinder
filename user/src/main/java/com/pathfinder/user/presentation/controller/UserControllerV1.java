@@ -7,6 +7,7 @@ import com.pathfinder.user.application.exception.UserErrorCode;
 import com.pathfinder.user.application.exception.ValidationException;
 import com.pathfinder.user.domain.entity.UserDetailsImpl;
 import com.pathfinder.user.domain.enums.UserRoleEnum;
+import com.pathfinder.user.jwt.JwtUserContext;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,14 +31,6 @@ public class UserControllerV1 {
     public ApiResponse<SignupResponseDto> signup(@RequestBody @Valid SignupRequestDto requestDto) {
         log.info("POST /auth/register - 회원가입 요청 - username: {}, email: {}, role: {}",
                 requestDto.getUsername(), requestDto.getEmail(), requestDto.getRole());
-
-        if (requestDto.getRole() == UserRoleEnum.DELIVERY_MANAGER
-                && requestDto.getDeliveryManagerType() == null) {
-            log.warn("회원가입 실패 - 배송 담당자 타입 누락 - username: {}", requestDto.getUsername());
-            throw new ValidationException(UserErrorCode.MISSING_REQUIRED_FIELD,
-                    UserErrorCode.MISSING_REQUIRED_FIELD.getFormattedMessage("배송 담당자 타입"));
-        }
-
         SignupResponseDto response = userServiceV1.signup(requestDto);
         log.info("POST /auth/register - 회원가입 완료 - username: {}", response.getUsername());
         return ApiResponse.success(response);
@@ -47,7 +40,7 @@ public class UserControllerV1 {
     public ApiResponse<Page<UserResponseDto>> getUserList(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "name") String sortBy,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc) {
 
         log.info("GET /users - 유저 목록 조회 - page: {}, size: {}, sortBy: {}, isAsc: {}",
@@ -60,20 +53,19 @@ public class UserControllerV1 {
         return ApiResponse.success(response);
     }
 
-    @PatchMapping("/users/{username}/confirm-member")
+    @PostMapping("/users/{username}/confirm-member")
     public ApiResponse<UserStatusUpdateResponseDto> updateUserConfirm(
             @PathVariable String username,
-            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @RequestBody @Valid UserStatusUpdateRequestDto userStatusUpdateRequestDto) {
 
-        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 요청 - 변경할 상태: {}, 요청자: {}",
-                username, userStatusUpdateRequestDto.getStatus(), userDetails.getUsername());
+        log.info("POST /users/{}/confirm-member - 유저 상태 변경 요청 - 변경할 상태: {}, 요청자: {}",
+                username, userStatusUpdateRequestDto.getStatus(), JwtUserContext.getUsernameFromHeader());
 
-        userServiceV1.checkActive(userDetails.getUsername());
+        userServiceV1.checkApproved(JwtUserContext.getUsernameFromHeader());
         UserStatusUpdateResponseDto response = userServiceV1.updateUserStatus(
-                username, userStatusUpdateRequestDto, userDetails.getUser());
+                username, userStatusUpdateRequestDto);
 
-        log.info("PATCH /users/{}/confirm-member - 유저 상태 변경 완료 - 새 상태: {}",
+        log.info("POST /users/{}/confirm-member - 유저 상태 변경 완료 - 새 상태: {}",
                 username, response.getStatus());
 
         return ApiResponse.success(response);
@@ -88,7 +80,7 @@ public class UserControllerV1 {
         log.info("PATCH /users/{}/role - 유저 권한 변경 요청 - 변경할 권한: {}, 요청자: {}",
                 username, userRoleUpdateRequestDto.getRole(), userDetails.getUsername());
 
-        userServiceV1.checkActive(userDetails.getUsername());
+        userServiceV1.checkApproved(userDetails.getUsername());
         UserRoleUpdateResponseDto response = userServiceV1.userRoleUpdate(
                 username, userRoleUpdateRequestDto, userDetails.getUser());
 
@@ -99,14 +91,11 @@ public class UserControllerV1 {
     }
 
     @GetMapping("/users/myInfo")
-    public ApiResponse<UserResponseDto> getMyUserInfo(
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<UserResponseDto> getMyUserInfo() {
 
-        log.info("GET /users/myInfo - 내 정보 조회 - username: {}", userDetails.getUsername());
+        log.info("GET /users/myInfo - 내 정보 조회 - username: {}", JwtUserContext.getUsernameFromHeader());
 
-        UserResponseDto response = userServiceV1.getUser(
-                userDetails.getUser().getUsername(),
-                userDetails.getUser());
+        UserResponseDto response = userServiceV1.getUser(JwtUserContext.getUsernameFromHeader());
 
         log.info("GET /users/myInfo - 내 정보 조회 완료 - username: {}", response.getUsername());
 
@@ -115,12 +104,11 @@ public class UserControllerV1 {
 
     @GetMapping("/users/{username}")
     public ApiResponse<UserResponseDto> getUserInfo(
-            @PathVariable String username,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @PathVariable String username) {
 
-        log.info("GET /users/{} - 유저 정보 조회 - 요청자: {}", username, userDetails.getUsername());
+        log.info("GET /users/{} - 유저 정보 조회 - 요청자: {}", username, JwtUserContext.getUsernameFromHeader());
 
-        UserResponseDto response = userServiceV1.getUser(username, userDetails.getUser());
+        UserResponseDto response = userServiceV1.getUser(username);
 
         log.info("GET /users/{} - 유저 정보 조회 완료", username);
 
@@ -130,13 +118,10 @@ public class UserControllerV1 {
     @PutMapping("/users/{username}")
     public ApiResponse<UserUpdateResponseDto> updateUserInfo(
             @PathVariable String username,
-            @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        log.info("PUT /users/{} - 유저 정보 수정 요청 - 요청자: {}", username, userDetails.getUsername());
+            @RequestBody @Valid UserUpdateRequestDto userUpdateRequestDto) {
 
         UserUpdateResponseDto response = userServiceV1.updateUser(
-                username, userUpdateRequestDto, userDetails.getUser());
+                username, userUpdateRequestDto, JwtUserContext.getUsernameFromHeader());
 
         log.info("PUT /users/{} - 유저 정보 수정 완료", username);
 
@@ -145,18 +130,14 @@ public class UserControllerV1 {
 
     @DeleteMapping("/users/{username}")
     public ApiResponse<UserDeleteResponseDto> deleteUser(
-            @PathVariable String username,
-            @RequestBody @Valid UserDeleteRequestDto userDeleteRequestDto,
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            @PathVariable String username) {
 
-        log.info("DELETE /users/{} - 유저 삭제 요청 - 요청자: {}", username, userDetails.getUsername());
+        log.info("DELETE /users/{} - 유저 삭제 요청 - 요청자: {}", username, JwtUserContext.getUsernameFromHeader());
 
-        UserDeleteResponseDto response = userServiceV1.deleteUser(
-                userDeleteRequestDto, userDetails.getUser());
+        userServiceV1.deleteUser(username, JwtUserContext.getUsernameFromHeader());
 
         log.info("DELETE /users/{} - 유저 삭제 완료 (Soft Delete)", username);
-
-        return ApiResponse.success(response);
+        return ApiResponse.noContent();
     }
 
 }

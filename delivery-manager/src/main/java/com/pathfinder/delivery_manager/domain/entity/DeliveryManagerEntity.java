@@ -1,6 +1,7 @@
 package com.pathfinder.delivery_manager.domain.entity;
 
 import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
+import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerUpdateRequestDto;
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -47,9 +48,9 @@ public class DeliveryManagerEntity extends BaseEntity {
         this.deliveryOrder = deliveryOrder;
     }
 
-    public void update(DeliveryManagerRequestDto requestDto) {
+    public void update(DeliveryManagerUpdateRequestDto requestDto) {
         this.type = requestDto.getType() == null ? this.type : requestDto.getType();
-        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder().intValue();
+//        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder().intValue();
         this.hubId = requestDto.getHubId() == null ? this.hubId : requestDto.getHubId();
     }
 }

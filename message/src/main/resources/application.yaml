@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: message-service
+  config:
+    import: "configserver:http://localhost:19000"
+  cloud:
+    config:
+      enabled: false
+    import-check:
+      enabled:false
+
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_KEY}

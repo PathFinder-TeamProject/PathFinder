@@ -1,32 +1,30 @@
-# ===============================
-# 1️⃣ Build Stage (Gradle Build)
-# ===============================
-FROM gradle:8.10.2-jdk17 AS builder
-
+# Build stage
+FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 
-# Gradle 설정 파일 복사 (캐시 최적화)
+# Copy gradle files
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 
-# 의존성 미리 다운로드
-RUN gradle dependencies --no-daemon || return 0
+# Copy source code
+COPY src ./src
 
-# 나머지 전체 복사
-COPY . .
-
-# jar 빌드
+# Build application
 RUN gradle clean build -x test --no-daemon
 
-# ===============================
-# 2️⃣ Runtime Stage (실행용)
-# ===============================
-FROM eclipse-temurin:17-jdk-jammy
-
+# Runtime stage
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# builder 단계에서 빌드된 jar 가져오기
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Copy built jar from build stage
+COPY --from=build /app/build/libs/*.jar app.jar
 
+# Expose port
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD wget -q --spider http://localhost:8080/actuator/health || exit 1
+
+# Run application
+ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=docker", "app.jar"]

@@ -18,7 +18,6 @@ public class UserInfoDto {
     private String slackId;
     private String role;
     private String status;
-    private Long hubId;
     private Instant createdAt;
     private boolean isDeleted;
 }
