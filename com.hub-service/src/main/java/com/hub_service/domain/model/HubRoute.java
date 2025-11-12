@@ -1,5 +1,6 @@
 package com.hub_service.domain.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,17 +19,21 @@ public class HubRoute {
     @Column(name = "route_id", nullable = false, updatable = false)
     private UUID routeId;
 
+    @Schema(description = "출발 허브 ID", example = "3dd50a9f-ea15-41d3-83eb-a55b7e282a83")
     @Column(name = "origin_hub_id", nullable = false)
     private UUID originHubId;
 
+    @Schema(description = "도착 허브 ID", example = "c881f817-cbd5-4d57-981c-5cbde5644e09")
     @Column(name = "destination_hub_id", nullable = false)
     private UUID destinationHubId;
 
     // km 단위 거리
+    @Schema(description = "거리(km)", example = "250.5")
     @Column(name = "distance_km", nullable = false)
     private Double distanceKm;
 
     // 분 단위 소요 시간
+    @Schema(description = "소요 시간(분)", example = "180")
     @Column(name = "duration_min", nullable = false)
     private Integer durationMin;
 
