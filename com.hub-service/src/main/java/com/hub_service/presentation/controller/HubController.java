@@ -1,7 +1,7 @@
 package com.hub_service.presentation.controller;
 
 
-import com.hub_service.application.HubServiceV1;
+import com.hub_service.application.HubService;
 import com.hub_service.presentation.dto.request.HubRequestDto;
 import com.hub_service.presentation.dto.response.HubResponseDto;
 import com.hub_service.presentation.dto.response.ResponseDto;
@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,30 +24,30 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class HubController {
 
-    private final HubServiceV1 hubServiceV1;
+    private final HubService hubService;
 
     @Operation(summary = "허브 전체 조회", description = "등록된 모든 허브 목록을 조회합니다.")
     @GetMapping("/hubs")
     public ResponseEntity<List<HubResponseDto>> getHubs(){
-        return ResponseEntity.ok(hubServiceV1.getAllHubs());
+        return ResponseEntity.ok(hubService.getAllHubs());
     }
 
     @Operation(summary = "허브 단건 조회", description = "허브 ID를 기준으로 단일 허브 정보를 조회합니다.")
     @Parameter(name = "hubId", description = "조회할 허브의 UUID", example = "3dd50a9f-ea15-41d3-83eb-a55b7e282a83")
     @GetMapping("/hubs/{hubId}")
     public ResponseEntity<HubResponseDto> getHub(@PathVariable UUID hubId){
-        return ResponseEntity.ok(hubServiceV1.getHubById(hubId));
+        return ResponseEntity.ok(hubService.getHubById(hubId));
     }
 
     @Operation(summary = "허브 생성", description = "새로운 허브 정보를 등록합니다.")
     @PostMapping("/hubs")
     public ResponseEntity<HubResponseDto> createHub(@RequestBody HubRequestDto requestDto){
-        return ResponseEntity.ok(hubServiceV1.createHub(requestDto));
+        return ResponseEntity.ok(hubService.createHub(requestDto));
     }
     @Operation(summary = "허브 수정", description = "허브 ID를 기준으로 허브 정보를 수정합니다.")
     @PatchMapping("/hubs/{hubId}")
     public ResponseEntity<HubResponseDto> updateHub(@PathVariable UUID hubId, @RequestBody HubRequestDto requestDto){
-        return ResponseEntity.ok(hubServiceV1.updateHub(hubId, requestDto));
+        return ResponseEntity.ok(hubService.updateHub(hubId, requestDto));
     }
 
     @Operation(summary = "허브 삭제", description = "허브 ID를 기준으로 허브를 논리적으로 삭제합니다.")
@@ -59,7 +58,7 @@ public class HubController {
             @PathVariable UUID hudId,
             @RequestParam(defaultValue = "master") String username
     ){
-        hubServiceV1.deleteHub(hudId, username);
+        hubService.deleteHub(hudId, username);
         return ResponseEntity.ok(ResponseDto.success("허브 삭제 완료", "허브가 논리적으로 삭제되었습니다."));
     }
 
@@ -72,7 +71,7 @@ public class HubController {
             @RequestParam(defaultValue = "10") int size
     ){
         Pageable pageable =  PageRequest.of(page, size);
-        Page<HubResponseDto> result = hubServiceV1.searchHubs(keyword, sortBy, pageable);
+        Page<HubResponseDto> result = hubService.searchHubs(keyword, sortBy, pageable);
         return ResponseEntity.ok(ResponseDto.success("허브 검색 성공", result));
 
     }

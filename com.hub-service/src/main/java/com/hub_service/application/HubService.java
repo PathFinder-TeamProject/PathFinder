@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class HubServiceV1 {
+public class HubService {
 
     private final HubRepository hubRepository;
 
