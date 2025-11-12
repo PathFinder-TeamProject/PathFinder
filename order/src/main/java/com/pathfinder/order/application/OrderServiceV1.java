@@ -1,5 +1,6 @@
 package com.pathfinder.order.application;
 
+import com.pathfinder.global.presentation.response.ApiResponse;
 import com.pathfinder.order.application.dto.request.OrderCreateRequestDto;
 import com.pathfinder.order.application.dto.request.OrderUpdateRequestDto;
 import com.pathfinder.order.application.dto.response.OrderResponseDto;
@@ -43,11 +44,18 @@ public class OrderServiceV1 {
 //        validateCompany(requestDto.getSupplierId());
 //        validateCompany(requestDto.getReceiverId());
 //
-//        int stock = validateProduct(requestDto.getProductId());
-//
-//        if(stock == 0 || stock < requestDto.getQuantity()) {
-//            throw new RuntimeException("재고가 부족합니다.");
-//        }
+        int stock = validateProduct(requestDto.getProductId());
+
+        if (stock == 0 || stock < requestDto.getQuantity()) {
+            throw new RuntimeException("재고가 부족합니다.");
+        }
+
+        ApiResponse<Void> response = productClient.decreaseStock(requestDto.getProductId(), requestDto.getQuantity());
+
+        if (!"200".equals(response.getCode())) {
+            throw new IllegalStateException("상품 재고 차감 실패: " + response.getMessage());
+        }
+
 
         OrderEntity order = OrderEntity.builder()
                 .productId(requestDto.getProductId())
@@ -78,6 +86,12 @@ public class OrderServiceV1 {
         order.changeStatus(OrderStatus.CANCELED);
         order.cancel(JwtUserContext.getUsernameFromHeader());
 
+        ApiResponse<Void> response = productClient.decreaseStock(order.getProductId(), order.getQuantity() * -1);
+
+        if (!"200".equals(response.getCode())) {
+            throw new IllegalStateException("상품 재고 차감 실패: " + response.getMessage());
+        }
+
         return new OrderResponseDto().fromEntity(order);
     }
 
@@ -91,11 +105,17 @@ public class OrderServiceV1 {
             throw new BusinessException(ApiStatus.CONFLICT);
         }
 
-//        int stock = validateProduct(order.getProductId());
+        int stock = validateProduct(order.getProductId());
 
-//        if(stock == 0 || stock < requestDto.getQuantity()) {
-//            throw new RuntimeException("재고가 부족합니다.");
-//        }
+        if(stock == 0 || stock < requestDto.getQuantity()) {
+            throw new RuntimeException("재고가 부족합니다.");
+        }
+
+        ApiResponse<Void> response = productClient.decreaseStock(order.getProductId(), requestDto.getQuantity() - order.getQuantity());
+
+        if (!"200".equals(response.getCode())) {
+            throw new IllegalStateException("상품 재고 차감 실패: " + response.getMessage());
+        }
 
         order.update(requestDto);
         order.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
@@ -129,7 +149,12 @@ public class OrderServiceV1 {
         return new OrderResponseDto().fromEntity(order);
     }
 
-//    public void validateCompany(UUID companyId) {
+    public void setDelivery(UUID orderId, UUID deliveryId) {
+        OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
+        order.setDelivery(deliveryId);
+    }
+
+    //    public void validateCompany(UUID companyId) {
 //        CompanyDto company = companyClient.getCompanyById(companyId);
 //
 //        if (company == null) {
@@ -137,12 +162,13 @@ public class OrderServiceV1 {
 //        }
 //    }
 //
-//    public int validateProduct(UUID productId) {
-//        ProductDto product = productClient.getProductById(productId);
-//
-//        if (product == null || product.getProductName().equals("UNKNOWN")) {
-//            throw new IllegalArgumentException("존재하지 않는 상품 ID입니다: " + productId);
-//        }
-//        return product.getStock();
-//    }
+    public Integer validateProduct(UUID productId) {
+        ApiResponse<ProductDto> response = productClient.getProductById(productId);
+
+        if (response == null || response.getData() == null) {
+            throw new IllegalStateException("상품 정보를 불러올 수 없습니다.");
+        }
+
+        return response.getData().getStock();
+    }
 }

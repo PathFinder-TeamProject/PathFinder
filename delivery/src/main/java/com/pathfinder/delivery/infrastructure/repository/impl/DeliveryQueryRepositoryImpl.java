@@ -26,7 +26,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepository {
     public Page<DeliveryEntity> searchDeliveries(
         UUID hubId,
         DeliveryStatus status,
-        UUID deliveryManagerId,
+        Long deliveryManagerId,
         Pageable pageable
     ) {
         QDeliveryEntity delivery = QDeliveryEntity.deliveryEntity;
@@ -70,7 +70,7 @@ public class DeliveryQueryRepositoryImpl implements DeliveryQueryRepository {
         return status != null ? QDeliveryEntity.deliveryEntity.status.eq(status) : null;
     }
 
-    private BooleanExpression deliveryManagerIdEq(UUID deliveryManagerId) {
+    private BooleanExpression deliveryManagerIdEq(Long deliveryManagerId) {
         return deliveryManagerId != null ? QDeliveryEntity.deliveryEntity.deliveryManagerId.eq(deliveryManagerId) : null;
     }
 }

@@ -18,7 +18,7 @@ public class UpdateDeliveryRequestDto {
     private String status;
     private UUID fromHubId;
     private UUID toHubId;
-    private UUID deliveryManagerId;
+    private Long deliveryManagerId;
     private BigDecimal expectedDistance;
     private BigDecimal actualDistance;
     private String deliveryAddress;

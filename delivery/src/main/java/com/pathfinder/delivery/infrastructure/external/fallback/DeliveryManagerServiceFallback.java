@@ -3,7 +3,6 @@ package com.pathfinder.delivery.infrastructure.external.fallback;
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -12,11 +11,10 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@Profile("!local")
 public class DeliveryManagerServiceFallback implements DeliveryManagerServiceClient {
 
     @Override
-    public DeliveryManagerDto getDeliveryManager(UUID deliveryManagerId) {
+    public DeliveryManagerDto getDeliveryManager(Long deliveryManagerId) {
         log.error("Delivery Manager Service Circuit Breaker activated for deliveryManagerId: {}", deliveryManagerId);
         return null;
     }
