@@ -1,9 +1,11 @@
 server:
-  port: 8085
+  port: 8086
 
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/product_db
+    username: pathfinder
+    password: pathfinder123
   redis:
     database: 5
   kafka:
@@ -24,11 +26,11 @@ logging:
 # External Service URLs
 services:
   company-service:
-    url: http://localhost:8086
+    url: http://localhost:8087
   hub-service:
-    url: http://localhost:8084
+    url: http://localhost:8083
   user-service:
     url: http://localhost:8081
   order-service:
-    url: http://localhost:8087
+    url: http://localhost:8084
 

@@ -85,6 +85,9 @@ dependencies {
     implementation "io.micrometer:micrometer-tracing-bridge-brave"
 //    implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
+    // Swagger (OpenAPI 3)
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
+
 }
 
 dependencyManagement {

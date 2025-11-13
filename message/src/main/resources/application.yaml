@@ -2,12 +2,12 @@ spring:
   application:
     name: message-service
   config:
-    import: "configserver:http://localhost:19000"
+    import: optional:configserver:http://localhost:19000
   cloud:
     config:
-      enabled: false
-    import-check:
-      enabled:false
+      name: message-service
+      profile: dev
+      fail-fast: false
 
 slack:
   webhook:
