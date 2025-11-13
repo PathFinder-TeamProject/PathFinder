@@ -226,6 +226,195 @@ PathFinder는 P2P + Hub-to-Hub Relay 알고리즘을 적용합니다.
 ### 🔗 디렉토리 구조
 <details>
     <summary><strong>디렉토리 구조</strong></summary>
+```
+    com.pathfinder
+    ├─ gateway-service
+    │ ├─ config
+    │ │ ├─ GatewayConfig.java
+    │ │ ├─ RedisConfig.java
+    │ │ └─ SecurityConfig.java
+    │ ├─ security
+    │ │ ├─ JwtAuthenticationFilter.java
+    │ │ └─ JwtUtil.java
+    │ ├─ service
+    │ │ └─ UserCacheService.java
+    │ └─ dto
+    │ └─ UserResponseDto.java
+    
+    ├─ eureka-server
+    │ └─ EurekaApplication.java
+    
+    ├─ config-server
+    │ ├─ ConfigApplication.java
+    │ └─ resources/config-repository/
+    │ ├─ user-service-dev.yml
+    │ ├─ order-service-dev.yml
+    │ ├─ delivery-service-dev.yml
+    │ ├─ hub-service-dev.yml
+    │ ├─ message-service-dev.yml
+    │ └─ gateway-service-dev.yml
+    
+    ├─ user-service
+    │ ├─ application
+    │ │ ├─ UserServiceV1.java
+    │ │ ├─ UserDetailsServiceImpl.java
+    │ │ ├─ dto/request/
+    │ │ ├─ exception/
+    │ │ └─ response/
+    │ ├─ domain
+    │ │ ├─ entity/
+    │ │ ├─ enums/
+    │ │ └─ repository/
+    │ ├─ infrastructure
+    │ │ ├─ client/
+    │ │ ├─ config/
+    │ │ │ ├─ redis/
+    │ │ │ └─ security/
+    │ │ └─ repository/
+    │ ├─ jwt/
+    │ └─ presentation
+    │ ├─ controller/
+    │ └─ dto/response/
+    
+    ├─ delivery-manager-service
+    │ ├─ application/
+    │ │ ├─ DeliveryManagerServiceV1.java
+    │ │ ├─ DeliveryManagerInternalServiceV1.java
+    │ │ └─ exception/
+    │ ├─ domain/
+    │ │ ├─ entity/
+    │ │ ├─ enums/
+    │ │ └─ repository/
+    │ ├─ infrastructure/
+    │ │ ├─ cache/
+    │ │ ├─ client/
+    │ │ ├─ config/
+    │ │ │ └─ security/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ └─ dto/response/
+    
+    ├─ hub-service
+    │ ├─ application/
+    │ │ ├─ HubServiceV1.java
+    │ │ ├─ HubRouteService.java
+    │ │ └─ HubManagerService.java
+    │ ├─ domain/
+    │ │ ├─ model/
+    │ │ ├─ enums/
+    │ │ └─ repository/
+    │ ├─ infrastructure/
+    │ │ ├─ client/
+    │ │ ├─ config/
+    │ │ └─ cache/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ ├─ advice/
+    │ └─ dto/
+    
+    ├─ delivery-service
+    │ ├─ application/
+    │ │ ├─ command/
+    │ │ │ └─ service/
+    │ │ ├─ query/
+    │ │ │ └─ service/
+    │ │ ├─ outbox/
+    │ │ ├─ dto/
+    │ │ └─ exception/
+    │ ├─ domain/
+    │ │ ├─ entity/
+    │ │ ├─ enums/
+    │ │ ├─ repository/
+    │ │ ├─ service/
+    │ │ └─ value/
+    │ ├─ infrastructure/
+    │ │ ├─ external/
+    │ │ │ ├─ client/
+    │ │ │ ├─ fallback/
+    │ │ │ ├─ dto/
+    │ │ │ └─ security/
+    │ │ ├─ config/
+    │ │ ├─ messaging/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ └─ controller/
+    
+    ├─ order-service
+    │ ├─ application/
+    │ │ ├─ OrderServiceV1.java
+    │ │ ├─ dto/
+    │ │ └─ exception/
+    │ ├─ domain/
+    │ │ ├─ entity/
+    │ │ ├─ enums/
+    │ │ └─ repository/
+    │ ├─ infrastructure/
+    │ │ ├─ global/
+    │ │ │ ├─ client/
+    │ │ │ ├─ fallback/
+    │ │ │ ├─ dto/
+    │ │ │ └─ security/
+    │ │ ├─ config/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ └─ dto/
+    
+    ├─ product-service
+    │ ├─ application/
+    │ │ ├─ ProductService.java
+    │ │ ├─ dto/
+    │ │ └─ exception/
+    │ ├─ domain/
+    │ │ └─ entity/
+    │ ├─ infrastructure/
+    │ │ ├─ global/
+    │ │ │ ├─ client/
+    │ │ │ ├─ fallback/
+    │ │ │ ├─ dto/
+    │ │ │ └─ security/
+    │ │ ├─ config/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ └─ dto/response/
+    
+    ├─ company-service
+    │ ├─ application/
+    │ │ ├─ CompanyService.java
+    │ │ ├─ dto/
+    │ │ └─ exception/
+    │ ├─ domain/
+    │ │ └─ entity/
+    │ ├─ infrastructure/
+    │ │ ├─ config/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ └─ dto/response/
+    
+    ├─ message-service
+    │ ├─ application/
+    │ │ └─ MessageService.java
+    │ ├─ domain/
+    │ │ ├─ entity/
+    │ │ ├─ enums/
+    │ │ └─ repository/
+    │ ├─ infrastructure/
+    │ │ ├─ config/
+    │ │ ├─ global/
+    │ │ │ └─ security/
+    │ │ └─ repository/
+    │ └─ presentation/
+    │ ├─ controller/
+    │ └─ dto/
+    
+    └─ docker/
+    ├─ docker-compose.yml
+    ├─ docker-compose.infrastructure.yml
+    └─ init-db.sql
+```
 </details>
 
 ---
