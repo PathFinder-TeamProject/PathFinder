@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * 배송 경로 생성을 담당하는 Domain Service
- * 경로 계산 결과를 기반으로 DeliveryRoute Entity를 생성합니다.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -26,10 +22,8 @@ public class DeliveryRouteFactory {
 
     private final HubServiceClient hubServiceClient;
     private final RouteCalculationService routeCalculationService;
+    private final DeliveryManagerAssignmentService deliveryManagerAssignmentService;
 
-    /**
-     * 경로를 계산하고 총 예상 거리를 반환합니다.
-     */
     public RouteCalculationResult calculateRoute(UUID fromHubId, UUID toHubId, BigDecimal expectedDistance) {
         if (fromHubId == null || toHubId == null) {
             return new RouteCalculationResult(null, expectedDistance);
@@ -46,13 +40,10 @@ public class DeliveryRouteFactory {
         return new RouteCalculationResult(path, totalDistance);
     }
 
-    /**
-     * 계산된 경로를 기반으로 DeliveryRoute Entity 리스트를 생성합니다.
-     */
     public List<DeliveryRouteEntity> createRoutes(
             UUID deliveryId,
             List<UUID> routePath,
-            UUID deliveryManagerId) {
+            Long deliveryManagerId) {
         
         List<DeliveryRouteEntity> routes = new ArrayList<>();
         
@@ -66,6 +57,8 @@ public class DeliveryRouteFactory {
             
             HubRouteDto hubRoute = hubServiceClient.findRouteByDepartAndArrive(fromHub, toHub);
             
+            Long hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
+            
             DeliveryRouteEntity route = CreateDeliveryRouteCommandDto.createRouteWithHubInfo(
                 deliveryId,
                 fromHub,
@@ -74,7 +67,7 @@ public class DeliveryRouteFactory {
                 hubRoute != null ? hubRoute.getTime() : null,
                 hubRoute != null && hubRoute.getDistance() != null ? 
                     BigDecimal.valueOf(hubRoute.getDistance()) : null,
-                deliveryManagerId
+                hubManagerId
             );
             
             routes.add(route);
@@ -83,15 +76,15 @@ public class DeliveryRouteFactory {
         return routes;
     }
 
-    /**
-     * 초기 경로 기록을 생성합니다 (경로가 계산되지 않은 경우).
-     */
     public DeliveryRouteEntity createInitialRoute(
             UUID deliveryId,
             UUID fromHubId,
             UUID toHubId,
             BigDecimal expectedDistance,
-            UUID deliveryManagerId) {
+            Long deliveryManagerId) {
+        
+        Long hubManagerId = fromHubId != null ? 
+            deliveryManagerAssignmentService.assignDeliveryManager(fromHubId, "HUB") : null;
         
         return CreateDeliveryRouteCommandDto.createRouteWithHubInfo(
             deliveryId,
@@ -100,7 +93,7 @@ public class DeliveryRouteFactory {
             0,
             null,
             expectedDistance,
-            deliveryManagerId
+            hubManagerId
         );
     }
 }

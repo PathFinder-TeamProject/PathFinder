@@ -17,5 +17,6 @@ public class DeliveryManagerDto {
     private String type;
     private Integer deliveryOrder;
     private UUID hubId;
+    private String slackId;
 }
 

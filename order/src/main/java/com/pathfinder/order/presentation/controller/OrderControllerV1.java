@@ -65,4 +65,10 @@ public class OrderControllerV1 {
         return ResponseEntity.status(ApiStatus.OK.getCode())
                 .body(ApiResponseDto.success(ApiStatus.OK, orderService.getOrder(orderId), "주문 상세 조회 성공"));
     }
+
+    @PutMapping("/{orderId}/delivery")
+    public ResponseEntity<Void> setDelivery(@PathVariable UUID orderId, @RequestBody UUID deliveryId) {
+        orderService.setDelivery(orderId, deliveryId);
+        return ResponseEntity.ok().build();
+    }
 }

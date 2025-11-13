@@ -19,7 +19,7 @@ public class OrderCreateRequestDto {
 
     private UUID receiverId;
 
-    private long quantity;
+    private int quantity;
 
     private String request;
 

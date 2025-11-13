@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.function.Consumer;
 import java.util.UUID;
 
 @Entity
@@ -37,7 +38,7 @@ public class DeliveryEntity extends BaseEntity {
     private UUID toHubId;
 
     @Column(name = "delivery_manager_id", nullable = false)
-    private UUID deliveryManagerId;
+    private Long deliveryManagerId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -60,39 +61,34 @@ public class DeliveryEntity extends BaseEntity {
     private String receiverSlackId;
 
     public boolean updateWithCommand(UpdateDeliveryCommandDto command, DeliveryStatus validatedStatus) {
-        boolean statusChanged = false;
-        
+        boolean statusChanged = updateStatusIfChanged(validatedStatus);
+        updateDeliveryFields(command);
+        return statusChanged;
+    }
+
+    private boolean updateStatusIfChanged(DeliveryStatus validatedStatus) {
         if (validatedStatus != null && this.status != validatedStatus) {
             this.status = validatedStatus;
-            statusChanged = true;
+            return true;
         }
-        
-        if (command.getExpectedDistance() != null) {
-            this.expectedDistance = command.getExpectedDistance();
+        return false;
+    }
+
+    private void updateDeliveryFields(UpdateDeliveryCommandDto command) {
+        updateIfNotNull(command.getExpectedDistance(), value -> this.expectedDistance = value);
+        updateIfNotNull(command.getActualDistance(), value -> this.actualDistance = value);
+        updateIfNotNull(command.getDeliveryAddress(), value -> this.deliveryAddress = value);
+        updateIfNotNull(command.getReceiverName(), value -> this.receiverName = value);
+        updateIfNotNull(command.getReceiverSlackId(), value -> this.receiverSlackId = value);
+        updateIfNotNull(command.getFromHubId(), value -> this.fromHubId = value);
+        updateIfNotNull(command.getToHubId(), value -> this.toHubId = value);
+        updateIfNotNull(command.getDeliveryManagerId(), value -> this.deliveryManagerId = value);
+    }
+
+    private <T> void updateIfNotNull(T value, Consumer<T> setter) {
+        if (value != null) {
+            setter.accept(value);
         }
-        if (command.getActualDistance() != null) {
-            this.actualDistance = command.getActualDistance();
-        }
-        if (command.getDeliveryAddress() != null) {
-            this.deliveryAddress = command.getDeliveryAddress();
-        }
-        if (command.getReceiverName() != null) {
-            this.receiverName = command.getReceiverName();
-        }
-        if (command.getReceiverSlackId() != null) {
-            this.receiverSlackId = command.getReceiverSlackId();
-        }
-        if (command.getFromHubId() != null) {
-            this.fromHubId = command.getFromHubId();
-        }
-        if (command.getToHubId() != null) {
-            this.toHubId = command.getToHubId();
-        }
-        if (command.getDeliveryManagerId() != null) {
-            this.deliveryManagerId = command.getDeliveryManagerId();
-        }
-        
-        return statusChanged;
     }
 
     public void cancel() {

@@ -1,21 +1,16 @@
-package com.pathfinder.delivery.infrastructure.external.security.auth;
+package com.pathfinder.product.infrastructure.security.auth;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.Collections;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.AccessLevel;
-
-import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Getter
 @Builder

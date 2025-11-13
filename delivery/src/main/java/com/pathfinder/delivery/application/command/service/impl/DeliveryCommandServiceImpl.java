@@ -14,10 +14,13 @@ import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import com.pathfinder.delivery.domain.service.DeliveryStatusValidator;
 import com.pathfinder.delivery.domain.service.DeliveryValidator;
 import com.pathfinder.delivery.domain.service.DeliveryRouteFactory;
+import com.pathfinder.delivery.domain.service.DeliveryManagerAssignmentService;
 import com.pathfinder.delivery.domain.value.RouteCalculationResult;
 import com.pathfinder.delivery.application.command.service.DeliveryCommandService;
 import com.pathfinder.delivery.application.outbox.DeliveryOutboxService;
-import com.pathfinder.delivery.infrastructure.external.security.auth.CustomUserDetails;
+import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClient;
+import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
+import com.pathfinder.delivery.infrastructure.external.security.filter.JwtAuthorizationFilter.GatewayPrincipal;
 import com.pathfinder.global.presentation.exception.PathException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +29,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -42,30 +46,62 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     private final DeliveryRouteFactory routeFactory;
     private final DeliveryOutboxService deliveryOutboxService;
     private final DeliveryStatusValidator statusValidator;
+    private final MessageServiceClient messageServiceClient;
+    private final DeliveryManagerAssignmentService deliveryManagerAssignmentService;
+    private final DeliveryManagerServiceClient deliveryManagerServiceClient;
 
     @Override
     @Transactional
     public DeliveryDto createDelivery(CreateDeliveryCommandDto command) {
         log.info("Creating delivery for orderId: {}", command.getOrderId());
-        
+
+        validateDeliveryCreation(command);
+        RouteCalculationResult routeResult = calculateRoute(command);
+        DeliveryEntity savedDelivery = createAndSaveDelivery(command, routeResult);
+        createAndSaveDeliveryRoutes(savedDelivery, command, routeResult);
+        publishDeliveryCreatedEvent(savedDelivery);
+        sendSlackNotification(savedDelivery, command);
+
+        return savedDelivery.toDeliveryDto();
+    }
+
+    private void validateDeliveryCreation(CreateDeliveryCommandDto command) {
         deliveryValidator.validateAndGetOrder(command.getOrderId());
-
         deliveryValidator.validateAndGetHub(command.getFromHubId());
+        if (command.getDeliveryManagerId() != null) {
+            deliveryValidator.validateAndGetDeliveryManager(command.getDeliveryManagerId());
+        }
+    }
 
-        deliveryValidator.validateAndGetDeliveryManager(command.getDeliveryManagerId());
+    private RouteCalculationResult calculateRoute(CreateDeliveryCommandDto command) {
+        return routeFactory.calculateRoute(
+            command.getFromHubId(),
+            command.getToHubId(),
+            command.getExpectedDistance()
+        );
+    }
 
-        RouteCalculationResult routeResult = 
-            routeFactory.calculateRoute(command.getFromHubId(), command.getToHubId(), command.getExpectedDistance());
+    private DeliveryEntity createAndSaveDelivery(CreateDeliveryCommandDto command, RouteCalculationResult routeResult) {
+        CreateDeliveryCommandDto commandWithManager = ensureDeliveryManagerAssigned(command);
+        DeliveryEntity delivery = commandWithManager.toEntity(routeResult.getTotalExpectedDistance());
+        return deliveryRepository.save(delivery);
+    }
 
-        DeliveryEntity delivery = command.toEntity(routeResult.getTotalExpectedDistance());
-        DeliveryEntity savedDelivery = deliveryRepository.save(delivery);
+    private CreateDeliveryCommandDto ensureDeliveryManagerAssigned(CreateDeliveryCommandDto command) {
+        if (command.getDeliveryManagerId() != null) {
+            return command;
+        }
+        Long assignedManagerId = deliveryManagerAssignmentService.assignDeliveryManager(command.getToHubId());
+        return command.withDeliveryManagerId(assignedManagerId);
+    }
 
+    private void createAndSaveDeliveryRoutes(DeliveryEntity savedDelivery, CreateDeliveryCommandDto command, RouteCalculationResult routeResult) {
         if (routeResult.hasValidPath()) {
             List<DeliveryRouteEntity> routes = routeFactory.createRoutes(
-                    savedDelivery.getDeliveryId(),
+                savedDelivery.getDeliveryId(),
                 routeResult.getPath(),
-                    command.getDeliveryManagerId()
-                );
+                command.getDeliveryManagerId()
+            );
             routeRepository.saveAll(routes);
         } else {
             DeliveryRouteEntity initialRoute = routeFactory.createInitialRoute(
@@ -77,11 +113,56 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
             );
             routeRepository.save(initialRoute);
         }
+    }
 
-        DeliveryEventDto event = savedDelivery.toEvent("CREATED");
+    private void publishDeliveryCreatedEvent(DeliveryEntity delivery) {
+        DeliveryEventDto event = delivery.toEvent("CREATED");
         deliveryOutboxService.enqueue(event);
+    }
 
-        return savedDelivery.toDeliveryDto();
+    private void sendSlackNotification(DeliveryEntity delivery, CreateDeliveryCommandDto command) {
+        try {
+            if (delivery.getFromHubId() != null && delivery.getDeliveryManagerId() != null) {
+                String senderUsername = getCurrentUserId();
+                List<DeliveryManagerDto> hubManagers = 
+                    deliveryManagerServiceClient.getDeliveryManagersByHubAndType(delivery.getFromHubId(), "HUB");
+                
+                if (hubManagers != null && !hubManagers.isEmpty() && 
+                    senderUsername != null && !senderUsername.equals("system")) {
+                    String receiverUsername = hubManagers.get(0).getUsername();
+                    
+                    MessageRequestDto messageRequest = MessageRequestDto.builder()
+                        .request(buildDeliveryNotificationMessage(delivery, command))
+                        .senderId(senderUsername)
+                        .receiverId(receiverUsername)
+                        .build();
+                    
+                    messageServiceClient.sendSlackMessage(messageRequest);
+                    log.info("Slack notification sent for delivery: {} from sender: {} to receiver: {}", 
+                        delivery.getDeliveryId(), senderUsername, receiverUsername);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to send slack notification for delivery: {}", delivery.getDeliveryId(), e);
+        }
+    }
+
+    private String buildDeliveryNotificationMessage(DeliveryEntity delivery, CreateDeliveryCommandDto command) {
+        return String.format(
+            "배송이 생성되었습니다.\n" +
+            "배송 ID: %s\n" +
+            "주문 ID: %s\n" +
+            "출발 허브: %s\n" +
+            "목적지 허브: %s\n" +
+            "배송지 주소: %s\n" +
+            "수령자: %s",
+            delivery.getDeliveryId(),
+            delivery.getOrderId(),
+            delivery.getFromHubId(),
+            delivery.getToHubId(),
+            command.getDeliveryAddress() != null ? command.getDeliveryAddress() : "미지정",
+            command.getReceiverName() != null ? command.getReceiverName() : "미지정"
+        );
     }
 
     @Override
@@ -89,28 +170,45 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     @CacheEvict(value = "delivery", key = "#command.deliveryId")
     public DeliveryDto updateDelivery(UpdateDeliveryCommandDto command) {
         log.info("Updating delivery: {}", command.getDeliveryId());
-        
-        DeliveryEntity delivery = deliveryRepository.findById(command.getDeliveryId())
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
+        DeliveryEntity delivery = findDeliveryById(command.getDeliveryId());
+        validateDeliveryManagerIfPresent(command);
+        DeliveryStatus validatedStatus = validateAndGetNewStatus(command, delivery);
+        boolean statusChanged = updateDeliveryEntity(delivery, command, validatedStatus);
+        DeliveryEntity savedDelivery = deliveryRepository.save(delivery);
+        publishDeliveryUpdatedEvent(savedDelivery, statusChanged);
+
+        return savedDelivery.toDeliveryDto();
+    }
+
+    private DeliveryEntity findDeliveryById(UUID deliveryId) {
+        return deliveryRepository.findById(deliveryId)
+            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
+    }
+
+    private void validateDeliveryManagerIfPresent(UpdateDeliveryCommandDto command) {
         if (command.getDeliveryManagerId() != null) {
             deliveryValidator.validateAndGetDeliveryManager(command.getDeliveryManagerId());
         }
+    }
 
-        DeliveryStatus validatedStatus = null;
+    private DeliveryStatus validateAndGetNewStatus(UpdateDeliveryCommandDto command, DeliveryEntity delivery) {
         if (command.getStatus() != null) {
             DeliveryStatus newStatus = DeliveryStatus.valueOf(command.getStatus());
-                statusValidator.validateStatusTransition(delivery.getStatus(), newStatus);
-            validatedStatus = newStatus;
-            }
+            statusValidator.validateStatusTransition(delivery.getStatus(), newStatus);
+            return newStatus;
+        }
+        return null;
+    }
 
-        boolean statusChanged = delivery.updateWithCommand(command, validatedStatus);
+    private boolean updateDeliveryEntity(DeliveryEntity delivery, UpdateDeliveryCommandDto command, DeliveryStatus validatedStatus) {
+        return delivery.updateWithCommand(command, validatedStatus);
+    }
 
+    private void publishDeliveryUpdatedEvent(DeliveryEntity delivery, boolean statusChanged) {
         String eventType = delivery.determineUpdateEventType(statusChanged);
         DeliveryEventDto event = delivery.toEvent(eventType);
         deliveryOutboxService.enqueue(event);
-
-        return delivery.toDeliveryDto();
     }
 
     @Override
@@ -118,26 +216,28 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     @CacheEvict(value = "delivery", key = "#id")
     public void deleteDelivery(UUID id) {
         log.info("Deleting delivery: {}", id);
-        
-        DeliveryEntity delivery = deliveryRepository.findById(id)
-            .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_NOT_FOUND));
 
+        DeliveryEntity delivery = findDeliveryById(id);
+        cancelAndSoftDeleteDelivery(delivery, id);
+        publishDeliveryCancelledEvent(delivery);
+    }
+
+    private void cancelAndSoftDeleteDelivery(DeliveryEntity delivery, UUID id) {
         delivery.cancel();
-        // 현재 인증된 사용자 ID 사용 (시스템 작업의 경우 "0")
-        deliveryRepository.softDelete(id, getCurrentUserIdAsString());
+        deliveryRepository.softDelete(id, getCurrentUserId());
+    }
 
+    private void publishDeliveryCancelledEvent(DeliveryEntity delivery) {
         DeliveryEventDto event = delivery.toEvent("CANCELLED");
         deliveryOutboxService.enqueue(event);
     }
 
   
-    private String getCurrentUserIdAsString() {
+    private String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-            // UUID를 Long으로 변환할 수 없으므로 mostSignificantBits 사용
-            long userId = Math.abs(userDetails.getId().getMostSignificantBits());
-            return String.valueOf(userId);
+        if (authentication != null && authentication.getPrincipal() instanceof GatewayPrincipal principal) {
+            return principal.username();
         }
-        return "0";
+        return "system";
     }
 }

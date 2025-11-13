@@ -38,46 +38,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-            .csrf(csrf -> csrf.disable())
-            .formLogin(form -> form.disable())
-            .httpBasic(basic -> basic.disable())
-            .logout(logout -> logout.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
-            .exceptionHandling(handler -> handler
-                .authenticationEntryPoint(customAuthenticationEntryPoint)
-                .accessDeniedHandler(customAccessDeniedHandler))
-            .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
-            .authorizeHttpRequests(authorize -> {
-                if ("dev".equalsIgnoreCase(activeProfile)) {
-                    authorize.requestMatchers("/h2/**").permitAll();
-                } else {
-                    authorize.requestMatchers("/h2/**").denyAll();
-                }
-
-                authorize.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
-                authorize.requestMatchers(
-                    "/css/**",
-                    "/js/**",
-                    "/assets/**",
-                    "/springdoc/**",
-                    "/favicon.ico",
-                    "/docs/**",
-                    "/swagger-ui/**",
-                    "/actuator/health",
-                    "/actuator/info"
-                ).permitAll();
-                authorize.requestMatchers(
-                    "/v3/api-docs/**",
-                    "/swagger-ui.html"
-                ).permitAll();
-                authorize.requestMatchers("/actuator/**").hasRole("MASTER");
-                authorize.anyRequest().authenticated();
-            });
+                .csrf(csrf -> csrf.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .logout(logout -> logout.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+                .exceptionHandling(handler -> handler
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
+                // 🔥 JWT 필터 완전 제거
+                //.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                // 🔓 모든 요청 허용
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
         return httpSecurity.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
