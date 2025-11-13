@@ -26,7 +26,6 @@
 - MSA 구조 기반의 **독립적 서비스 운영**
 - **JWT 인증** 기반 사용자 권한 관리
 - **P2P + Hub-to-Hub Relay** 방식의 효율적인 배송 경로 관리
-- **Slack API**를 통한 주문/배송 실시간 알림
 - **논리적 삭제(Soft Delete)** 및 **Audit 필드 관리**
 - **FeignClient**를 통한 마이크로서비스 간 통신
 
@@ -68,7 +67,7 @@
 ## 2. 프로젝트 관리
 
 ### 📅 개발 기간
-2025.09.29 ~ 2025.10.31
+2025.10.31 ~ 2025.11.13
 
 <details>
 <summary><strong>협업 라이프사이클</strong></summary>
@@ -184,7 +183,7 @@ ERD 이미지 삽입 예정
 | **Delivery Service** | 배송 상태 추적 및 경로 이력 관리                 |
 | **Company Service**  | 업체 정보 및 허브 소속 관리                    |
 | **Product Service**  | 상품 정보 CRUD                          |
-| **Slack Service**    | 주문·배송 이벤트 실시간 알림 전송                 |
+
 
 🚚 허브 간 이동 방식
 PathFinder는 P2P + Hub-to-Hub Relay 알고리즘을 적용합니다.
