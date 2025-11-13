@@ -16,5 +16,10 @@ public class OrderServiceFallback implements OrderServiceClient {
         log.error("Order Service Circuit Breaker activated for orderId: {}", orderId);
         return null;
     }
+
+    @Override
+    public void delivery(UUID orderId, UUID deliveryId) {
+        log.error("배송 지정 실패 orderId: {}", orderId);
+    }
 }
 

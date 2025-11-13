@@ -18,6 +18,7 @@ import com.pathfinder.delivery.domain.service.DeliveryManagerAssignmentService;
 import com.pathfinder.delivery.domain.value.RouteCalculationResult;
 import com.pathfinder.delivery.application.command.service.DeliveryCommandService;
 import com.pathfinder.delivery.application.outbox.DeliveryOutboxService;
+import com.pathfinder.delivery.infrastructure.external.OrderServiceClient;
 import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
 import com.pathfinder.delivery.infrastructure.external.security.filter.JwtAuthorizationFilter.GatewayPrincipal;
@@ -49,6 +50,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     private final MessageServiceClient messageServiceClient;
     private final DeliveryManagerAssignmentService deliveryManagerAssignmentService;
     private final DeliveryManagerServiceClient deliveryManagerServiceClient;
+    private final OrderServiceClient orderServiceClient;
 
     @Override
     @Transactional
@@ -61,6 +63,8 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         createAndSaveDeliveryRoutes(savedDelivery, command, routeResult);
         publishDeliveryCreatedEvent(savedDelivery);
         sendSlackNotification(savedDelivery, command);
+
+        orderServiceClient.delivery(command.getOrderId(), savedDelivery.getDeliveryId());
 
         return savedDelivery.toDeliveryDto();
     }
