@@ -8,3 +8,10 @@ spring:
       name: order-service
       profile: dev
       fail-fast: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    prefer-ip-address: false
+    hostname: order-service

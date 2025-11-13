@@ -7,17 +7,20 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DeliveryManagerResponseDto {
 
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     private String username;
     private Integer deliveryOrder;
     private DeliveryManagerTypeEnum type;
 
+    private UUID hubId;
     private HubInfoDto hubInfo;
     private UserInfoDto userInfo;
 
@@ -36,28 +39,56 @@ public class DeliveryManagerResponseDto {
                 .username(deliveryManager.getUsername())
                 .deliveryOrder(deliveryManager.getDeliveryOrder())
                 .type(deliveryManager.getType())
-/*              .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getIsDeleted())*/
                 .hubInfo(hubInfo)
                 .userInfo(userInfo)
                 .build();
     }
 
-    // 상세보기용 DTO (추후 UserService, HubService 연동 시 확장)
-    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager, UserInfoDto userInfoDto) {
-        HubInfoDto hubInfo = HubInfoDto.builder()
-                .hubId(deliveryManager.getHubId())
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager,HubInfoDto hubInfoDto, UserInfoDto userInfoDto) {
+        return DeliveryManagerResponseDto.builder()
+                .username(userInfoDto.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubInfo(hubInfoDto)
+                .userInfo(userInfoDto)
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
                 .build();
+    }
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager) {
+        return DeliveryManagerResponseDto.builder()
+                .username(deliveryManager.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubInfo(HubInfoDto.builder()
+                        .hubId(deliveryManager.getHubId())
+                        .build())
+                .userInfo(UserInfoDto.builder()
+                        .username(deliveryManager.getUsername())
+                        .build())
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+                .build();
+    }
+
+    public static DeliveryManagerResponseDto toDto(DeliveryManagerEntity deliveryManager) {
+        return DeliveryManagerResponseDto.builder()
+                .username(deliveryManager.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubId(deliveryManager.getHubId())
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+                .build();
+    }
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager, UserInfoDto userInfoDto) {
 
         return DeliveryManagerResponseDto.builder()
                 .username(userInfoDto.getUsername())
                 .deliveryManagerId(deliveryManager.getDeliveryManagerId())
-                .hubInfo(hubInfo)
+                .hubInfo(HubInfoDto.builder()
+                        .hubId(deliveryManager.getHubId())
+                        .build())
                 .userInfo(userInfoDto)
                 .deliveryOrder(deliveryManager.getDeliveryOrder())
                 .type(deliveryManager.getType())
-                    /* .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getIsDeleted())*/
                 .build();
     }
 }

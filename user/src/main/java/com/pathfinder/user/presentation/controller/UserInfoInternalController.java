@@ -15,26 +15,15 @@ public class UserInfoInternalController {
 
     private final UserServiceV1 userService;
 
-    /**
-     * 내부 서비스용 사용자 정보 조회 API
-     * DeliveryManager 서비스에서 FeignClient로 호출
-     * @param username 조회할 사용자명
-     * @return 사용자 정보 DTO
-     */
+    //내부 서비스용 사용자 정보 조회 API
     @GetMapping("/{username}")
     public ResponseEntity<UserResponseDto> getUserInfo(@PathVariable String username) {
-        log.info("[User Service] 사용자 정보 조회 요청 (Feign) - Username: {}", username);
 
         try {
-            // @Cacheable이 적용된 메서드 호출 (캐싱 유지)
-            UserEntity userEntity = userService.findUser(username);
-            UserResponseDto userInfo = UserResponseDto.of(userEntity);
-
-            log.info("[User Service] 사용자 정보 조회 완료 (Feign) - Username: {}", username);
+            UserResponseDto userInfo = UserResponseDto.of(userService.findUser(username));
             return ResponseEntity.ok(userInfo);
 
         } catch (Exception e) {
-            log.error("[User Service] 사용자 조회 중 오류 발생 - Username: {}", username, e);
             return ResponseEntity.notFound().build();
         }
     }

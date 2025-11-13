@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.UUID;
 
 @FeignClient(
-    name = "delivery-manager-service", 
-    path = "/internal/delivery-managers",
-    fallback = DeliveryManagerServiceFallback.class
+        name = "delivery-manager-service",
+        path = "/internal",
+        fallback = DeliveryManagerServiceFallback.class
 )
 public interface DeliveryManagerServiceClient {
     
     @GetMapping("/{deliveryManagerId}")
-    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
+    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") Long deliveryManagerId);
     
     @GetMapping("/hub/{hubId}")
     List<DeliveryManagerDto> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);

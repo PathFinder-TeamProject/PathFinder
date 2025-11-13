@@ -19,7 +19,7 @@ public class UserCacheService {
 
     public Mono<UserResponseDto> getUser(String username) {
         return webClient.get()
-                .uri("/v1/users/{username}", username)
+                .uri("/api//users/{username}", username)
                 .retrieve()
                 .bodyToMono(UserResponseDto.class);
     }
