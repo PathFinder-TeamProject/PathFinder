@@ -60,7 +60,7 @@ public class DeliveryQueryServiceImpl implements DeliveryQueryService {
     public Page<DeliveryDto> searchDeliveries(
         UUID hubId,
         DeliveryStatus status,
-        Long deliveryManagerId,
+        UUID deliveryManagerId,
         Pageable pageable
     ) {
         log.debug("Searching deliveries with filters: hubId={}, status={}, managerId={}", hubId, status, deliveryManagerId);

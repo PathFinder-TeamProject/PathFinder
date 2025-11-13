@@ -14,7 +14,7 @@ import java.util.UUID;
 public class DeliveryManagerServiceFallback implements DeliveryManagerServiceClient {
 
     @Override
-    public DeliveryManagerDto getDeliveryManager(Long deliveryManagerId) {
+    public DeliveryManagerDto getDeliveryManager(UUID deliveryManagerId) {
         log.error("Delivery Manager Service Circuit Breaker activated for deliveryManagerId: {}", deliveryManagerId);
         return null;
     }

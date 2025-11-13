@@ -85,7 +85,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto fromHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(1L)
+                .deliveryManagerId(UUID.randomUUID())
                 .username("hub_manager_a")
                 .slackId("slack_id_a")
                 .type("HUB")
@@ -93,7 +93,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto toHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(2L)
+                .deliveryManagerId(UUID.randomUUID())
                 .username("hub_manager_b")
                 .slackId("slack_id_b")
                 .type("HUB")
@@ -135,7 +135,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto fromHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(1L)
+                .deliveryManagerId(UUID.randomUUID())
                 .username("hub_manager_a")
                 .slackId("slack_id_a")
                 .type("HUB")
@@ -143,7 +143,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto toHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(2L)
+                .deliveryManagerId(UUID.randomUUID())
                 .username("hub_manager_b")
                 .slackId("slack_id_b")
                 .type("HUB")

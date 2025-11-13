@@ -91,7 +91,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         if (command.getDeliveryManagerId() != null) {
             return command;
         }
-        Long assignedManagerId = deliveryManagerAssignmentService.assignDeliveryManager(command.getToHubId());
+        UUID assignedManagerId = deliveryManagerAssignmentService.assignDeliveryManager(command.getToHubId());
         return command.withDeliveryManagerId(assignedManagerId);
     }
 

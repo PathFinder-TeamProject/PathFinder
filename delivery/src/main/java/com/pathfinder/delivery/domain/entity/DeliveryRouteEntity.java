@@ -60,7 +60,7 @@ public class DeliveryRouteEntity extends BaseEntity {
     private BigDecimal expectedDistance;
 
     @Column(name = "delivery_manager_id")
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
 
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
@@ -122,7 +122,7 @@ public class DeliveryRouteEntity extends BaseEntity {
         }
     }
 
-    private void updateManagerIdIfPresent(Long deliveryManagerId) {
+    private void updateManagerIdIfPresent(UUID deliveryManagerId) {
         if (deliveryManagerId != null) {
             this.deliveryManagerId = deliveryManagerId;
         }

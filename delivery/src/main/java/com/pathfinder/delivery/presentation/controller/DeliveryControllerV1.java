@@ -73,7 +73,7 @@ public class DeliveryControllerV1 {
     public ResponseEntity<ApiResponse<Page<DeliveryResponseDto>>> searchDeliveries(
         @RequestParam(required = false) UUID hubId,
         @RequestParam(required = false) String status,
-        @RequestParam(required = false) Long deliveryManagerId,
+        @RequestParam(required = false) UUID deliveryManagerId,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "createdAt") String sortBy,

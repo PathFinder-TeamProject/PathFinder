@@ -54,8 +54,8 @@ class DeliveryRouteFactoryTest {
         UUID hubC = UUID.randomUUID();
         List<UUID> routePath = List.of(hubA, hubB, hubC);
 
-        Long hubManagerA = 10L;
-        Long hubManagerB = 20L;
+        UUID hubManagerA = UUID.randomUUID();
+        UUID hubManagerB = UUID.randomUUID();
 
         HubRouteDto routeAB = HubRouteDto.builder()
                 .time(60)
@@ -79,7 +79,7 @@ class DeliveryRouteFactoryTest {
         List<DeliveryRouteEntity> routes = routeFactory.createRoutes(
                 deliveryId,
                 routePath,
-                1L      
+                UUID.randomUUID()      
         );
 
         // then
@@ -112,7 +112,7 @@ class DeliveryRouteFactoryTest {
         UUID fromHubId = UUID.randomUUID();
         UUID toHubId = UUID.randomUUID();
         BigDecimal expectedDistance = BigDecimal.valueOf(100.5);
-        Long hubManagerId = 10L;
+        UUID hubManagerId = UUID.randomUUID();
 
         when(deliveryManagerAssignmentService.assignDeliveryManager(fromHubId, "HUB"))
                 .thenReturn(hubManagerId);
@@ -123,7 +123,7 @@ class DeliveryRouteFactoryTest {
                 fromHubId,
                 toHubId,
                 expectedDistance,
-                1L
+                UUID.randomUUID()
         );
 
         // then

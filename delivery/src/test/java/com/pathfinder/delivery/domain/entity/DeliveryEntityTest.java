@@ -18,7 +18,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -46,7 +46,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -74,7 +74,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -96,7 +96,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -118,7 +118,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -139,7 +139,7 @@ class DeliveryEntityTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity delivery = DeliveryEntity.builder()
                 .deliveryId(deliveryId)

@@ -40,7 +40,7 @@ public class DeliveryValidator {
         return hub;
     }
 
-    public DeliveryManagerDto validateAndGetDeliveryManager(Long deliveryManagerId) {
+    public DeliveryManagerDto validateAndGetDeliveryManager(UUID deliveryManagerId) {
         DeliveryManagerDto manager = deliveryManagerServiceClient.getDeliveryManager(deliveryManagerId);
         if (manager == null) {
             throw new PathException(DeliveryErrorCode.DELIVERY_MANAGER_NOT_FOUND);

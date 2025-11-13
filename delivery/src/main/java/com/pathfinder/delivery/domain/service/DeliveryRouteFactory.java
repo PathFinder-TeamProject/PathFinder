@@ -43,7 +43,7 @@ public class DeliveryRouteFactory {
     public List<DeliveryRouteEntity> createRoutes(
             UUID deliveryId,
             List<UUID> routePath,
-            Long deliveryManagerId) {
+            UUID deliveryManagerId) {
         
         List<DeliveryRouteEntity> routes = new ArrayList<>();
         
@@ -57,7 +57,7 @@ public class DeliveryRouteFactory {
             
             HubRouteDto hubRoute = hubServiceClient.findRouteByDepartAndArrive(fromHub, toHub);
             
-            Long hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
+            UUID hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
             
             DeliveryRouteEntity route = CreateDeliveryRouteCommandDto.createRouteWithHubInfo(
                 deliveryId,
@@ -81,9 +81,9 @@ public class DeliveryRouteFactory {
             UUID fromHubId,
             UUID toHubId,
             BigDecimal expectedDistance,
-            Long deliveryManagerId) {
+            UUID deliveryManagerId) {
         
-        Long hubManagerId = fromHubId != null ? 
+        UUID hubManagerId = fromHubId != null ? 
             deliveryManagerAssignmentService.assignDeliveryManager(fromHubId, "HUB") : null;
         
         return CreateDeliveryRouteCommandDto.createRouteWithHubInfo(

@@ -22,14 +22,14 @@ public class CreateDeliveryCommandDto {
     private UUID fromHubId;
     private UUID toHubId;
     
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     
     private BigDecimal expectedDistance;
     private String deliveryAddress;
     private String receiverName;
     private String receiverSlackId;
 
-    public CreateDeliveryCommandDto withDeliveryManagerId(Long deliveryManagerId) {
+    public CreateDeliveryCommandDto withDeliveryManagerId(UUID deliveryManagerId) {
         return CreateDeliveryCommandDto.builder()
                 .orderId(this.orderId)
                 .fromHubId(this.fromHubId)

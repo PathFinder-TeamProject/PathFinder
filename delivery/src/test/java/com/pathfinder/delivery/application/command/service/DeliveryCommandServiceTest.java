@@ -106,7 +106,7 @@ class DeliveryCommandServiceTest {
     void createDelivery_shouldCreateAndSaveDelivery_whenValidCommand() {
         // given
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
         UUID fromHubId = UUID.randomUUID();
         UUID toHubId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
@@ -175,7 +175,7 @@ class DeliveryCommandServiceTest {
     void createDelivery_shouldThrowException_whenSaveFails() {
         // given
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
         CreateDeliveryCommandDto command = CreateDeliveryCommandDto.builder()
                 .orderId(orderId)
                 .deliveryManagerId(deliveryManagerId)
@@ -204,7 +204,7 @@ class DeliveryCommandServiceTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         UpdateDeliveryCommandDto command = UpdateDeliveryCommandDto.builder()
                 .deliveryId(deliveryId)
@@ -266,7 +266,7 @@ class DeliveryCommandServiceTest {
         DeliveryEntity deliveryEntity = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
                 .orderId(UUID.randomUUID())
-                .deliveryManagerId(1L)
+                .deliveryManagerId(UUID.randomUUID())
                 .status(DeliveryStatus.READY)
                 .build();
 
@@ -305,7 +305,7 @@ class DeliveryCommandServiceTest {
         UUID fromHubId = UUID.randomUUID();
         UUID toHubId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
-        Long assignedManagerId = 1L;
+        UUID assignedManagerId = UUID.randomUUID();
         Long receiverId = 12345L;
 
         CreateDeliveryCommandDto command = CreateDeliveryCommandDto.builder()
@@ -367,7 +367,7 @@ class DeliveryCommandServiceTest {
         UUID fromHubId = UUID.randomUUID();
         UUID toHubId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
-        Long managerWithOrder0 = 1L;
+        UUID managerWithOrder0 = UUID.randomUUID();
 
         CreateDeliveryCommandDto command = CreateDeliveryCommandDto.builder()
                 .orderId(orderId)
@@ -413,9 +413,9 @@ class DeliveryCommandServiceTest {
         UUID hubC = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
         
-        Long companyManagerId = 1L;
-        Long hubManagerA = 10L;
-        Long hubManagerB = 20L;
+        UUID companyManagerId = UUID.randomUUID();
+        UUID hubManagerA = UUID.randomUUID();
+        UUID hubManagerB = UUID.randomUUID();
 
         CreateDeliveryCommandDto command = CreateDeliveryCommandDto.builder()
                 .orderId(orderId)

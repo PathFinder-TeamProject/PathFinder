@@ -45,8 +45,8 @@ class DeliveryManagerAssignmentServiceTest {
     void assignDeliveryManager_shouldAssignOrder0_whenFirstAssignment() {
         // given
         UUID hubId = UUID.randomUUID();
-        Long manager0Id = 1L;
-        Long manager1Id = 2L;
+        UUID manager0Id = UUID.randomUUID();
+        UUID manager1Id = UUID.randomUUID();
 
         DeliveryManagerDto dto0 = createManagerDto(manager0Id, 0);
         DeliveryManagerDto dto1 = createManagerDto(manager1Id, 1);
@@ -56,7 +56,7 @@ class DeliveryManagerAssignmentServiceTest {
         when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(null);
 
         // when
-        Long assignedId = assignmentService.assignDeliveryManager(hubId);
+        UUID assignedId = assignmentService.assignDeliveryManager(hubId);
 
         // then
         assertThat(assignedId).isEqualTo(manager0Id);
@@ -68,9 +68,9 @@ class DeliveryManagerAssignmentServiceTest {
             void assignDeliveryManager_shouldAssignNextOrder_whenRoundRobin() {
                 // given
                 UUID hubId = UUID.randomUUID();
-                Long manager0Id = 1L;
-                Long manager1Id = 2L;
-                Long manager2Id = 3L;
+                UUID manager0Id = UUID.randomUUID();
+                UUID manager1Id = UUID.randomUUID();
+                UUID manager2Id = UUID.randomUUID();
 
                 DeliveryManagerDto dto0 = createManagerDto(manager0Id, 0);
                 DeliveryManagerDto dto1 = createManagerDto(manager1Id, 1);
@@ -81,7 +81,7 @@ class DeliveryManagerAssignmentServiceTest {
                 when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(0);
 
                 // when
-                Long assignedId = assignmentService.assignDeliveryManager(hubId);
+                UUID assignedId = assignmentService.assignDeliveryManager(hubId);
 
                 // then
                 assertThat(assignedId).isEqualTo(manager1Id);
@@ -93,8 +93,8 @@ class DeliveryManagerAssignmentServiceTest {
             void assignDeliveryManager_shouldReturnToOrder0_whenLastOrderIsMax() {
                 // given
                 UUID hubId = UUID.randomUUID();
-                Long manager0Id = 1L;
-                Long manager2Id = 3L;
+                UUID manager0Id = UUID.randomUUID();
+                UUID manager2Id = UUID.randomUUID();
 
                 DeliveryManagerDto dto0 = createManagerDto(manager0Id, 0);
                 DeliveryManagerDto dto2 = createManagerDto(manager2Id, 2);
@@ -104,7 +104,7 @@ class DeliveryManagerAssignmentServiceTest {
                 when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(2);
 
                 // when
-                Long assignedId = assignmentService.assignDeliveryManager(hubId);
+                UUID assignedId = assignmentService.assignDeliveryManager(hubId);
 
                 // then
                 assertThat(assignedId).isEqualTo(manager0Id);
@@ -127,7 +127,7 @@ class DeliveryManagerAssignmentServiceTest {
                 .isEqualTo(DeliveryErrorCode.DELIVERY_MANAGER_NOT_FOUND);
     }
 
-    private DeliveryManagerDto createManagerDto(Long managerId, Integer deliveryOrder) {
+    private DeliveryManagerDto createManagerDto(UUID managerId, Integer deliveryOrder) {
         return DeliveryManagerDto.builder()
                 .deliveryManagerId(managerId)
                 .username("manager" + managerId)
