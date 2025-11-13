@@ -1,8 +1,11 @@
 package com.pathfinder.delivery.infrastructure.external.client;
 
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
+import com.pathfinder.delivery.infrastructure.external.dto.MessageResponseDto;
 import com.pathfinder.delivery.infrastructure.external.fallback.MessageServiceFallback;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -14,6 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface MessageServiceClient {
     
     @PostMapping
-    void sendSlackMessage(@RequestBody MessageRequestDto request);
+    ResponseEntity<ApiResponse<MessageResponseDto>> sendSlackMessage(@RequestBody MessageRequestDto request);
 }
 

@@ -2,6 +2,7 @@ package com.pathfinder.delivery.infrastructure.external;
 
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.fallback.DeliveryManagerServiceFallback;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,14 +17,27 @@ import java.util.UUID;
 )
 public interface DeliveryManagerServiceClient {
     
-    @GetMapping("/{deliveryManagerId}")
-    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") Long deliveryManagerId);
+    /**
+     * 배송담당자 조회
+     * 실제 컨트롤러는 ApiResponse<DeliveryManagerResponseDto>를 반환
+     * Jackson이 DeliveryManagerResponseDto를 DeliveryManagerDto로 자동 변환 (필드명 일치)
+     */
+    @GetMapping("/deliverys/{deliveryManagerId}")
+    ApiResponse<DeliveryManagerDto> getDeliveryManager(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
     
-    @GetMapping("/hub/{hubId}")
-    List<DeliveryManagerDto> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
+    /**
+     * 허브별 배송담당자 목록 조회
+     * 실제 컨트롤러는 ApiResponse<List<DeliveryManagerResponseDto>>를 반환
+     */
+    @GetMapping("/deliverys/hub/{hubId}")
+    ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
     
-    @GetMapping("/hub/{hubId}/type/{type}")
-    List<DeliveryManagerDto> getDeliveryManagersByHubAndType(
+    /**
+     * 허브 및 타입별 배송담당자 목록 조회
+     * 실제 컨트롤러는 ApiResponse<List<DeliveryManagerResponseDto>>를 반환
+     */
+    @GetMapping("/deliverys/hub/{hubId}/type/{type}")
+    ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHubAndType(
         @PathVariable("hubId") UUID hubId,
         @PathVariable("type") String type
     );

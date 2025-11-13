@@ -38,7 +38,6 @@ class DeliveryRouteFactoryTest {
     @BeforeEach
     void setUp() {
         routeFactory = new DeliveryRouteFactory(
-                hubServiceClient,
                 routeCalculationService,
                 deliveryManagerAssignmentService
         );
@@ -58,17 +57,21 @@ class DeliveryRouteFactoryTest {
         UUID hubManagerB = UUID.randomUUID();
 
         HubRouteDto routeAB = HubRouteDto.builder()
-                .time(60)
-                .distance(100.0)
+                .durationMin(60)
+                .distanceKm(100.0)
+                .originHubId(hubA)
+                .destinationHubId(hubB)
                 .build();
         HubRouteDto routeBC = HubRouteDto.builder()
-                .time(90)
-                .distance(150.0)
+                .durationMin(90)
+                .distanceKm(150.0)
+                .originHubId(hubB)
+                .destinationHubId(hubC)
                 .build();
 
-        when(hubServiceClient.findRouteByDepartAndArrive(hubA, hubB))
+        when(routeCalculationService.getRoute(hubA, hubB))
                 .thenReturn(routeAB);
-        when(hubServiceClient.findRouteByDepartAndArrive(hubB, hubC))
+        when(routeCalculationService.getRoute(hubB, hubC))
                 .thenReturn(routeBC);
         when(deliveryManagerAssignmentService.assignDeliveryManager(hubA, "HUB"))
                 .thenReturn(hubManagerA);

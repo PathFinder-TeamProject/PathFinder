@@ -5,6 +5,7 @@ import com.pathfinder.delivery.domain.repository.DeliveryManagerAssignmentReposi
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class DeliveryManagerAssignmentServiceTest {
         DeliveryManagerDto dto1 = createManagerDto(manager1Id, 1);
 
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, "COMPANY"))
-                .thenReturn(List.of(dto1, dto0));
+                .thenReturn(ApiResponse.success(List.of(dto1, dto0)));
         when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(null);
 
         // when
@@ -77,7 +78,7 @@ class DeliveryManagerAssignmentServiceTest {
                 DeliveryManagerDto dto2 = createManagerDto(manager2Id, 2);
 
                 when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, "COMPANY"))
-                        .thenReturn(List.of(dto2, dto0, dto1));
+                        .thenReturn(ApiResponse.success(List.of(dto2, dto0, dto1)));
                 when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(0);
 
                 // when
@@ -100,7 +101,7 @@ class DeliveryManagerAssignmentServiceTest {
                 DeliveryManagerDto dto2 = createManagerDto(manager2Id, 2);
 
                 when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, "COMPANY"))
-                        .thenReturn(List.of(dto2, dto0));
+                        .thenReturn(ApiResponse.success(List.of(dto2, dto0)));
                 when(assignmentRepository.getLastAssignedOrder(hubId)).thenReturn(2);
 
                 // when
@@ -118,7 +119,7 @@ class DeliveryManagerAssignmentServiceTest {
         UUID hubId = UUID.randomUUID();
 
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, "COMPANY"))
-                .thenReturn(List.of());
+                .thenReturn(ApiResponse.success(List.of()));
 
         // when & then
         assertThatThrownBy(() -> assignmentService.assignDeliveryManager(hubId))

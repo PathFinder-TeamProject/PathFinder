@@ -3,7 +3,6 @@ package com.pathfinder.delivery.infrastructure.external.fallback;
 import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.HubDto;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;
-import com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

@@ -4,6 +4,7 @@ import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommandDto;
 import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommandDto;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
 import com.pathfinder.delivery.domain.entity.DeliveryEntity;
+import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import com.pathfinder.delivery.domain.repository.DeliveryRouteRepository;
@@ -36,8 +37,12 @@ import static org.mockito.Mockito.*;
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
+import com.pathfinder.delivery.infrastructure.external.OrderServiceClient;
 import com.pathfinder.delivery.domain.service.RouteCalculationService;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;
+import com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto;
+import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import java.util.List;
 
 
@@ -79,12 +84,14 @@ class DeliveryCommandServiceTest {
     @Mock
     private DeliveryManagerServiceClient deliveryManagerServiceClient;
 
+    @Mock
+    private OrderServiceClient orderServiceClient;
+
     private DeliveryCommandService deliveryCommandService;
 
     @BeforeEach
     void setUp() {
         realRouteFactory = new DeliveryRouteFactory(
-                hubServiceClient,
                 routeCalculationService,
                 deliveryManagerAssignmentService
         );
@@ -97,7 +104,8 @@ class DeliveryCommandServiceTest {
                 statusValidator,
                 messageServiceClient,
                 deliveryManagerAssignmentService,
-                deliveryManagerServiceClient
+                deliveryManagerServiceClient,
+                orderServiceClient
         );
     }
 
@@ -145,12 +153,32 @@ class DeliveryCommandServiceTest {
                 .hubId(toHubId)
                 .build();
         
+        DeliveryManagerDto hubManager = DeliveryManagerDto.builder()
+                .deliveryManagerId(UUID.randomUUID())
+                .username("hub_manager")
+                .type("HUB")
+                .hubId(fromHubId)
+                .build();
+
+        DeliveryRouteEntity initialRoute = DeliveryRouteEntity.builder()
+                .deliveryId(deliveryId)
+                .fromHubId(fromHubId)
+                .toHubId(toHubId)
+                .sequence(0)
+                .build();
+        
         when(deliveryValidator.validateAndGetOrder(orderId)).thenReturn(null);
         when(deliveryValidator.validateAndGetHub(fromHubId)).thenReturn(null);
         when(deliveryValidator.validateAndGetDeliveryManager(deliveryManagerId)).thenReturn(managerDto);
         when(routeFactory.calculateRoute(fromHubId, toHubId, BigDecimal.valueOf(100.5)))
                 .thenReturn(new RouteCalculationResult(null, BigDecimal.valueOf(100.5)));
+        when(routeFactory.createInitialRoute(eq(deliveryId), eq(fromHubId), eq(toHubId), 
+                eq(BigDecimal.valueOf(100.5)), eq(deliveryManagerId)))
+                .thenReturn(initialRoute);
         when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(savedEntity);
+        when(routeRepository.save(any(DeliveryRouteEntity.class))).thenReturn(initialRoute);
+        when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(fromHubId, "HUB"))
+                .thenReturn(ApiResponse.success(List.of(hubManager)));
 
         // when
         DeliveryDto result = deliveryCommandService.createDelivery(command);
@@ -167,7 +195,11 @@ class DeliveryCommandServiceTest {
         verify(deliveryValidator).validateAndGetDeliveryManager(deliveryManagerId);
         verify(routeFactory).calculateRoute(fromHubId, toHubId, BigDecimal.valueOf(100.5));
         verify(deliveryRepository).save(any(DeliveryEntity.class));
+        verify(routeRepository).save(any(DeliveryRouteEntity.class));
         verify(deliveryOutboxService).enqueue(any(DeliveryEventDto.class));
+        verify(deliveryManagerServiceClient).getDeliveryManagersByHubAndType(fromHubId, "HUB");
+        verify(messageServiceClient).sendSlackMessage(any(MessageRequestDto.class));
+        verify(orderServiceClient).delivery(orderId, deliveryId);
     }
 
     @Test
@@ -341,13 +373,33 @@ class DeliveryCommandServiceTest {
                 .hubId(toHubId)
                 .build();
         
+        DeliveryManagerDto hubManager = DeliveryManagerDto.builder()
+                .deliveryManagerId(UUID.randomUUID())
+                .username("hub_manager")
+                .type("HUB")
+                .hubId(fromHubId)
+                .build();
+
+        DeliveryRouteEntity initialRoute = DeliveryRouteEntity.builder()
+                .deliveryId(deliveryId)
+                .fromHubId(fromHubId)
+                .toHubId(toHubId)
+                .sequence(0)
+                .build();
+        
         when(deliveryValidator.validateAndGetOrder(orderId)).thenReturn(null);
         when(deliveryValidator.validateAndGetHub(fromHubId)).thenReturn(null);
         when(deliveryManagerAssignmentService.assignDeliveryManager(toHubId))
                 .thenReturn(assignedManagerId);
         when(routeFactory.calculateRoute(fromHubId, toHubId, BigDecimal.valueOf(100.5)))
                 .thenReturn(new RouteCalculationResult(null, BigDecimal.valueOf(100.5)));
+        when(routeFactory.createInitialRoute(eq(deliveryId), eq(fromHubId), eq(toHubId), 
+                eq(BigDecimal.valueOf(100.5)), eq(assignedManagerId)))
+                .thenReturn(initialRoute);
         when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(savedEntity);
+        when(routeRepository.save(any(DeliveryRouteEntity.class))).thenReturn(initialRoute);
+        when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(fromHubId, "HUB"))
+                .thenReturn(ApiResponse.success(List.of(hubManager)));
 
         // when
         DeliveryDto result = deliveryCommandService.createDelivery(command);
@@ -357,6 +409,10 @@ class DeliveryCommandServiceTest {
         assertThat(result.getDeliveryManagerId()).isEqualTo(assignedManagerId);
         verify(deliveryManagerAssignmentService).assignDeliveryManager(toHubId);
         verify(deliveryRepository).save(any(DeliveryEntity.class));
+        verify(routeRepository).save(any(DeliveryRouteEntity.class));
+        verify(deliveryManagerServiceClient).getDeliveryManagersByHubAndType(fromHubId, "HUB");
+        verify(messageServiceClient).sendSlackMessage(any(MessageRequestDto.class));
+        verify(orderServiceClient).delivery(orderId, deliveryId);
     }
 
     @Test
@@ -387,13 +443,33 @@ class DeliveryCommandServiceTest {
                 .expectedDistance(BigDecimal.valueOf(100.5))
                 .build();
 
+        DeliveryManagerDto hubManager = DeliveryManagerDto.builder()
+                .deliveryManagerId(UUID.randomUUID())
+                .username("hub_manager")
+                .type("HUB")
+                .hubId(fromHubId)
+                .build();
+
+        DeliveryRouteEntity initialRoute = DeliveryRouteEntity.builder()
+                .deliveryId(deliveryId)
+                .fromHubId(fromHubId)
+                .toHubId(toHubId)
+                .sequence(0)
+                .build();
+
         when(deliveryValidator.validateAndGetOrder(orderId)).thenReturn(null);
         when(deliveryValidator.validateAndGetHub(fromHubId)).thenReturn(null);
         when(deliveryManagerAssignmentService.assignDeliveryManager(toHubId))
                 .thenReturn(managerWithOrder0);
         when(routeFactory.calculateRoute(fromHubId, toHubId, BigDecimal.valueOf(100.5)))
                 .thenReturn(new RouteCalculationResult(null, BigDecimal.valueOf(100.5)));
+        when(routeFactory.createInitialRoute(eq(deliveryId), eq(fromHubId), eq(toHubId), 
+                eq(BigDecimal.valueOf(100.5)), eq(managerWithOrder0)))
+                .thenReturn(initialRoute);
         when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(savedEntity);
+        when(routeRepository.save(any(DeliveryRouteEntity.class))).thenReturn(initialRoute);
+        when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(fromHubId, "HUB"))
+                .thenReturn(ApiResponse.success(List.of(hubManager)));
 
         // when
         DeliveryDto result = deliveryCommandService.createDelivery(command);
@@ -401,6 +477,10 @@ class DeliveryCommandServiceTest {
         // then
         assertThat(result.getDeliveryManagerId()).isEqualTo(managerWithOrder0);
         verify(deliveryManagerAssignmentService).assignDeliveryManager(toHubId);
+        verify(routeRepository).save(any(DeliveryRouteEntity.class));
+        verify(deliveryManagerServiceClient).getDeliveryManagersByHubAndType(fromHubId, "HUB");
+        verify(messageServiceClient).sendSlackMessage(any(MessageRequestDto.class));
+        verify(orderServiceClient).delivery(eq(orderId), any(UUID.class));
     }
 
     @Test
@@ -439,12 +519,23 @@ class DeliveryCommandServiceTest {
         List<UUID> routePath = List.of(hubA, hubB, hubC);
 
         HubRouteDto routeAB = HubRouteDto.builder()
-                .time(60)
-                .distance(100.0)
+                .durationMin(60)
+                .distanceKm(100.0)
+                .originHubId(hubA)
+                .destinationHubId(hubB)
                 .build();
         HubRouteDto routeBC = HubRouteDto.builder()
-                .time(90)
-                .distance(150.0)
+                .durationMin(90)
+                .distanceKm(150.0)
+                .originHubId(hubB)
+                .destinationHubId(hubC)
+                .build();
+
+        DeliveryManagerDto hubManager = DeliveryManagerDto.builder()
+                .deliveryManagerId(UUID.randomUUID())
+                .username("hub_manager")
+                .type("HUB")
+                .hubId(hubA)
                 .build();
 
         when(deliveryValidator.validateAndGetOrder(orderId)).thenReturn(null);
@@ -452,8 +543,7 @@ class DeliveryCommandServiceTest {
         when(deliveryManagerAssignmentService.assignDeliveryManager(hubC))
                 .thenReturn(companyManagerId);
         
-        com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto calculationDto = 
-            com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto.builder()
+        RouteCalculationDto calculationDto = RouteCalculationDto.builder()
                 .path(routePath)
                 .totalDistance(250.0)
                 .build();
@@ -462,14 +552,17 @@ class DeliveryCommandServiceTest {
         
         when(deliveryRepository.save(any(DeliveryEntity.class))).thenReturn(savedEntity);
         
-        when(hubServiceClient.findRouteByDepartAndArrive(hubA, hubB))
+        when(routeCalculationService.getRoute(hubA, hubB))
                 .thenReturn(routeAB);
-        when(hubServiceClient.findRouteByDepartAndArrive(hubB, hubC))
+        when(routeCalculationService.getRoute(hubB, hubC))
                 .thenReturn(routeBC);
         when(deliveryManagerAssignmentService.assignDeliveryManager(hubA, "HUB"))
                 .thenReturn(hubManagerA);
         when(deliveryManagerAssignmentService.assignDeliveryManager(hubB, "HUB"))
                 .thenReturn(hubManagerB);
+        when(routeRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubA, "HUB"))
+                .thenReturn(ApiResponse.success(List.of(hubManager)));
 
         DeliveryCommandService serviceWithRealFactory = new DeliveryCommandServiceImpl(
                 deliveryRepository,
@@ -480,7 +573,8 @@ class DeliveryCommandServiceTest {
                 statusValidator,
                 messageServiceClient,
                 deliveryManagerAssignmentService,
-                deliveryManagerServiceClient
+                deliveryManagerServiceClient,
+                orderServiceClient
         );
 
         // when
@@ -493,5 +587,9 @@ class DeliveryCommandServiceTest {
         verify(deliveryManagerAssignmentService).assignDeliveryManager(hubC);
         verify(deliveryManagerAssignmentService).assignDeliveryManager(hubA, "HUB");
         verify(deliveryManagerAssignmentService).assignDeliveryManager(hubB, "HUB");
+        verify(routeRepository).saveAll(anyList());
+        verify(deliveryManagerServiceClient).getDeliveryManagersByHubAndType(hubA, "HUB");
+        verify(messageServiceClient).sendSlackMessage(any(MessageRequestDto.class));
+        verify(orderServiceClient).delivery(eq(orderId), any(UUID.class));
     }
 }

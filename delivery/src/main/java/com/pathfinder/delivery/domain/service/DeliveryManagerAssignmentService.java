@@ -5,6 +5,7 @@ import com.pathfinder.delivery.domain.repository.DeliveryManagerAssignmentReposi
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -29,7 +30,8 @@ public class DeliveryManagerAssignmentService {
     public UUID assignDeliveryManager(UUID hubId, String type) {
         log.info("Assigning {} delivery manager automatically for hubId: {}", type, hubId);
         
-        List<DeliveryManagerDto> managers = deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, type);
+        ApiResponse<List<DeliveryManagerDto>> response = deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, type);
+        List<DeliveryManagerDto> managers = response != null ? response.getData() : null;
         
         if (managers == null || managers.isEmpty()) {
             log.warn("No {} delivery managers found for hubId: {}", type, hubId);
