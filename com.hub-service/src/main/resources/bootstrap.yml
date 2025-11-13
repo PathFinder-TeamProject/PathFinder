@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: hub-service
+  config:
+    import: optional:configserver:http://localhost:19000
+  cloud:
+    config:
+      profile: dev
+      fail-fast: true

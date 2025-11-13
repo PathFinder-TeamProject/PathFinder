@@ -13,6 +13,7 @@ public class HubResponseDto {
     private UUID hubId;
     private String hubName;
     private String hubAddress;
+    private String hubManagerUsername;
     private double latitude;
     private double longitude;
 }

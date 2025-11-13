@@ -2,14 +2,8 @@ package com.pathfinder.delivery_manager.infrastructure.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathfinder.delivery_manager.application.DeliveryManagerServiceV1;
-import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
-import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
-import com.pathfinder.global.event.NewDeliveryManagerEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,6 +21,7 @@ public class DeliveryManagerConsumer {
     /**
      * 새로운 배송 담당자 등록 이벤트 수신 및 처리
      */
+    /*
     @KafkaListener(
             topics = TOPIC_NEW_DM,
             groupId = GROUP_ID
@@ -71,5 +66,5 @@ public class DeliveryManagerConsumer {
             // TODO: 재처리 로직 구현
             // TODO: 알림 발송 등의 오류 처리
         }
-    }
+    }*/
 }

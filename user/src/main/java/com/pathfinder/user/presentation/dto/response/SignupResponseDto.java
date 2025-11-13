@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.UUID;
+
 @Builder
 @Getter
 @ToString
@@ -27,7 +29,7 @@ public class SignupResponseDto {
 
     private UserRoleEnum role;
 
-    private Long hubId;
+    private UUID hubId;
 
     public static SignupResponseDto of(UserEntity userEntity) {
         return SignupResponseDto.builder()

@@ -21,13 +21,4 @@ public class UserDeleteResponseDto {
     private Instant deletedAt;
 
     private boolean isDeleted;
-    public static UserDeleteResponseDto of(UserEntity user) {
-        return UserDeleteResponseDto.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .name(user.getName())
-                .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getDeletedBy()==null? false:true)
-                .build();
-    }
 }

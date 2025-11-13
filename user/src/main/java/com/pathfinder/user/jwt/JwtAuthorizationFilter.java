@@ -40,7 +40,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         log.info("요청 URI: {}", requestURI);
 
         // /v1/auth/** 경로는 JWT 검증 건너뛰기
-        if (requestURI.startsWith("/v1/auth/")) {
+        if (requestURI.startsWith("/api/v1/auth/")) {
             log.info("인증 경로 - JWT 검증 건너뜀");
             filterChain.doFilter(request, response);
             return;
