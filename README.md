@@ -156,13 +156,18 @@
 <br>
 
 ## 3. 프로젝트 구상도
-이미지 삽입 예정
+ 이미지 삽입 예정
 ### 🛠️ 아키텍처
-이미지 삽입 예정
+<p align="center">
+  <img src="images/아키택쳐.png" width="200" alt="아키택쳐.png">
+</p>
 ### 🔗 ERD
 
 ERD 이미지 삽입 예정
 
+<p align="center">
+  <img src="images/erd.png" width="200" alt="erd.png">
+</p>
 
 
 ## 4. 기능 구현
