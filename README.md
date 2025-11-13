@@ -226,203 +226,203 @@ PathFinder는 P2P + Hub-to-Hub Relay 알고리즘을 적용합니다.
 ### 🔗 디렉토리 구조
 <details>
     <summary><strong>디렉토리 구조</strong></summary>
+
 ```
     com.pathfinder
     ├─ gateway-service
-    │ ├─ config
-    │ │ ├─ GatewayConfig.java
-    │ │ ├─ RedisConfig.java
-    │ │ └─ SecurityConfig.java
-    │ ├─ security
-    │ │ ├─ JwtAuthenticationFilter.java
-    │ │ └─ JwtUtil.java
-    │ ├─ service
-    │ │ └─ UserCacheService.java
-    │ └─ dto
-    │ └─ UserResponseDto.java
+    │  ├─ config
+    │  │   ├─ GatewayConfig.java
+    │  │   ├─ RedisConfig.java
+    │  │   └─ SecurityConfig.java
+    │  ├─ security
+    │  │   ├─ JwtAuthenticationFilter.java
+    │  │   └─ JwtUtil.java
+    │  ├─ service
+    │  │   └─ UserCacheService.java
+    │  └─ dto
+    │      └─ UserResponseDto.java
     
     ├─ eureka-server
-    │ └─ EurekaApplication.java
+    │  └─ EurekaApplication.java
     
     ├─ config-server
-    │ ├─ ConfigApplication.java
-    │ └─ resources/config-repository/
-    │ ├─ user-service-dev.yml
-    │ ├─ order-service-dev.yml
-    │ ├─ delivery-service-dev.yml
-    │ ├─ hub-service-dev.yml
-    │ ├─ message-service-dev.yml
-    │ └─ gateway-service-dev.yml
+    │  ├─ ConfigApplication.java
+    │  └─ resources/config-repository/
+    │      ├─ user-service-dev.yml
+    │      ├─ order-service-dev.yml
+    │      ├─ delivery-service-dev.yml
+    │      ├─ hub-service-dev.yml
+    │      ├─ message-service-dev.yml
+    │      └─ gateway-service-dev.yml
     
     ├─ user-service
-    │ ├─ application
-    │ │ ├─ UserServiceV1.java
-    │ │ ├─ UserDetailsServiceImpl.java
-    │ │ ├─ dto/request/
-    │ │ ├─ exception/
-    │ │ └─ response/
-    │ ├─ domain
-    │ │ ├─ entity/
-    │ │ ├─ enums/
-    │ │ └─ repository/
-    │ ├─ infrastructure
-    │ │ ├─ client/
-    │ │ ├─ config/
-    │ │ │ ├─ redis/
-    │ │ │ └─ security/
-    │ │ └─ repository/
-    │ ├─ jwt/
-    │ └─ presentation
-    │ ├─ controller/
-    │ └─ dto/response/
+    │  ├─ application
+    │  │   ├─ UserServiceV1.java
+    │  │   ├─ UserDetailsServiceImpl.java
+    │  │   ├─ dto/request/
+    │  │   ├─ exception/
+    │  │   └─ response/
+    │  ├─ domain
+    │  │   ├─ entity/
+    │  │   ├─ enums/
+    │  │   └─ repository/
+    │  ├─ infrastructure
+    │  │   ├─ client/
+    │  │   ├─ config/
+    │  │   │   ├─ redis/
+    │  │   │   └─ security/
+    │  │   └─ repository/
+    │  ├─ jwt/
+    │  └─ presentation
+    │      ├─ controller/
+    │      └─ dto/response/
     
     ├─ delivery-manager-service
-    │ ├─ application/
-    │ │ ├─ DeliveryManagerServiceV1.java
-    │ │ ├─ DeliveryManagerInternalServiceV1.java
-    │ │ └─ exception/
-    │ ├─ domain/
-    │ │ ├─ entity/
-    │ │ ├─ enums/
-    │ │ └─ repository/
-    │ ├─ infrastructure/
-    │ │ ├─ cache/
-    │ │ ├─ client/
-    │ │ ├─ config/
-    │ │ │ └─ security/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ └─ dto/response/
+    │  ├─ application/
+    │  │   ├─ DeliveryManagerServiceV1.java
+    │  │   ├─ DeliveryManagerInternalServiceV1.java
+    │  │   └─ exception/
+    │  ├─ domain/
+    │  │   ├─ entity/
+    │  │   ├─ enums/
+    │  │   └─ repository/
+    │  ├─ infrastructure/
+    │  │   ├─ cache/
+    │  │   ├─ client/
+    │  │   ├─ config/
+    │  │   │   └─ security/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      └─ dto/response/
     
     ├─ hub-service
-    │ ├─ application/
-    │ │ ├─ HubServiceV1.java
-    │ │ ├─ HubRouteService.java
-    │ │ └─ HubManagerService.java
-    │ ├─ domain/
-    │ │ ├─ model/
-    │ │ ├─ enums/
-    │ │ └─ repository/
-    │ ├─ infrastructure/
-    │ │ ├─ client/
-    │ │ ├─ config/
-    │ │ └─ cache/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ ├─ advice/
-    │ └─ dto/
+    │  ├─ application/
+    │  │   ├─ HubServiceV1.java
+    │  │   ├─ HubRouteService.java
+    │  │   └─ HubManagerService.java
+    │  ├─ domain/
+    │  │   ├─ model/
+    │  │   ├─ enums/
+    │  │   └─ repository/
+    │  ├─ infrastructure/
+    │  │   ├─ client/
+    │  │   ├─ config/
+    │  │   └─ cache/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      ├─ advice/
+    │      └─ dto/
     
     ├─ delivery-service
-    │ ├─ application/
-    │ │ ├─ command/
-    │ │ │ └─ service/
-    │ │ ├─ query/
-    │ │ │ └─ service/
-    │ │ ├─ outbox/
-    │ │ ├─ dto/
-    │ │ └─ exception/
-    │ ├─ domain/
-    │ │ ├─ entity/
-    │ │ ├─ enums/
-    │ │ ├─ repository/
-    │ │ ├─ service/
-    │ │ └─ value/
-    │ ├─ infrastructure/
-    │ │ ├─ external/
-    │ │ │ ├─ client/
-    │ │ │ ├─ fallback/
-    │ │ │ ├─ dto/
-    │ │ │ └─ security/
-    │ │ ├─ config/
-    │ │ ├─ messaging/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ └─ controller/
+    │  ├─ application/
+    │  │   ├─ command/
+    │  │   │   └─ service/
+    │  │   ├─ query/
+    │  │   │   └─ service/
+    │  │   ├─ outbox/
+    │  │   ├─ dto/
+    │  │   └─ exception/
+    │  ├─ domain/
+    │  │   ├─ entity/
+    │  │   ├─ enums/
+    │  │   ├─ repository/
+    │  │   ├─ service/
+    │  │   └─ value/
+    │  ├─ infrastructure/
+    │  │   ├─ external/
+    │  │   │   ├─ client/
+    │  │   │   ├─ fallback/
+    │  │   │   ├─ dto/
+    │  │   │   └─ security/
+    │  │   ├─ config/
+    │  │   ├─ messaging/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      └─ controller/
     
     ├─ order-service
-    │ ├─ application/
-    │ │ ├─ OrderServiceV1.java
-    │ │ ├─ dto/
-    │ │ └─ exception/
-    │ ├─ domain/
-    │ │ ├─ entity/
-    │ │ ├─ enums/
-    │ │ └─ repository/
-    │ ├─ infrastructure/
-    │ │ ├─ global/
-    │ │ │ ├─ client/
-    │ │ │ ├─ fallback/
-    │ │ │ ├─ dto/
-    │ │ │ └─ security/
-    │ │ ├─ config/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ └─ dto/
+    │  ├─ application/
+    │  │   ├─ OrderServiceV1.java
+    │  │   ├─ dto/
+    │  │   └─ exception/
+    │  ├─ domain/
+    │  │   ├─ entity/
+    │  │   ├─ enums/
+    │  │   └─ repository/
+    │  ├─ infrastructure/
+    │  │   ├─ global/
+    │  │   │   ├─ client/
+    │  │   │   ├─ fallback/
+    │  │   │   ├─ dto/
+    │  │   │   └─ security/
+    │  │   ├─ config/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      └─ dto/
     
     ├─ product-service
-    │ ├─ application/
-    │ │ ├─ ProductService.java
-    │ │ ├─ dto/
-    │ │ └─ exception/
-    │ ├─ domain/
-    │ │ └─ entity/
-    │ ├─ infrastructure/
-    │ │ ├─ global/
-    │ │ │ ├─ client/
-    │ │ │ ├─ fallback/
-    │ │ │ ├─ dto/
-    │ │ │ └─ security/
-    │ │ ├─ config/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ └─ dto/response/
+    │  ├─ application/
+    │  │   ├─ ProductService.java
+    │  │   ├─ dto/
+    │  │   └─ exception/
+    │  ├─ domain/
+    │  │   └─ entity/
+    │  ├─ infrastructure/
+    │  │   ├─ global/
+    │  │   │   ├─ client/
+    │  │   │   ├─ fallback/
+    │  │   │   ├─ dto/
+    │  │   │   └─ security/
+    │  │   ├─ config/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      └─ dto/response/
     
     ├─ company-service
-    │ ├─ application/
-    │ │ ├─ CompanyService.java
-    │ │ ├─ dto/
-    │ │ └─ exception/
-    │ ├─ domain/
-    │ │ └─ entity/
-    │ ├─ infrastructure/
-    │ │ ├─ config/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ └─ dto/response/
+    │  ├─ application/
+    │  │   ├─ CompanyService.java
+    │  │   ├─ dto/
+    │  │   └─ exception/
+    │  ├─ domain/
+    │  │   └─ entity/
+    │  ├─ infrastructure/
+    │  │   ├─ config/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      └─ dto/response/
     
     ├─ message-service
-    │ ├─ application/
-    │ │ └─ MessageService.java
-    │ ├─ domain/
-    │ │ ├─ entity/
-    │ │ ├─ enums/
-    │ │ └─ repository/
-    │ ├─ infrastructure/
-    │ │ ├─ config/
-    │ │ ├─ global/
-    │ │ │ └─ security/
-    │ │ └─ repository/
-    │ └─ presentation/
-    │ ├─ controller/
-    │ └─ dto/
+    │  ├─ application/
+    │  │   └─ MessageService.java
+    │  ├─ domain/
+    │  │   ├─ entity/
+    │  │   ├─ enums/
+    │  │   └─ repository/
+    │  ├─ infrastructure/
+    │  │   ├─ config/
+    │  │   ├─ global/
+    │  │   │   └─ security/
+    │  │   └─ repository/
+    │  └─ presentation/
+    │      ├─ controller/
+    │      └─ dto/
     
     └─ docker/
-    ├─ docker-compose.yml
-    ├─ docker-compose.infrastructure.yml
-    └─ init-db.sql
+       ├─ docker-compose.yml
+       ├─ docker-compose.infrastructure.yml
+       └─ init-db.sql
+
 ```
 </details>
-
 ---
+
 ## 6. 트러블슈팅
 순환 의존성 → FeignClient 인터페이스 분리로 해결
 
 허브 거리 계산 오류 → 캐싱 및 ID 매핑 로직 개선
 
 허브 배송 담당자(허브와 허브간의 이동)의 hubId 값 → 중앙 허브 한 곳을 지정하고, 해당 허브의 매니저를 MASTER으로 지정
-
----
