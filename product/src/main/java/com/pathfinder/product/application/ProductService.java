@@ -50,7 +50,7 @@ public class ProductService {
 	public GetProductRes createProduct(CreateProductReq req) {
 
         validateCompany(req.getCompanyId());
-//        validateHub(req.getHubId());
+        validateHub(req.getHubId());
 
 		Product product = productRepository.save(req.toEntity());
 		return GetProductRes.fromEntity(product);

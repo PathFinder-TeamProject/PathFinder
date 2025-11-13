@@ -149,6 +149,7 @@ public class OrderServiceV1 {
         return new OrderResponseDto().fromEntity(order);
     }
 
+    @Transactional
     public void setDelivery(UUID orderId, UUID deliveryId) {
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
         order.setDelivery(deliveryId);
