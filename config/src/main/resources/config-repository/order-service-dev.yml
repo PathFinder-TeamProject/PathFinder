@@ -9,6 +9,7 @@ spring:
   data:
     redis:
       database: 3
-jwt:
-  secret:
-    key: c3BhcnRhX3Rpa2l0YWthX2JhcHppcF8xMjM0NTY3ODk=
+
+springdoc:
+  api-docs:
+    path: /springdoc/openapi3-order-service.json

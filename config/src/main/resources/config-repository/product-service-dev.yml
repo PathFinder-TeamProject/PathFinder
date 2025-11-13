@@ -34,3 +34,7 @@ services:
   order-service:
     url: http://localhost:8084
 
+springdoc:
+  api-docs:
+    path: /springdoc/openapi3-product-service.json
+

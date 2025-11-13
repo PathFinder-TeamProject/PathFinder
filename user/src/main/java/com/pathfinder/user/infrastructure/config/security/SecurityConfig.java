@@ -68,7 +68,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
 
-                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/internal/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/springdoc/**", "/internal/**").permitAll()
                         // user
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").authenticated()
