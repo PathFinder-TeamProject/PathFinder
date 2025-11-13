@@ -1,8 +1,11 @@
-package com.pathfinder.order.infrastructure.global.client;
+package com.pathfinder.product.infrastructure.global.client;
 
-import com.pathfinder.order.infrastructure.global.fallback.CompanyClientFallback;
-import com.pathfinder.order.infrastructure.global.dto.CompanyDto;
+
+import com.pathfinder.product.infrastructure.global.dto.CompanyDto;
+import com.pathfinder.product.infrastructure.global.fallback.CompanyClientFallback;
+import com.pathfinder.product.presentation.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -18,4 +21,5 @@ public interface CompanyClient {
     @GetMapping("/{companyId}")
     CompanyDto getCompanyById(@PathVariable UUID companyId);
 }
+
 

@@ -1,4 +1,4 @@
-package com.pathfinder.product.infrastructure.security.filter;
+package com.pathfinder.product.infrastructure.global.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,7 +27,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        log.info("=== JWT Authorization Filter (Delivery-Manager) ===");
+        log.info("=== JWT Authorization Filter (Product) ===");
         log.info("요청 URI: {}", requestURI);
 
         // Gateway에서 전달한 헤더 확인
