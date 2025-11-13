@@ -28,33 +28,9 @@ public class HubServiceFallback implements HubServiceClient {
     }
 
     @Override
-    public HubRouteDto getHubRoute(UUID routeId) {
-        log.error("Hub Service Circuit Breaker activated for routeId: {}", routeId);
-        return null;
-    }
-
-    @Override
-    public List<HubRouteDto> getRoutesByDepart(UUID departHubId) {
-        log.error("Hub Service Circuit Breaker activated for departHubId: {}", departHubId);
+    public List<HubRouteDto> findPath(UUID origin, UUID destination) {
+        log.error("Hub Service Circuit Breaker activated for findPath: {} -> {}", origin, destination);
         return Collections.emptyList();
-    }
-
-    @Override
-    public List<HubRouteDto> getRoutesByArrive(UUID arriveHubId) {
-        log.error("Hub Service Circuit Breaker activated for arriveHubId: {}", arriveHubId);
-        return Collections.emptyList();
-    }
-
-    @Override
-    public HubRouteDto findRouteByDepartAndArrive(UUID depart, UUID arrive) {
-        log.error("Hub Service Circuit Breaker activated for depart: {}, arrive: {}", depart, arrive);
-        return null;
-    }
-
-    @Override
-    public RouteCalculationDto calculateRoute(UUID start, UUID end) {
-        log.error("Hub Service Circuit Breaker activated for calculateRoute: {} -> {}", start, end);
-        return null;
     }
 }
 

@@ -3,7 +3,6 @@ package com.pathfinder.delivery.domain.service;
 import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommandDto;
 import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
 import com.pathfinder.delivery.domain.value.RouteCalculationResult;
-import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;
 import com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeliveryRouteFactory {
 
-    private final HubServiceClient hubServiceClient;
     private final RouteCalculationService routeCalculationService;
     private final DeliveryManagerAssignmentService deliveryManagerAssignmentService;
 
@@ -55,7 +53,7 @@ public class DeliveryRouteFactory {
             UUID fromHub = routePath.get(i);
             UUID toHub = routePath.get(i + 1);
             
-            HubRouteDto hubRoute = hubServiceClient.findRouteByDepartAndArrive(fromHub, toHub);
+            HubRouteDto hubRoute = routeCalculationService.getRoute(fromHub, toHub);
             
             UUID hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
             

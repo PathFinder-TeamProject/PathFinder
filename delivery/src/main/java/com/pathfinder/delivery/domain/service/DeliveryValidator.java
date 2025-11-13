@@ -8,6 +8,7 @@ import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.HubDto;
 import com.pathfinder.delivery.infrastructure.external.dto.OrderDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +23,11 @@ public class DeliveryValidator {
     private final DeliveryManagerServiceClient deliveryManagerServiceClient;
 
     public OrderDto validateAndGetOrder(UUID orderId) {
-        OrderDto order = orderServiceClient.getOrder(orderId);
-        if (order == null) {
+       ApiResponse<OrderDto> response = orderServiceClient.getOrder(orderId);
+        if (response == null || response.getData() == null) {
             throw new PathException(DeliveryErrorCode.ORDER_NOT_FOUND);
         }
-        return order;
+        return response.getData();
     }
 
     public HubDto validateAndGetHub(UUID hubId) {

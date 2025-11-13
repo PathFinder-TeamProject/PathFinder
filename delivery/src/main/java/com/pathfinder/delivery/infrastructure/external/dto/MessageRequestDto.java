@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MessageRequestDto {
     private String request;
-    private String senderId;
-    private String receiverId;
+    private UUID senderId;  // String -> UUID로 변경
+    private UUID receiverId;  // String -> UUID로 변경
 }
 

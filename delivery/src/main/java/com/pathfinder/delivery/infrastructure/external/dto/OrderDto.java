@@ -13,14 +13,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderDto {
-    private UUID orderId;
+    private UUID id;  // order-service의 OrderResponseDto.id와 매핑
     private UUID productId;
-    private UUID supplierCompanyId;
-    private UUID receiverCompanyId;
+    private UUID supplierId;  // order-service의 OrderResponseDto.supplierId와 매핑
+    private UUID receiverId;  // order-service의 OrderResponseDto.receiverId와 매핑
     private UUID deliveryId;
-    private String status;
-    private Long quantity;
+    private String orderStatus;  // OrderStatus Enum을 String으로 받음 (JSON 역직렬화 시 자동 변환)
+    private long quantity;  // OrderResponseDto.quantity (long)와 일치
     private String request;
-    private LocalDateTime deadline;
+    private java.sql.Timestamp deadline;
 }
 
