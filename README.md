@@ -420,8 +420,74 @@ PathFinder는 P2P + Hub-to-Hub Relay 알고리즘을 적용합니다.
 ---
 
 ## 6. 트러블슈팅
-순환 의존성 → FeignClient 인터페이스 분리로 해결
+### 1️⃣ User Service 인증 및 Gateway 헤더 전달 구조 개선
+**문제 요약**  
+  로그인 이후 각 서비스에서 인증이 일관되지 않거나, 게이트웨이를 통해 전달된 요청이 JWT 인증 정보를 유지하지 못해 접근 권한 검증이 실패하는 문제가 발생했다.
 
-허브 거리 계산 오류 → 캐싱 및 ID 매핑 로직 개선
+**원인 분석**
+  - User 서비스에서 발급한 JWT를 각 서비스가 개별적으로 검증  
+  - Gateway가 단순 프록시 역할만 수행하여 인증 결과를 공유하지 않음  
+  - 서비스 간 인증 필터 중복으로 유지보수가 어려움  
 
-허브 배송 담당자(허브와 허브간의 이동)의 hubId 값 → 중앙 허브 한 곳을 지정하고, 해당 허브의 매니저를 MASTER으로 지정
+**해결 방법**
+  - **인증은 User 서비스에서 수행, 검증은 Gateway에서만 수행**  
+  - Gateway의 `JwtAuthenticationFilter`에서 토큰을 검증한 뒤 사용자 정보(`username`, `role`)를 헤더에 저장  
+  - 이후 모든 서비스는 Gateway가 전달하는 헤더(`X-User-Username`, `X-User-Role`)를 이용하여 인증 및 권한 처리  
+
+**핵심 코드 (JwtAuthenticationFilter)**
+```java
+ServerWebExchange modifiedExchange = rebuildExchange(exchange, bytes)
+        .mutate()
+        .request(builder -> builder
+                .header("X-User-Username", username)
+                .header("X-User-Role", role))
+        .build();
+return chain.filter(modifiedExchange);
+```
+**추가 개선**
+  /api/v1/auth/**, /v3/api-docs 등 공개 경로는 JWT 검증을 건너뛰도록 PUBLIC_PATHS 지정
+  토큰이 유효하지 않거나 누락된 경우 401 Unauthorized 반환
+
+**결과**
+  인증 책임이 명확하게 분리됨 (User → 발급 / Gateway → 검증 및 전달)
+  서비스 간 인증 중복 제거
+  API 요청마다 공통 헤더 기반으로 일관된 인증 상태 유지
+
+### 2️⃣ 공통 모듈(JitPack) 관리 및 버전 충돌 해결
+**문제 요약**  
+  SwaggerConfig, BaseEntity, GlobalExceptionHandler 등 공통 모듈을 각 서비스가 중복 보유하여 관리가 어려움.
+
+**해결 방법**
+  공통 코드(pathfinder-common)를 별도 모듈로 분리
+  JitPack을 통해 배포 후 각 서비스 build.gradle에 의존성 추가
+
+**결과**
+  공통 유틸, 예외 처리, Swagger 설정 재사용
+  서비스별 중복 코드 제거 및 관리 용이
+
+### 3️⃣ 허브 거리 계산 및 캐싱 구조 개선
+
+**문제 요약**  
+  허브 간 거리 계산 시 불필요한 DB 조회와 매핑 오류로 인해 성능 저하 및 잘못된 배송 경로가 발생했다.
+
+**원인 분석**
+  허브 ID 간 매핑 로직 누락
+  동일 경로 요청에도 매번 거리 계산 수행
+
+**해결 방법**
+  허브 경로 정보를 Redis 캐싱 구조로 변경
+  허브 간 ID 매핑 로직 보완
+  허브 간 이동은 P2P + Hub to Hub Relay 방식으로 처리
+
+### 4️⃣ 허브 배송 담당자 관리 로직 개선
+**문제 요약**  
+  허브 간 배송 담당자(hub-to-hub courier)의 소속 허브 정보(hubId)가 불명확하여 배차 오류 발생.
+
+**해결 방법**
+  중앙 허브 하나를 지정하고, 해당 허브의 담당 매니저를 MASTER 등급으로 지정
+  허브 간 이동 담당자는 항상 중앙 허브에 소속되도록 정책화
+
+**결과**
+  허브 간 배송 책임 및 소속 관계 명확화
+  중앙 집중형 허브 관리 구조 확립
+
