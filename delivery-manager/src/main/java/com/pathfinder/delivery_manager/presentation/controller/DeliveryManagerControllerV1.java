@@ -80,7 +80,6 @@ public class DeliveryManagerControllerV1 {
                     @Parameter(name = "page", description = "페이지 번호 (기본값: 1)"),
                     @Parameter(name = "size", description = "페이지 크기 (기본값: 10)"),
                     @Parameter(name = "sortBy", description = "정렬 기준 (기본값: createdAt)"),
-                    @Parameter(name = "status", description = "배송담당자 상태 (기본값: approve)"),
                     @Parameter(name = "isAsc", description = "정렬 방향 (기본값: false)")
             },
             responses = {
@@ -95,7 +94,6 @@ public class DeliveryManagerControllerV1 {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "status", defaultValue = "approve") String status,
             @RequestParam(value = "isAsc", defaultValue = "false") boolean isAsc
 
     ) {

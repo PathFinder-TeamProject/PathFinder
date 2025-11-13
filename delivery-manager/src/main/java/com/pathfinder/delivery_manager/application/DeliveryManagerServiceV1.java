@@ -58,12 +58,11 @@ public class DeliveryManagerServiceV1 {
             throw new DuplicateDeliveryManagerException(DeliveryManagerErrorCode.DUPLICATE_DELIVERY_MANAGER);
         }
         if(deliveryManagerRepository.countByHubId(dto.getHubId()) < 10) {
-            dto.setDeliveryOrder(deliveryManagerRepository.countByHubId(dto.getHubId()) + 1);
-        } else {
             throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
         }
 
         DeliveryManagerEntity deliveryManager = DeliveryManagerEntity.create(dto);
+        deliveryManager.setDeliveryOrder(deliveryManagerRepository.countByHubId(dto.getHubId()) + 1);
         deliveryManager.setCreate(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity saved = deliveryManagerRepository.save(deliveryManager);
 
