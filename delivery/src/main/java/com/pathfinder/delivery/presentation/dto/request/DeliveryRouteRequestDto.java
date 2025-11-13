@@ -24,7 +24,7 @@ public class DeliveryRouteRequestDto {
     private BigDecimal expectedDistance;
     private Integer actualTime;
     private BigDecimal actualDistance;
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     private String note;
 
     public CreateDeliveryRouteCommandDto toCommand(UUID deliveryId) {

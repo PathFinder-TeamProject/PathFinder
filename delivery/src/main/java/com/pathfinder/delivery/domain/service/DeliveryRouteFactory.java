@@ -3,7 +3,6 @@ package com.pathfinder.delivery.domain.service;
 import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommandDto;
 import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
 import com.pathfinder.delivery.domain.value.RouteCalculationResult;
-import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;
 import com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DeliveryRouteFactory {
 
-    private final HubServiceClient hubServiceClient;
     private final RouteCalculationService routeCalculationService;
     private final DeliveryManagerAssignmentService deliveryManagerAssignmentService;
 
@@ -43,7 +41,7 @@ public class DeliveryRouteFactory {
     public List<DeliveryRouteEntity> createRoutes(
             UUID deliveryId,
             List<UUID> routePath,
-            Long deliveryManagerId) {
+            UUID deliveryManagerId) {
         
         List<DeliveryRouteEntity> routes = new ArrayList<>();
         
@@ -55,9 +53,9 @@ public class DeliveryRouteFactory {
             UUID fromHub = routePath.get(i);
             UUID toHub = routePath.get(i + 1);
             
-            HubRouteDto hubRoute = hubServiceClient.findRouteByDepartAndArrive(fromHub, toHub);
+            HubRouteDto hubRoute = routeCalculationService.getRoute(fromHub, toHub);
             
-            Long hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
+            UUID hubManagerId = deliveryManagerAssignmentService.assignDeliveryManager(fromHub, "HUB");
             
             DeliveryRouteEntity route = CreateDeliveryRouteCommandDto.createRouteWithHubInfo(
                 deliveryId,
@@ -81,9 +79,9 @@ public class DeliveryRouteFactory {
             UUID fromHubId,
             UUID toHubId,
             BigDecimal expectedDistance,
-            Long deliveryManagerId) {
+            UUID deliveryManagerId) {
         
-        Long hubManagerId = fromHubId != null ? 
+        UUID hubManagerId = fromHubId != null ? 
             deliveryManagerAssignmentService.assignDeliveryManager(fromHubId, "HUB") : null;
         
         return CreateDeliveryRouteCommandDto.createRouteWithHubInfo(

@@ -17,7 +17,7 @@ public interface DeliveryQueryService {
     Page<DeliveryDto> searchDeliveries(
         UUID hubId,
         DeliveryStatus status,
-        Long deliveryManagerId,
+        UUID deliveryManagerId,
         Pageable pageable
     );
     

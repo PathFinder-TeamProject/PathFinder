@@ -25,7 +25,7 @@ public class DeliveryRouteResponseDto {
     private BigDecimal actualDistance;
     private Integer expectedTime;
     private BigDecimal expectedDistance;
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     private String note;
 }
 

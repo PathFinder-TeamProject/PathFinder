@@ -15,7 +15,7 @@ public class HubDto {
     private UUID hubId;
     private String hubName;
     private String hubAddress;
-    private Double lat;
-    private Double lng;
+    private double latitude;  // HubResponseDto.latitude (double)와 일치
+    private double longitude;  // HubResponseDto.longitude (double)와 일치
 }
 

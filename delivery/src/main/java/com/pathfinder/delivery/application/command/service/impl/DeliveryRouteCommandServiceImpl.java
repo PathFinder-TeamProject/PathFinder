@@ -14,6 +14,7 @@ import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClie
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -98,10 +99,12 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
             return;
         }
 
-        List<DeliveryManagerDto> fromHubManagers = 
+        ApiResponse<List<DeliveryManagerDto>> fromResponse = 
             deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getFromHubId(), "HUB");
-        List<DeliveryManagerDto> toHubManagers = 
+        ApiResponse<List<DeliveryManagerDto>> toResponse = 
             deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getToHubId(), "HUB");
+        List<DeliveryManagerDto> fromHubManagers = fromResponse != null ? fromResponse.getData() : null;
+        List<DeliveryManagerDto> toHubManagers = toResponse != null ? toResponse.getData() : null;
 
         if ((fromHubManagers != null && !fromHubManagers.isEmpty()) && 
             (toHubManagers != null && !toHubManagers.isEmpty())) {
@@ -111,8 +114,8 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
             
             MessageRequestDto messageRequest = MessageRequestDto.builder()
                 .request(message)
-                .senderId(senderManager.getUsername())
-                .receiverId(receiverManager.getUsername())
+                .senderId(senderManager.getDeliveryManagerId())
+                .receiverId(receiverManager.getDeliveryManagerId())
                 .build();
 
             messageServiceClient.sendSlackMessage(messageRequest);
@@ -126,10 +129,12 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
             return;
         }
 
-        List<DeliveryManagerDto> fromHubManagers = 
+        ApiResponse<List<DeliveryManagerDto>> fromResponse = 
             deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getFromHubId(), "HUB");
-        List<DeliveryManagerDto> toHubManagers = 
+        ApiResponse<List<DeliveryManagerDto>> toResponse = 
             deliveryManagerServiceClient.getDeliveryManagersByHubAndType(route.getToHubId(), "HUB");
+        List<DeliveryManagerDto> fromHubManagers = fromResponse != null ? fromResponse.getData() : null;
+        List<DeliveryManagerDto> toHubManagers = toResponse != null ? toResponse.getData() : null;
 
         if ((fromHubManagers != null && !fromHubManagers.isEmpty()) && 
             (toHubManagers != null && !toHubManagers.isEmpty())) {
@@ -139,8 +144,8 @@ public class DeliveryRouteCommandServiceImpl implements DeliveryRouteCommandServ
             
             MessageRequestDto messageRequest = MessageRequestDto.builder()
                 .request(message)
-                .senderId(senderManager.getUsername())
-                .receiverId(receiverManager.getUsername())
+                .senderId(senderManager.getDeliveryManagerId())
+                .receiverId(receiverManager.getDeliveryManagerId())
                 .build();
 
             messageServiceClient.sendSlackMessage(messageRequest);

@@ -20,7 +20,7 @@ public class DeliveryDto {
     private UUID orderId;
     private UUID fromHubId;
     private UUID toHubId;
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
     private DeliveryStatus status;
     private BigDecimal expectedDistance;
     private BigDecimal actualDistance;

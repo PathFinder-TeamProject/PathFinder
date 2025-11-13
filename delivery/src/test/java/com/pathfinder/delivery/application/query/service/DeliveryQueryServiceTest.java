@@ -50,7 +50,7 @@ class DeliveryQueryServiceTest {
         // given
         UUID deliveryId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity deliveryEntity = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -101,7 +101,7 @@ class DeliveryQueryServiceTest {
         // given
         UUID orderId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryEntity deliveryEntity = DeliveryEntity.builder()
                 .deliveryId(deliveryId)
@@ -146,7 +146,7 @@ class DeliveryQueryServiceTest {
     void searchDeliveries_shouldReturnPagedDeliveryDtos_whenSearchConditionsProvided() {
         // given
         UUID hubId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
         Pageable pageable = PageRequest.of(0, 10);
 
         List<DeliveryEntity> deliveryEntities = Arrays.asList(

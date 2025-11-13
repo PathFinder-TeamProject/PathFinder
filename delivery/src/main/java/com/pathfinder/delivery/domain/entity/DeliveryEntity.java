@@ -38,7 +38,7 @@ public class DeliveryEntity extends BaseEntity {
     private UUID toHubId;
 
     @Column(name = "delivery_manager_id", nullable = false)
-    private Long deliveryManagerId;
+    private UUID deliveryManagerId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

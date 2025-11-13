@@ -15,6 +15,7 @@ import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClie
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,8 +85,11 @@ class DeliveryRouteCommandServiceTest {
                 .status(DeliveryRouteStatus.PICKED_UP)
                 .build();
 
+        UUID fromManagerId = UUID.randomUUID();
+        UUID toManagerId = UUID.randomUUID();
+
         DeliveryManagerDto fromHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(1L)
+                .deliveryManagerId(fromManagerId)
                 .username("hub_manager_a")
                 .slackId("slack_id_a")
                 .type("HUB")
@@ -93,7 +97,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto toHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(2L)
+                .deliveryManagerId(toManagerId)
                 .username("hub_manager_b")
                 .slackId("slack_id_b")
                 .type("HUB")
@@ -102,17 +106,17 @@ class DeliveryRouteCommandServiceTest {
 
         when(routeRepository.findById(routeId)).thenReturn(Optional.of(existingRoute));
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(fromHubId, "HUB"))
-                .thenReturn(List.of(fromHubManager));
+                .thenReturn(ApiResponse.success(List.of(fromHubManager)));
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(toHubId, "HUB"))
-                .thenReturn(List.of(toHubManager));
+                .thenReturn(ApiResponse.success(List.of(toHubManager)));
 
         // when
         routeCommandService.updateRoute(routeId, command);
 
         // then
         verify(messageServiceClient, times(1)).sendSlackMessage(argThat(request -> {
-            return request.getSenderId().equals("hub_manager_a") && 
-                   request.getReceiverId().equals("hub_manager_b");
+            return request.getSenderId().equals(fromManagerId) && 
+                   request.getReceiverId().equals(toManagerId);
         }));
     }
 
@@ -134,8 +138,11 @@ class DeliveryRouteCommandServiceTest {
                 .status(DeliveryRouteStatus.DELIVERED)
                 .build();
 
+        UUID fromManagerId = UUID.randomUUID();
+        UUID toManagerId = UUID.randomUUID();
+
         DeliveryManagerDto fromHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(1L)
+                .deliveryManagerId(fromManagerId)
                 .username("hub_manager_a")
                 .slackId("slack_id_a")
                 .type("HUB")
@@ -143,7 +150,7 @@ class DeliveryRouteCommandServiceTest {
                 .build();
 
         DeliveryManagerDto toHubManager = DeliveryManagerDto.builder()
-                .deliveryManagerId(2L)
+                .deliveryManagerId(toManagerId)
                 .username("hub_manager_b")
                 .slackId("slack_id_b")
                 .type("HUB")
@@ -152,17 +159,17 @@ class DeliveryRouteCommandServiceTest {
 
         when(routeRepository.findById(routeId)).thenReturn(Optional.of(existingRoute));
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(fromHubId, "HUB"))
-                .thenReturn(List.of(fromHubManager));
+                .thenReturn(ApiResponse.success(List.of(fromHubManager)));
         when(deliveryManagerServiceClient.getDeliveryManagersByHubAndType(toHubId, "HUB"))
-                .thenReturn(List.of(toHubManager));
+                .thenReturn(ApiResponse.success(List.of(toHubManager)));
 
         // when
         routeCommandService.updateRoute(routeId, command);
 
         // then
         verify(messageServiceClient, times(1)).sendSlackMessage(argThat(request -> {
-            return request.getSenderId().equals("hub_manager_a") && 
-                   request.getReceiverId().equals("hub_manager_b");
+            return request.getSenderId().equals(fromManagerId) && 
+                   request.getReceiverId().equals(toManagerId);
         }));
     }
 }

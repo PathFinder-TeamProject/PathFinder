@@ -5,6 +5,7 @@ import com.pathfinder.delivery.domain.repository.DeliveryManagerAssignmentReposi
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,14 +23,15 @@ public class DeliveryManagerAssignmentService {
     private final DeliveryManagerServiceClient deliveryManagerServiceClient;
     private final DeliveryManagerAssignmentRepository assignmentRepository;
 
-    public Long assignDeliveryManager(UUID hubId) {
+    public UUID assignDeliveryManager(UUID hubId) {
         return assignDeliveryManager(hubId, "COMPANY");
     }
 
-    public Long assignDeliveryManager(UUID hubId, String type) {
+    public UUID assignDeliveryManager(UUID hubId, String type) {
         log.info("Assigning {} delivery manager automatically for hubId: {}", type, hubId);
         
-        List<DeliveryManagerDto> managers = deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, type);
+        ApiResponse<List<DeliveryManagerDto>> response = deliveryManagerServiceClient.getDeliveryManagersByHubAndType(hubId, type);
+        List<DeliveryManagerDto> managers = response != null ? response.getData() : null;
         
         if (managers == null || managers.isEmpty()) {
             log.warn("No {} delivery managers found for hubId: {}", type, hubId);
@@ -39,7 +41,7 @@ public class DeliveryManagerAssignmentService {
         Integer lastOrder = assignmentRepository.getLastAssignedOrder(hubId);
         Integer nextOrder = calculateNextOrder(managers, lastOrder);
         
-        Long assignedManagerId = findManagerByOrder(managers, nextOrder)
+        UUID assignedManagerId = findManagerByOrder(managers, nextOrder)
                 .orElseThrow(() -> new PathException(DeliveryErrorCode.DELIVERY_MANAGER_NOT_FOUND));
 
         assignmentRepository.saveLastAssignedOrder(hubId, nextOrder);
@@ -80,7 +82,7 @@ public class DeliveryManagerAssignmentService {
         return nextOrder;
     }
 
-    private Optional<Long> findManagerByOrder(List<DeliveryManagerDto> managers, Integer order) {
+    private Optional<UUID> findManagerByOrder(List<DeliveryManagerDto> managers, Integer order) {
         return managers.stream()
                 .filter(manager -> order.equals(manager.getDeliveryOrder()))
                 .findFirst()

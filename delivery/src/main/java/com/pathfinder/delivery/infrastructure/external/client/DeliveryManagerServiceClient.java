@@ -1,7 +1,8 @@
-package com.pathfinder.delivery.infrastructure.external.client;
+package com.pathfinder.delivery.infrastructure.external;
 
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.fallback.DeliveryManagerServiceFallback;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,14 +17,14 @@ import java.util.UUID;
 )
 public interface DeliveryManagerServiceClient {
     
-    @GetMapping("/{deliveryManagerId}")
-    DeliveryManagerDto getDeliveryManager(@PathVariable("deliveryManagerId") Long deliveryManagerId);
+    @GetMapping("/deliverys/{deliveryManagerId}")
+    ApiResponse<DeliveryManagerDto> getDeliveryManager(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
     
-    @GetMapping("/hub/{hubId}")
-    List<DeliveryManagerDto> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
+    @GetMapping("/deliverys/hub/{hubId}")
+    ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
     
-    @GetMapping("/hub/{hubId}/type/{type}")
-    List<DeliveryManagerDto> getDeliveryManagersByHubAndType(
+    @GetMapping("/deliverys/hub/{hubId}/type/{type}")
+    ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHubAndType(
         @PathVariable("hubId") UUID hubId,
         @PathVariable("type") String type
     );

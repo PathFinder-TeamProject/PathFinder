@@ -89,7 +89,7 @@ class DeliveryRouteEntityTest {
         UUID deliveryId = UUID.randomUUID();
         UUID fromHubId = UUID.randomUUID();
         UUID toHubId = UUID.randomUUID();
-        Long deliveryManagerId = 1L;
+        UUID deliveryManagerId = UUID.randomUUID();
 
         DeliveryRouteEntity route = DeliveryRouteEntity.builder()
                 .routeId(routeId)

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -95,7 +96,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         if (command.getDeliveryManagerId() != null) {
             return command;
         }
-        Long assignedManagerId = deliveryManagerAssignmentService.assignDeliveryManager(command.getToHubId());
+        UUID assignedManagerId = deliveryManagerAssignmentService.assignDeliveryManager(command.getToHubId());
         return command.withDeliveryManagerId(assignedManagerId);
     }
 
@@ -104,7 +105,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
             List<DeliveryRouteEntity> routes = routeFactory.createRoutes(
                 savedDelivery.getDeliveryId(),
                 routeResult.getPath(),
-                command.getDeliveryManagerId()
+                savedDelivery.getDeliveryManagerId()
             );
             routeRepository.saveAll(routes);
         } else {
@@ -113,7 +114,7 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
                 command.getFromHubId(),
                 command.getToHubId(),
                 routeResult.getTotalExpectedDistance(),
-                command.getDeliveryManagerId()
+                savedDelivery.getDeliveryManagerId()
             );
             routeRepository.save(initialRoute);
         }
@@ -127,23 +128,20 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
     private void sendSlackNotification(DeliveryEntity delivery, CreateDeliveryCommandDto command) {
         try {
             if (delivery.getFromHubId() != null && delivery.getDeliveryManagerId() != null) {
-                String senderUsername = getCurrentUserId();
-                List<DeliveryManagerDto> hubManagers = 
+                ApiResponse<List<DeliveryManagerDto>> response = 
                     deliveryManagerServiceClient.getDeliveryManagersByHubAndType(delivery.getFromHubId(), "HUB");
+                List<DeliveryManagerDto> hubManagers = response != null ? response.getData() : null;
                 
-                if (hubManagers != null && !hubManagers.isEmpty() && 
-                    senderUsername != null && !senderUsername.equals("system")) {
-                    String receiverUsername = hubManagers.get(0).getUsername();
-                    
+                if (hubManagers != null && !hubManagers.isEmpty()) {
                     MessageRequestDto messageRequest = MessageRequestDto.builder()
                         .request(buildDeliveryNotificationMessage(delivery, command))
-                        .senderId(senderUsername)
-                        .receiverId(receiverUsername)
+                        .senderId(delivery.getDeliveryManagerId())
+                        .receiverId(hubManagers.get(0).getDeliveryManagerId())
                         .build();
                     
                     messageServiceClient.sendSlackMessage(messageRequest);
                     log.info("Slack notification sent for delivery: {} from sender: {} to receiver: {}", 
-                        delivery.getDeliveryId(), senderUsername, receiverUsername);
+                        delivery.getDeliveryId(), delivery.getDeliveryManagerId(), hubManagers.get(0).getDeliveryManagerId());
                 }
             }
         } catch (Exception e) {
