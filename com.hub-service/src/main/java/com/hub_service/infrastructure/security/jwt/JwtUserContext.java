@@ -1,5 +1,5 @@
 package com.hub_service.infrastructure.security.jwt;
-// 허브라우터 서비스일 경우: com.hub_route_service.infrastructure.config.security.jwt
+
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
