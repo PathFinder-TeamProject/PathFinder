@@ -33,7 +33,6 @@ public class UserRedisConfig {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(3)) // TTL 3분 유지
                 .disableCachingNullValues()
-                // Serializer 추가
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new StringRedisSerializer()))

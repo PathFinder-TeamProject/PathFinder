@@ -41,9 +41,9 @@ public class OrderServiceV1 {
     @CacheEvict(value = "orders", allEntries = true)
     @Transactional
     public OrderResponseDto createOrder(OrderCreateRequestDto requestDto) {
-//        validateCompany(requestDto.getSupplierId());
-//        validateCompany(requestDto.getReceiverId());
-//
+        validateCompany(requestDto.getSupplierId());
+        validateCompany(requestDto.getReceiverId());
+
         int stock = validateProduct(requestDto.getProductId());
 
         if (stock == 0 || stock < requestDto.getQuantity()) {
@@ -154,14 +154,14 @@ public class OrderServiceV1 {
         order.setDelivery(deliveryId);
     }
 
-    //    public void validateCompany(UUID companyId) {
-//        CompanyDto company = companyClient.getCompanyById(companyId);
-//
-//        if (company == null) {
-//            throw new IllegalArgumentException("존재하지 않는 회사 ID입니다: " + companyId);
-//        }
-//    }
-//
+        public void validateCompany(UUID companyId) {
+        CompanyDto company = companyClient.getCompanyById(companyId);
+
+        if (company == null) {
+            throw new IllegalArgumentException("존재하지 않는 회사 ID입니다: " + companyId);
+        }
+    }
+
     public Integer validateProduct(UUID productId) {
         ApiResponse<ProductDto> response = productClient.getProductById(productId);
 

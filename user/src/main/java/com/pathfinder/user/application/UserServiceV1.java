@@ -8,7 +8,6 @@ import com.pathfinder.user.domain.enums.UserRoleEnum;
 import com.pathfinder.user.domain.repository.UserRepository;
 import com.pathfinder.user.infrastructure.client.DeliveryManagerClient;
 import com.pathfinder.user.jwt.JwtUserContext;
-import com.pathfinder.user.kafka.UserEventProducer;
 import com.pathfinder.user.presentation.dto.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,6 @@ import java.time.Instant;
 public class UserServiceV1 {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserEventProducer userEventProducer;
     private final DeliveryManagerClient deliveryManagerClient;
 
     public SignupResponseDto signup(SignupRequestDto requestDto) {
@@ -232,9 +230,6 @@ public class UserServiceV1 {
                     log.error("[유저 서비스] ⚠️ 수동 처리 필요: 배송담당자 서비스에서 username [{}]를 직접 삭제해주세요",
                             saveUser.getUsername());
                     log.error("========================================");
-
-                    // 유저 삭제는 성공했지만 배송담당자 삭제는 실패
-                    // 트랜잭션 롤백하지 않음 (유저 삭제는 유지)
                 }
             }
         } catch (Exception e) {

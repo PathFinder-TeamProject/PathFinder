@@ -2,6 +2,7 @@ package com.hub_service.application;
 
 import com.hub_service.domain.model.Hub;
 import com.hub_service.domain.repository.HubRepository;
+import com.hub_service.infrastructure.client.DeliveryManagerClient;
 import com.hub_service.presentation.dto.request.HubRequestDto;
 import com.hub_service.presentation.dto.response.HubResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class HubService {
 
     private final HubRepository hubRepository;
+    private final DeliveryManagerClient deliveryManagerClient;
 
     @Cacheable(value = "hubs", key = "'all'")
     public List<HubResponseDto> getAllHubs() {
@@ -66,6 +68,8 @@ public class HubService {
                 .orElseThrow(() -> new IllegalArgumentException("허브가 존재하지 않거나 이미 삭제되었습니다."));
         hub.softDelete(username);
         hubRepository.save(hub);
+        //배송담당자 서비스에 허브삭제 알림 발송
+        deliveryManagerClient.notifyHubDeletion(hubId.toString());
     }
 
     @Transactional

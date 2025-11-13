@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @FeignClient(
         name = "company-service",
-        path = "/v1/companies",
+        path = "/api/v1/companies",
         fallback = CompanyClientFallback.class
 )
 public interface CompanyClient {

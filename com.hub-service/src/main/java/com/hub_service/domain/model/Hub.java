@@ -32,6 +32,9 @@ public class Hub {
     @Column(nullable = false)
     private double longitude;
 
+    @Column(name = "manager")
+    private String managerUsername;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;

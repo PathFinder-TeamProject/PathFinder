@@ -11,4 +11,15 @@ spring:
     config:
       name: hub-service
       profile: dev
-      fail-fast: true
+      enabled: true
+#      fail-fast: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: gateway,health,routes,metrics
+  endpoint:
+    gateway:
+      access: unrestricted
+    health:
+      show-details: always
