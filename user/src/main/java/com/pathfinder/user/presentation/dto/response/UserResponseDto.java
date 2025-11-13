@@ -9,6 +9,7 @@ import lombok.ToString;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -26,7 +27,7 @@ public class UserResponseDto {
 
     private String role;
 
-    private Long hubId;
+    private UUID hubId;
 
     private String status;
 
@@ -44,7 +45,6 @@ public class UserResponseDto {
                 .organization(user.getOrganization())
                 .slackId(user.getSlackId())
                 .createdAt(user.getCreatedAt())
-                .isDeleted(user.getDeletedBy()==null? false:true)
                 .build();
     }
 }

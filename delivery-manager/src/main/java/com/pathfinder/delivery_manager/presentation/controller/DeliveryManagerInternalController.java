@@ -1,5 +1,6 @@
 package com.pathfinder.delivery_manager.presentation.controller;
 
+import com.pathfinder.delivery_manager.application.DeliveryManagerInternalServiceV1;
 import com.pathfinder.delivery_manager.application.DeliveryManagerServiceV1;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class DeliveryManagerInternalController {
 
     private final DeliveryManagerServiceV1 deliveryManagerService;
+    private final DeliveryManagerInternalServiceV1 deliveryManagerInternalService;
 
     @DeleteMapping("/user/{username}")
     public ResponseEntity<Void> deleteDeliveryManagerByUsername(@PathVariable String username) {
@@ -49,16 +52,37 @@ public class DeliveryManagerInternalController {
         }
     }
 
-    //내부 서비스용 사용자 정보 조회 API
-    @GetMapping("/deliverys/{username}")
-    public ApiResponse<DeliveryManagerResponseDto> getDeliveryManagerInfo(@PathVariable String username) {
+    @GetMapping("/deliverys/{deliveryManagerId}")
+    public ApiResponse<DeliveryManagerResponseDto> getDeliveryManagerInfo(@PathVariable UUID deliveryManagerId) {
 
         try {
-            DeliveryManagerResponseDto deliveryManagerInfo = deliveryManagerService.getManagerByUsername(username);
+            DeliveryManagerResponseDto deliveryManagerInfo = deliveryManagerInternalService.getManagerById(deliveryManagerId);
             return ApiResponse.success(deliveryManagerInfo);
 
         } catch (Exception e) {
-            return ApiResponse.fail("500", e.getMessage());
+            return ApiResponse.fail("배송담당자 조회 실패 : ", e.getMessage());
+        }
+    }
+    @GetMapping("/deliverys/hub/{hubId}")
+    public ApiResponse<List<DeliveryManagerResponseDto>> getDeliveryManagerInfoByHubId(@PathVariable UUID hubId) {
+
+        try {
+            List<DeliveryManagerResponseDto> deliveryManagerInfoList = deliveryManagerInternalService.getDeliveryManagerInfoByHubId(hubId);
+            return ApiResponse.success(deliveryManagerInfoList);
+
+        } catch (Exception e) {
+            return ApiResponse.fail("배송담당자 조회 실패 : ", e.getMessage());
+        }
+    }
+    @GetMapping("/deliverys/hub/{hubId}/type/{type}")
+    public ApiResponse<List<DeliveryManagerResponseDto>> getDeliveryManagerInfoByHubIdAndType(@PathVariable UUID hubId, @PathVariable String type) {
+
+        try {
+            List<DeliveryManagerResponseDto> deliveryManagerInfoList = deliveryManagerInternalService.getDeliveryManagerInfoByHubIdAndType(hubId, type);
+            return ApiResponse.success(deliveryManagerInfoList);
+
+        } catch (Exception e) {
+            return ApiResponse.fail("배송담당자 조회 실패 : ", e.getMessage());
         }
     }
 }

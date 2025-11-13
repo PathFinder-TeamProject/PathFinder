@@ -29,4 +29,7 @@ public interface DeliveryManagerJpaRepository extends JpaRepository<DeliveryMana
 
     @Query("SELECT COALESCE(MAX(dm.deliveryOrder), 0) FROM DeliveryManagerEntity dm WHERE dm.hubId = :hubId")
     int findMaxDeliverySeqByHubId(@Param("hubId") UUID hubId);
+
+    @Query("SELECT d FROM DeliveryManagerEntity d WHERE d.hubId = :hubId AND d.type = :type  AND d.deletedAt IS NULL")
+    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type);
 }

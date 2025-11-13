@@ -48,6 +48,11 @@ public class DeliveryManagerRepositoryImpl implements DeliveryManagerRepository 
     }
 
     @Override
+    public List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type) {
+        return deliveryManagerJpaRepository.findByHubIdAndType(hubId, type);
+    }
+
+    @Override
     public Page<DeliveryManagerEntity> findAll(Pageable pageable) {
         return deliveryManagerJpaRepository.findAll(pageable);
     }

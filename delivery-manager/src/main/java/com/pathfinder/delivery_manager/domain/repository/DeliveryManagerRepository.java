@@ -23,6 +23,8 @@ public interface DeliveryManagerRepository {
 
     List<DeliveryManagerEntity> findByHubId(UUID hubId);
 
+    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type);
+
     Page<DeliveryManagerEntity> findAll(Pageable pageable);
 
     void saveAll(List<DeliveryManagerEntity> managers);

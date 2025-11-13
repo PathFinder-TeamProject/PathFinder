@@ -1,15 +1,15 @@
 package com.pathfinder.delivery_manager.domain.entity;
 
-import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
+import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerCreateRequestDto;
 import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerUpdateRequestDto;
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.global.infrastructure.entity.BaseEntity;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
@@ -37,7 +37,7 @@ public class DeliveryManagerEntity extends BaseEntity {
     @Column(nullable = false)
     private UUID hubId;
 
-    public static DeliveryManagerEntity create(DeliveryManagerRequestDto requestDto) {
+    public static DeliveryManagerEntity create(@Valid DeliveryManagerCreateRequestDto requestDto) {
         return DeliveryManagerEntity.builder()
                 .username(requestDto.getUsername())
                 .type(requestDto.getType())
@@ -51,7 +51,6 @@ public class DeliveryManagerEntity extends BaseEntity {
 
     public void update(DeliveryManagerUpdateRequestDto requestDto) {
         this.type = requestDto.getType() == null ? this.type : requestDto.getType();
-//        this.deliveryOrder = requestDto.getDeliveryOrder() == null ? this.deliveryOrder : requestDto.getDeliveryOrder().intValue();
         this.hubId = requestDto.getHubId() == null ? this.hubId : requestDto.getHubId();
     }
 }

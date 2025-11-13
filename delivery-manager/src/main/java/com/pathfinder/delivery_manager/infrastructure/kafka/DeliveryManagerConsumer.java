@@ -2,14 +2,8 @@ package com.pathfinder.delivery_manager.infrastructure.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathfinder.delivery_manager.application.DeliveryManagerServiceV1;
-import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
-import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
-import com.pathfinder.global.event.NewDeliveryManagerEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.pathfinder.delivery.infrastructure.external;
+package com.pathfinder.delivery.infrastructure.external.client;
 
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.fallback.DeliveryManagerServiceFallback;
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 @FeignClient(
-    name = "delivery-manager-service", 
-    path = "/api/v1/delivery-managers",
-    fallback = DeliveryManagerServiceFallback.class
+        name = "delivery-manager-service",
+        path = "/internal",
+        fallback = DeliveryManagerServiceFallback.class
 )
 public interface DeliveryManagerServiceClient {
     

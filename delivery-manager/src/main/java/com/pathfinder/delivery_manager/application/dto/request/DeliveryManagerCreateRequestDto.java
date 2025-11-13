@@ -1,7 +1,6 @@
 package com.pathfinder.delivery_manager.application.dto.request;
 
 import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
-import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import lombok.*;
 
 import java.util.UUID;
@@ -12,9 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class DeliveryManagerRequestDto {
-
-    private UUID deliveryManagerId;
+public class DeliveryManagerCreateRequestDto {
 
     private String username;
 
@@ -22,6 +19,6 @@ public class DeliveryManagerRequestDto {
 
     private DeliveryManagerTypeEnum type;
 
-    private Integer deliveryOrder;
+    private int deliveryOrder;
 
 }

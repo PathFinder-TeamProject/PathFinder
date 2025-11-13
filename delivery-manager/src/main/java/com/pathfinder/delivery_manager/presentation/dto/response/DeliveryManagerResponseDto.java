@@ -20,6 +20,7 @@ public class DeliveryManagerResponseDto {
     private Integer deliveryOrder;
     private DeliveryManagerTypeEnum type;
 
+    private UUID hubId;
     private HubInfoDto hubInfo;
     private UserInfoDto userInfo;
 
@@ -44,18 +45,35 @@ public class DeliveryManagerResponseDto {
     }
 
     public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager,HubInfoDto hubInfoDto, UserInfoDto userInfoDto) {
-        HubInfoDto hubInfo = HubInfoDto.builder()
-                .hubId(deliveryManager.getHubId())
-                .hubName(hubInfoDto.getHubName())
-                .hubAddress(hubInfoDto.getHubAddress())
-                .hubManagerUsername(hubInfoDto.getHubManagerUsername())
-                .build();
-
         return DeliveryManagerResponseDto.builder()
                 .username(userInfoDto.getUsername())
                 .deliveryManagerId(deliveryManager.getDeliveryManagerId())
-                .hubInfo(hubInfo)
+                .hubInfo(hubInfoDto)
                 .userInfo(userInfoDto)
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+                .build();
+    }
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager) {
+        return DeliveryManagerResponseDto.builder()
+                .username(deliveryManager.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubInfo(HubInfoDto.builder()
+                        .hubId(deliveryManager.getHubId())
+                        .build())
+                .userInfo(UserInfoDto.builder()
+                        .username(deliveryManager.getUsername())
+                        .build())
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
+                .build();
+    }
+
+    public static DeliveryManagerResponseDto toDto(DeliveryManagerEntity deliveryManager) {
+        return DeliveryManagerResponseDto.builder()
+                .username(deliveryManager.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubId(deliveryManager.getHubId())
                 .deliveryOrder(deliveryManager.getDeliveryOrder())
                 .type(deliveryManager.getType())
                 .build();

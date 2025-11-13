@@ -1,6 +1,6 @@
 package com.pathfinder.delivery_manager.application;
 
-import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerRequestDto;
+import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerCreateRequestDto;
 import com.pathfinder.delivery_manager.application.dto.request.DeliveryManagerUpdateRequestDto;
 import com.pathfinder.delivery_manager.application.excpetion.DeliveryManagerErrorCode;
 import com.pathfinder.delivery_manager.application.excpetion.DuplicateDeliveryManagerException;
@@ -16,6 +16,7 @@ import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManager
 import com.pathfinder.delivery_manager.presentation.dto.response.HubInfoDto;
 import com.pathfinder.delivery_manager.presentation.dto.response.UserInfoDto;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,11 +41,8 @@ public class DeliveryManagerServiceV1 {
     private final HubServiceClient hubServiceClient;
 
     @Transactional
-    public DeliveryManagerResponseDto createDeliveryManager(DeliveryManagerRequestDto dto) {
+    public DeliveryManagerResponseDto createDeliveryManager(@Valid DeliveryManagerCreateRequestDto dto) {
         // 허브 캐시 기반 존재 여부 확인
-    /*    if (!hubCacheRepository.exists(dto.getHubId())) {
-            throw new IllegalArgumentException("허브 서비스에서 존재하지 않는 허브입니다.");
-        }*/
         if(hubServiceClient.getHubInfo(dto.getHubId()) == null) {
             throw new IllegalArgumentException("허브 조회에 실패했습니다.");
         }
