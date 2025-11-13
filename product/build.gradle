@@ -74,7 +74,7 @@ dependencies {
     implementation "io.zipkin.reporter2:zipkin-reporter-brave"
 
     // Swagger (OpenAPI 3)
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
 }
 
 dependencyManagement {

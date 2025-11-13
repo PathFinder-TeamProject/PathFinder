@@ -104,6 +104,10 @@ springdoc:
         url: /springdoc/openapi3-order-service.json
       - name: 4-delivery-manager-service
         url: /springdoc/openapi3-delivery-manager-service.json
+      - name: 5-product-service
+        url: /springdoc/openapi3-product-service.json
+      - name: 6-company-service
+        url: /springdoc/openapi3-company-service.json
     path: /docs
 
 logging:
