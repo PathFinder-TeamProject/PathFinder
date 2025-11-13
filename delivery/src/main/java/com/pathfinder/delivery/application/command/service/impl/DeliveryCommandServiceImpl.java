@@ -133,7 +133,6 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
                 List<DeliveryManagerDto> hubManagers = response != null ? response.getData() : null;
                 
                 if (hubManagers != null && !hubManagers.isEmpty()) {
-                    // senderId는 배송 담당자 ID 사용, receiverId는 허브 담당자 ID 사용
                     MessageRequestDto messageRequest = MessageRequestDto.builder()
                         .request(buildDeliveryNotificationMessage(delivery, command))
                         .senderId(delivery.getDeliveryManagerId())

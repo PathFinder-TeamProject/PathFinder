@@ -17,25 +17,12 @@ import java.util.UUID;
 )
 public interface DeliveryManagerServiceClient {
     
-    /**
-     * 배송담당자 조회
-     * 실제 컨트롤러는 ApiResponse<DeliveryManagerResponseDto>를 반환
-     * Jackson이 DeliveryManagerResponseDto를 DeliveryManagerDto로 자동 변환 (필드명 일치)
-     */
     @GetMapping("/deliverys/{deliveryManagerId}")
     ApiResponse<DeliveryManagerDto> getDeliveryManager(@PathVariable("deliveryManagerId") UUID deliveryManagerId);
     
-    /**
-     * 허브별 배송담당자 목록 조회
-     * 실제 컨트롤러는 ApiResponse<List<DeliveryManagerResponseDto>>를 반환
-     */
     @GetMapping("/deliverys/hub/{hubId}")
     ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHub(@PathVariable("hubId") UUID hubId);
     
-    /**
-     * 허브 및 타입별 배송담당자 목록 조회
-     * 실제 컨트롤러는 ApiResponse<List<DeliveryManagerResponseDto>>를 반환
-     */
     @GetMapping("/deliverys/hub/{hubId}/type/{type}")
     ApiResponse<List<DeliveryManagerDto>> getDeliveryManagersByHubAndType(
         @PathVariable("hubId") UUID hubId,

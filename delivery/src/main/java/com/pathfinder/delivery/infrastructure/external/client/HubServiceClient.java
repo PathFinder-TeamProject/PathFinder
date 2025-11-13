@@ -18,27 +18,12 @@ import java.util.UUID;
 )
 public interface HubServiceClient {
     
-    /**
-     * 허브 조회
-     * 실제 컨트롤러는 ResponseEntity<HubResponseDto>를 직접 반환 (래퍼 없음)
-     * Feign이 자동으로 ResponseEntity의 body를 추출
-     */
     @GetMapping("/hubs/{hubId}")
     HubDto getHub(@PathVariable("hubId") UUID hubId);
     
-    /**
-     * 모든 허브 경로 조회
-     * 실제 컨트롤러는 ResponseEntity<List<HubRoute>>를 직접 반환 (래퍼 없음)
-     * Feign이 자동으로 ResponseEntity의 body를 추출
-     */
     @GetMapping("/hub-routes")
     List<HubRouteDto> getAllHubRoutes();
     
-    /**
-     * 경로 찾기
-     * 실제 컨트롤러는 ResponseEntity<List<HubRoute>>를 직접 반환 (래퍼 없음)
-     * Feign이 자동으로 ResponseEntity의 body를 추출
-     */
     @GetMapping("/hub-routes/path")
     List<HubRouteDto> findPath(
         @RequestParam("origin") UUID origin,

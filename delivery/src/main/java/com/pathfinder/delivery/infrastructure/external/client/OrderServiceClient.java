@@ -19,11 +19,6 @@ import java.util.UUID;
 )
 public interface OrderServiceClient {
     
-    /**
-     * 주문 조회
-     * 실제 컨트롤러는 ResponseEntity<ApiResponseDto<OrderResponseDto>>를 반환
-     * order-service는 status, message, data 필드를 사용하는 ApiResponseDto 사용
-     */
     @GetMapping("/{orderId}")
     ResponseEntity<ApiResponseDto<OrderDto>> getOrder(@PathVariable("orderId") UUID orderId);
 
