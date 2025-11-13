@@ -23,3 +23,7 @@ management:
   zipkin:
     tracing:
       endpoint: http://localhost:9411/api/v2/spans
+
+springdoc:
+  api-docs:
+    path: /springdoc/openapi3-hub-service.json

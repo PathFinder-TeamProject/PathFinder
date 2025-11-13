@@ -1,6 +1,7 @@
 package com.pathfinder.delivery_manager.infrastructure.repository;
 
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.delivery_manager.domain.repository.DeliveryManagerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -48,7 +49,7 @@ public class DeliveryManagerRepositoryImpl implements DeliveryManagerRepository 
     }
 
     @Override
-    public List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type) {
+    public List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, DeliveryManagerTypeEnum type) {
         return deliveryManagerJpaRepository.findByHubIdAndType(hubId, type);
     }
 

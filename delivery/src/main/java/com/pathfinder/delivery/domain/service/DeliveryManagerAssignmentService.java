@@ -2,7 +2,7 @@ package com.pathfinder.delivery.domain.service;
 
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
 import com.pathfinder.delivery.domain.repository.DeliveryManagerAssignmentRepository;
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.exception.PathException;
 import com.pathfinder.global.presentation.response.ApiResponse;

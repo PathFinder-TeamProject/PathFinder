@@ -9,7 +9,7 @@ import com.pathfinder.delivery.domain.enums.DeliveryRouteStatus;
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
 import com.pathfinder.delivery.domain.repository.DeliveryRepository;
 import com.pathfinder.delivery.domain.repository.DeliveryRouteRepository;
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;

@@ -68,7 +68,16 @@ public class SecurityConfig {
         http.authorizeHttpRequests((authorizeHttpRequests) ->
                 authorizeHttpRequests
 
-                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/springdoc/**", "/internal/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/springdoc/**",
+                                "/internal/**"
+                        ).permitAll()
                         // user
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").authenticated()

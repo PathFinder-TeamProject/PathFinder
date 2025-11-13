@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5434/user_db
+    url: jdbc:postgresql://localhost:5432/user_db
     username: pathfinder
     password: pathfinder123
   data:
@@ -22,7 +22,3 @@ logging:
 springdoc:
   api-docs:
     path: /springdoc/openapi3-user-service.json
-
-jwt:
-  secret:
-    key: c3BhcnRhX3Rpa2l0YWthX2JhcHppcF8xMjM0NTY3ODk=

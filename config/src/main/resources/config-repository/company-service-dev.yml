@@ -46,3 +46,7 @@ logging:
   level:
     com.pathfinder.company: DEBUG
     org.springframework.web: DEBUG
+
+springdoc:
+  api-docs:
+    path: /springdoc/openapi3-company-service.json

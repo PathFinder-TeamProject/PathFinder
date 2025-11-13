@@ -57,7 +57,7 @@ public class DeliveryManagerServiceV1 {
             log.info("배송 담당자 이미 존재 - Username: {}", dto.getUsername());
             throw new DuplicateDeliveryManagerException(DeliveryManagerErrorCode.DUPLICATE_DELIVERY_MANAGER);
         }
-        if(deliveryManagerRepository.countByHubId(dto.getHubId()) < 10) {
+        if(deliveryManagerRepository.countByHubId(dto.getHubId()) > 10) {
             throw new TooManyDeliveryManagersException(DeliveryManagerErrorCode.TOO_MANY_DELIVERY_MANAGERS);
         }
 
