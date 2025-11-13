@@ -159,14 +159,14 @@
  이미지 삽입 예정
 ### 🛠️ 아키텍처
 <p align="center">
-  <img src="images/아키택쳐.png" width="200" alt="아키택쳐.png">
+  <img src="images/아키택쳐.png" width="1200" alt="아키택쳐.png">
 </p>
 ### 🔗 ERD
 
 ERD 이미지 삽입 예정
 
 <p align="center">
-  <img src="images/erd.png" width="200" alt="erd.png">
+  <img src="images/erd.png" width="1200" alt="erd.png">
 </p>
 
 
