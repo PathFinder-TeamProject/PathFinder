@@ -27,7 +27,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String requestURI = request.getRequestURI();
 
-        log.info("=== JWT Authorization Filter (Delivery-Manager) ===");
+        log.info("=== JWT Authorization Filter (Product) ===");
         log.info("요청 URI: {}", requestURI);
 
         // Gateway에서 전달한 헤더 확인
