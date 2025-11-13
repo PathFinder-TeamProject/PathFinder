@@ -180,10 +180,8 @@ public class DeliveryManagerServiceV1 {
         }
 
         deliveryManager.update(requestDto);
-        log.info("Soft deleting Delivery Manager ID:{}, 삭제하는 주체:{}", deliveryManagerId, JwtUserContext.getUsernameFromHeader());
         deliveryManager.setModified(Instant.now(), JwtUserContext.getUsernameFromHeader());
         DeliveryManagerEntity savedDeliveryManager = deliveryManagerRepository.save(deliveryManager);
-//        UserInfoDto userInfoDto = userRequestProducer.requestUserInfo(deliveryManager.getUsername());
         UserInfoDto userInfo = UserInfoDto.builder()
                 .username(deliveryManager.getUsername())
                 .build();
@@ -200,8 +198,6 @@ public class DeliveryManagerServiceV1 {
         Instant deletedAt = Instant.now();
 
         for (DeliveryManagerEntity manager : managers) {
-            log.info("Soft deleting Delivery Manager ID: {}, 허브 ID: {}, 삭제 주체: {}",
-                    manager.getDeliveryManagerId(), hubId, deletedBy);
             manager.softDelete(deletedAt, deletedBy);
         }
 

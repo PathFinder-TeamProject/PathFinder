@@ -57,16 +57,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Http basic Auth 기반으로 로그인 인증창이 뜨지 않게 설정
         http.httpBasic(HttpBasicConfigurer::disable);
 
-        // CSRF 설정
         http.csrf(AbstractHttpConfigurer::disable);
-
-        // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
-        http.sessionManagement((sessionManagement) ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
 
         http.sessionManagement((sessionManagement) ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -80,61 +73,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/myInfo").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/*").authenticated()
                         .requestMatchers("/api/v1/users/**").hasRole("MASTER")
-
-                        // AI
-                        .requestMatchers("/api/v1/ai/**").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.POST, "/v1/ai").authenticated()
-
-                        // Hubs
-                        .requestMatchers(HttpMethod.POST,"/v1/hubs").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.PUT,"/v1/hubs/{hubId}").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.DELETE,"/v1/hubs/{hubId}").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.GET,"/v1/hubs","/v1/hubs/{hubId}")
-                        .authenticated()
-
-                        // Deliveries
-                        // Deliveries API
-                        .requestMatchers(HttpMethod.POST, "/v1/deliverys/*/assign").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/v1/deliverys").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.GET, "/v1/deliverys/*/routes/*").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.POST, "/v1/deliverys/*/routes/*").hasAnyRole("MASTER", "HUB_MANAGER", "DELIVERY_MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/v1/deliverys/*").hasAnyRole("MASTER", "DELIVERY_MANAGER")
-                        .requestMatchers(HttpMethod.PUT, "/v1/deliverys/*").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/v1/deliverys/*/routes/*").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/v1/deliverys/*/routes", "/v1/deliverys", "/v1/deliverys/*").authenticated()
-                        // Slack Messages
-                        .requestMatchers(HttpMethod.GET,"/v1/slack-messages","/v1/slack-messages/{message_id}").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.DELETE,"/v1/slack-messages/{message_id}").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.PATCH,"/v1/slack-messages/{message_id}").hasRole("MASTER")
-                        .requestMatchers(HttpMethod.POST,"/v1/slack-messages")
-                        .authenticated()
-
-                        // Products
-                        .requestMatchers(HttpMethod.GET,"/v1/products","/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.POST,"/v1/products").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.PUT,"/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.DELETE,"/v1/products/{product_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-
-                        // Companies
-                        .requestMatchers(HttpMethod.GET,"/v1/companys","/v1/companys/{company_id}")
-                        .authenticated()
-                        .requestMatchers(HttpMethod.POST,"/v1/companys").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.PUT,"/v1/companys/{company_id}").hasAnyRole("MASTER", "HUB_MANAGER", "COMPANY_MANAGER")
-                        .requestMatchers(HttpMethod.DELETE,"/v1/companys/{company_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-
-                        // Orders
-                        .requestMatchers(HttpMethod.GET, "/v1/orders", "/v1/orders/{order_id}").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/v1/orders","/v1/orders/{order_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-                        .requestMatchers(HttpMethod.PATCH, "/v1/orders/{order_id}").hasAnyRole("MASTER", "HUB_MANAGER")
-
                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
         // 필터 관리
         http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-
-
-
         return http.build();
     }
 }

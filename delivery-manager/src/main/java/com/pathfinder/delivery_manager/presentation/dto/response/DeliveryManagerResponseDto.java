@@ -38,14 +38,11 @@ public class DeliveryManagerResponseDto {
                 .username(deliveryManager.getUsername())
                 .deliveryOrder(deliveryManager.getDeliveryOrder())
                 .type(deliveryManager.getType())
-/*              .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getIsDeleted())*/
                 .hubInfo(hubInfo)
                 .userInfo(userInfo)
                 .build();
     }
 
-    // 상세보기용 DTO (추후 UserService, HubService 연동 시 확장)
     public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager,HubInfoDto hubInfoDto, UserInfoDto userInfoDto) {
         HubInfoDto hubInfo = HubInfoDto.builder()
                 .hubId(deliveryManager.getHubId())
@@ -61,8 +58,19 @@ public class DeliveryManagerResponseDto {
                 .userInfo(userInfoDto)
                 .deliveryOrder(deliveryManager.getDeliveryOrder())
                 .type(deliveryManager.getType())
-                    /* .deletedAt(user.getDeletedAt())
-                .isDeleted(user.getIsDeleted())*/
+                .build();
+    }
+    public static DeliveryManagerResponseDto of(DeliveryManagerEntity deliveryManager, UserInfoDto userInfoDto) {
+
+        return DeliveryManagerResponseDto.builder()
+                .username(userInfoDto.getUsername())
+                .deliveryManagerId(deliveryManager.getDeliveryManagerId())
+                .hubInfo(HubInfoDto.builder()
+                        .hubId(deliveryManager.getHubId())
+                        .build())
+                .userInfo(userInfoDto)
+                .deliveryOrder(deliveryManager.getDeliveryOrder())
+                .type(deliveryManager.getType())
                 .build();
     }
 }

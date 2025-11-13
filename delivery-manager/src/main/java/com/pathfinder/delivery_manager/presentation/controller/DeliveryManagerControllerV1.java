@@ -8,9 +8,8 @@ import com.pathfinder.global.presentation.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,6 +17,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/delivery-managers")
+@Tag(name = "배송담당자 API", description = "허브 및 업체 소속 배송담당자의 등록, 수정, 삭제, 조회 기능을 제공합니다.")
 public class DeliveryManagerControllerV1 {
 
     private final DeliveryManagerServiceV1 deliveryManagerService;
