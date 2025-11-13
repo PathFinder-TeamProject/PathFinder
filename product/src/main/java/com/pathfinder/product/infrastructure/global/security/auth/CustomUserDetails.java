@@ -1,4 +1,4 @@
-package com.pathfinder.product.infrastructure.security.auth;
+package com.pathfinder.product.infrastructure.global.security.auth;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.*;
