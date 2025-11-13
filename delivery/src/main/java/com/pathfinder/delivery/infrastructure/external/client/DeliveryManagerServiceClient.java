@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @FeignClient(
     name = "delivery-manager-service", 
-    path = "/api/v1/delivery-managers",
+    path = "/internal/delivery-managers",
     fallback = DeliveryManagerServiceFallback.class
 )
 public interface DeliveryManagerServiceClient {

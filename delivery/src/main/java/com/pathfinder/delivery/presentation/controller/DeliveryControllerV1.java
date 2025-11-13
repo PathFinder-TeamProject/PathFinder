@@ -22,7 +22,7 @@ import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/deliveries")
+@RequestMapping("/v1/deliveries")
 @RequiredArgsConstructor
 public class DeliveryControllerV1 {
 

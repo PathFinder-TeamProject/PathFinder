@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
     name = "message-service",
-    path = "/api/v1/slack-messages",
+    path = "/internal/messages",
     fallback = MessageServiceFallback.class
 )
 public interface MessageServiceClient {

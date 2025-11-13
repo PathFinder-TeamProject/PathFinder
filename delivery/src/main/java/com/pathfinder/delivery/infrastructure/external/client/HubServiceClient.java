@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @FeignClient(
     name = "hub-service", 
-    path = "/api/v1",
+    path = "/internal",
     fallback = HubServiceFallback.class
 )
 public interface HubServiceClient {

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @FeignClient(
     name = "order-service", 
-    path = "/api/v1/orders",
+    path = "/internal/orders",
     fallback = OrderServiceFallback.class
 )
 public interface OrderServiceClient {
