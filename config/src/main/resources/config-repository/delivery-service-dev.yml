@@ -109,3 +109,7 @@ delivery:
       poll-interval: 5000
       batch-size: 50
       max-retries: 5
+
+springdoc:
+  api-docs:
+    path: /springdoc/openapi3-delivery-service.json

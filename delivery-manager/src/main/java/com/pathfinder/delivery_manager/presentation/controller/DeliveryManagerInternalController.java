@@ -2,6 +2,7 @@ package com.pathfinder.delivery_manager.presentation.controller;
 
 import com.pathfinder.delivery_manager.application.DeliveryManagerInternalServiceV1;
 import com.pathfinder.delivery_manager.application.DeliveryManagerServiceV1;
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -78,7 +79,7 @@ public class DeliveryManagerInternalController {
     public ApiResponse<List<DeliveryManagerResponseDto>> getDeliveryManagerInfoByHubIdAndType(@PathVariable UUID hubId, @PathVariable String type) {
 
         try {
-            List<DeliveryManagerResponseDto> deliveryManagerInfoList = deliveryManagerInternalService.getDeliveryManagerInfoByHubIdAndType(hubId, type);
+            List<DeliveryManagerResponseDto> deliveryManagerInfoList = deliveryManagerInternalService.getDeliveryManagerInfoByHubIdAndType(hubId, DeliveryManagerTypeEnum.valueOf(type));
             return ApiResponse.success(deliveryManagerInfoList);
 
         } catch (Exception e) {

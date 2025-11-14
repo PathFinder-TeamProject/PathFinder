@@ -1,6 +1,6 @@
 package com.pathfinder.delivery.domain.service;
 
-import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.HubServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;
 import com.pathfinder.delivery.infrastructure.external.dto.RouteCalculationDto;
 import lombok.RequiredArgsConstructor;

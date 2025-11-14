@@ -2,7 +2,7 @@ package com.pathfinder.delivery.domain.service;
 
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
 import com.pathfinder.delivery.domain.repository.DeliveryManagerAssignmentRepository;
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.exception.PathException;
 import com.pathfinder.global.presentation.response.ApiResponse;
@@ -18,9 +18,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryManagerAssignmentServiceTest {

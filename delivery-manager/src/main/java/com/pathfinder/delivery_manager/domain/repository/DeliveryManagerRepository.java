@@ -1,6 +1,7 @@
 package com.pathfinder.delivery_manager.domain.repository;
 
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,7 +24,7 @@ public interface DeliveryManagerRepository {
 
     List<DeliveryManagerEntity> findByHubId(UUID hubId);
 
-    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type);
+    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, DeliveryManagerTypeEnum type);
 
     Page<DeliveryManagerEntity> findAll(Pageable pageable);
 

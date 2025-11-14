@@ -37,7 +37,16 @@ public class SecurityConfig {
                 // 요청 경로별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // Swagger & Actuator & HealthCheck
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/actuator/**").permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/springdoc/**",
+                                "/internal/**"
+                        ).permitAll()
                         // 허브 기본 조회 API는 인증 없이 허용 (필요시 조정)
                         .requestMatchers(HttpMethod.GET, "/api/v1/hubs/**", "/api/v1/hub-routes/**").permitAll()
                         // 그 외 요청은 인증 필요

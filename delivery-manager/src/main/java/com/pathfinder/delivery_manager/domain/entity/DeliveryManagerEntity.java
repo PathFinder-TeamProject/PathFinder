@@ -41,7 +41,6 @@ public class DeliveryManagerEntity extends BaseEntity {
         return DeliveryManagerEntity.builder()
                 .username(requestDto.getUsername())
                 .type(requestDto.getType())
-                .deliveryOrder(requestDto.getDeliveryOrder())
                 .hubId(requestDto.getHubId())
                 .build();
     }

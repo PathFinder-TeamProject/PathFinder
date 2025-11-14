@@ -1,28 +1,30 @@
 package com.pathfinder.delivery.application.command.service.impl;
 
+import com.pathfinder.delivery.application.command.service.DeliveryCommandService;
 import com.pathfinder.delivery.application.dto.request.CreateDeliveryCommandDto;
-import com.pathfinder.delivery.application.dto.request.CreateDeliveryRouteCommandDto;
 import com.pathfinder.delivery.application.dto.request.UpdateDeliveryCommandDto;
 import com.pathfinder.delivery.application.dto.response.DeliveryDto;
+import com.pathfinder.delivery.application.outbox.DeliveryOutboxService;
 import com.pathfinder.delivery.domain.entity.DeliveryEntity;
 import com.pathfinder.delivery.domain.entity.DeliveryRouteEntity;
 import com.pathfinder.delivery.domain.enums.DeliveryStatus;
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
 import com.pathfinder.delivery.domain.event.DeliveryEventDto;
-import com.pathfinder.delivery.domain.repository.DeliveryRouteRepository;
 import com.pathfinder.delivery.domain.repository.DeliveryRepository;
+import com.pathfinder.delivery.domain.repository.DeliveryRouteRepository;
+import com.pathfinder.delivery.domain.service.DeliveryManagerAssignmentService;
+import com.pathfinder.delivery.domain.service.DeliveryRouteFactory;
 import com.pathfinder.delivery.domain.service.DeliveryStatusValidator;
 import com.pathfinder.delivery.domain.service.DeliveryValidator;
-import com.pathfinder.delivery.domain.service.DeliveryRouteFactory;
-import com.pathfinder.delivery.domain.service.DeliveryManagerAssignmentService;
 import com.pathfinder.delivery.domain.value.RouteCalculationResult;
-import com.pathfinder.delivery.application.command.service.DeliveryCommandService;
-import com.pathfinder.delivery.application.outbox.DeliveryOutboxService;
-import com.pathfinder.delivery.infrastructure.external.OrderServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.client.MessageServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.OrderServiceClient;
+import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.MessageRequestDto;
 import com.pathfinder.delivery.infrastructure.external.security.filter.JwtAuthorizationFilter.GatewayPrincipal;
 import com.pathfinder.global.presentation.exception.PathException;
+import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,10 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
-import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
-import com.pathfinder.global.presentation.response.ApiResponse;
-import java.math.BigDecimal;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -59,11 +58,17 @@ public class DeliveryCommandServiceImpl implements DeliveryCommandService {
         log.info("Creating delivery for orderId: {}", command.getOrderId());
 
         validateDeliveryCreation(command);
+        System.out.println("Creating delivery for orderId1: " + command.getOrderId());
         RouteCalculationResult routeResult = calculateRoute(command);
+        System.out.println("Creating delivery for orderId2: " + command.getOrderId());
         DeliveryEntity savedDelivery = createAndSaveDelivery(command, routeResult);
+        System.out.println("Creating delivery for orderId3: " + command.getOrderId());
         createAndSaveDeliveryRoutes(savedDelivery, command, routeResult);
+        System.out.println("Creating delivery for orderId4: " + command.getOrderId());
         publishDeliveryCreatedEvent(savedDelivery);
+        System.out.println("Creating delivery for orderId5: " + command.getOrderId());
         sendSlackNotification(savedDelivery, command);
+        System.out.println("Creating delivery for orderId6: " + command.getOrderId());
 
         orderServiceClient.delivery(command.getOrderId(), savedDelivery.getDeliveryId());
 

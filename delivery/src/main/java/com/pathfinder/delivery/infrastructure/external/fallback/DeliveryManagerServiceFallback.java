@@ -1,6 +1,6 @@
 package com.pathfinder.delivery.infrastructure.external.fallback;
 
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;

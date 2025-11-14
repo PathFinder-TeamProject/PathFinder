@@ -1,4 +1,4 @@
-package com.pathfinder.delivery_manager.infrastructure.config;
+package com.pathfinder.company.infrastructure.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -15,11 +15,11 @@ import java.util.List;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI deliveryManagerServiceOpenAPI() {
+    public OpenAPI companyServiceOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Delivery Manager Service API")
-                        .description("배송담당자 서비스 API 문서")
+                        .title("Company Service API")
+                        .description("기업 서비스 API 문서")
                         .version("v1.0.0"))
                 .servers(List.of(
                         new Server().url("http://localhost:19200").description("Gateway Server")
@@ -36,3 +36,5 @@ public class SwaggerConfig {
                 .scheme("bearer");
     }
 }
+
+

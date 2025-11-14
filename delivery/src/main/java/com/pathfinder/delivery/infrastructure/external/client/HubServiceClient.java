@@ -1,4 +1,4 @@
-package com.pathfinder.delivery.infrastructure.external;
+package com.pathfinder.delivery.infrastructure.external.client;
 
 import com.pathfinder.delivery.infrastructure.external.dto.HubDto;
 import com.pathfinder.delivery.infrastructure.external.dto.HubRouteDto;

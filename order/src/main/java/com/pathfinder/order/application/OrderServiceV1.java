@@ -1,5 +1,6 @@
 package com.pathfinder.order.application;
 
+import com.pathfinder.global.presentation.exception.PathException;
 import com.pathfinder.global.presentation.response.ApiResponse;
 import com.pathfinder.order.application.dto.request.OrderCreateRequestDto;
 import com.pathfinder.order.application.dto.request.OrderUpdateRequestDto;
@@ -152,6 +153,12 @@ public class OrderServiceV1 {
     @Transactional
     public void setDelivery(UUID orderId, UUID deliveryId) {
         OrderEntity order = orderRepository.findById(orderId).orElseThrow(() -> new BusinessException(ApiStatus.NOT_FOUND));
+
+        if(!order.getOrderStatus().equals(OrderStatus.CREATED)) {
+            throw new RuntimeException("이미 배송중인 주문입니다.");
+        }
+
+        order.changeStatus(OrderStatus.IN_PROGRESS);
         order.setDelivery(deliveryId);
     }
 

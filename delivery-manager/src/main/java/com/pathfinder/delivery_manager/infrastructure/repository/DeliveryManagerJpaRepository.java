@@ -1,6 +1,7 @@
 package com.pathfinder.delivery_manager.infrastructure.repository;
 
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,5 +32,5 @@ public interface DeliveryManagerJpaRepository extends JpaRepository<DeliveryMana
     int findMaxDeliverySeqByHubId(@Param("hubId") UUID hubId);
 
     @Query("SELECT d FROM DeliveryManagerEntity d WHERE d.hubId = :hubId AND d.type = :type  AND d.deletedAt IS NULL")
-    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, String type);
+    List<DeliveryManagerEntity> findByHubIdAndType(UUID hubId, DeliveryManagerTypeEnum type);
 }

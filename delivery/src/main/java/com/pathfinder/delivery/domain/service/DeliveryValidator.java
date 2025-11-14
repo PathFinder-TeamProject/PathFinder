@@ -1,9 +1,9 @@
 package com.pathfinder.delivery.domain.service;
 
 import com.pathfinder.delivery.domain.error.DeliveryErrorCode;
-import com.pathfinder.delivery.infrastructure.external.DeliveryManagerServiceClient;
-import com.pathfinder.delivery.infrastructure.external.HubServiceClient;
-import com.pathfinder.delivery.infrastructure.external.OrderServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.DeliveryManagerServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.HubServiceClient;
+import com.pathfinder.delivery.infrastructure.external.client.OrderServiceClient;
 import com.pathfinder.delivery.infrastructure.external.dto.ApiResponseDto;
 import com.pathfinder.delivery.infrastructure.external.dto.DeliveryManagerDto;
 import com.pathfinder.delivery.infrastructure.external.dto.HubDto;

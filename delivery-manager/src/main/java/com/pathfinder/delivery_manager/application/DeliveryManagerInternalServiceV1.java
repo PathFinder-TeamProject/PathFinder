@@ -1,5 +1,6 @@
 package com.pathfinder.delivery_manager.application;
 import com.pathfinder.delivery_manager.domain.entity.DeliveryManagerEntity;
+import com.pathfinder.delivery_manager.domain.enums.DeliveryManagerTypeEnum;
 import com.pathfinder.delivery_manager.domain.repository.DeliveryManagerRepository;
 import com.pathfinder.delivery_manager.infrastructure.client.DeliveryServiceClient;
 import com.pathfinder.delivery_manager.presentation.dto.response.DeliveryManagerResponseDto;
@@ -35,7 +36,7 @@ public class DeliveryManagerInternalServiceV1 {
                 .collect(Collectors.toList());
     }
     @Transactional(readOnly = true)
-    public List<DeliveryManagerResponseDto> getDeliveryManagerInfoByHubIdAndType(UUID hubId, String type) {
+    public List<DeliveryManagerResponseDto> getDeliveryManagerInfoByHubIdAndType(UUID hubId, DeliveryManagerTypeEnum type) {
         List<DeliveryManagerEntity> deliveryManagerList = deliveryManagerRepository.findByHubIdAndType(hubId, type);
         return deliveryManagerList.stream()
                 .map(DeliveryManagerResponseDto::toDto)

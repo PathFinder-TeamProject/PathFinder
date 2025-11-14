@@ -133,7 +133,3 @@ resilience4j:
       default:
         timeoutDuration: 5s
         cancelRunningFuture: true
-
-#jwt:
-#  secret:
-#    key: s/1o8ta1+r5iIA99VZ31GhEN8y7/e2TPjToC2efI5dY=
